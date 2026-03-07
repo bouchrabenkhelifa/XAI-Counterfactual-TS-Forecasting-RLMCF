@@ -1,1 +1,4 @@
-Hello
+torch
+numpy
+reformer-pytorch
+einops
