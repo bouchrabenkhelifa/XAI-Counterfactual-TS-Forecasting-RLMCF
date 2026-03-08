@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python src/inference/itransformer_inference.py
+python src.inference.itransformer_inference.py
