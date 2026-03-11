@@ -39,7 +39,7 @@ def prepare_rl_data(cfg_forecaster, cfg_ae, device):
 
     ot        = df[["OT"]].values.astype(np.float32)
     ot_s      = scaler.transform(ot[:int(0.70 * len(ot))])
-    threshold = compute_threshold(ot_s, k=0.5)
+    threshold = compute_threshold(ot_s, k=-0.5)
     print(f"[Data] threshold S = {threshold:.4f}")
 
     return train_loader, test_loader, scaler, threshold
