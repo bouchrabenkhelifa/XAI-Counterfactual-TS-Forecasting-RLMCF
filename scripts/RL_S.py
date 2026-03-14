@@ -7,7 +7,7 @@ from src.training.RL_trainer_S import RLTrainer
 
 CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
 CONFIG_AE         = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_RL         = "assets/configs/models/rl/etth1_rl_S.json"
+CONFIG_RL         = "assets/configs/models/RL/etth1_rl_S.json"
 
 if __name__ == "__main__":
     cfg_f  = load_config(CONFIG_FORECASTER)
