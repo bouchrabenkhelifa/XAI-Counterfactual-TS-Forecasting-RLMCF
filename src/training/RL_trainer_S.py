@@ -203,7 +203,7 @@ class RLTrainer:
     def evaluate(self, n_batches=20):
         print(f"\n[Eval] Test set ({n_batches} batches) ...")
         self.agent.eval()
-        stats = {k: [] for k in ["reward","validity","proximity",
+        stats = {k: [] for k in ["total","validity","proximity",
                                    "plausibility","delta_mean","success"]}
         cf_examples = []
 
@@ -222,9 +222,12 @@ class RLTrainer:
                     "y_cf" : ep["y_cf"][0].cpu().numpy(),
                 })
 
+        labels = {"total":"reward", "validity":"validity",
+          "proximity":"proximity", "plausibility":"plausibility",
+          "delta_mean":"delta_mean", "success":"success"}
         for k, v in stats.items():
-            print(f"  {k:15s} = {np.mean(v):.4f}")
-        print(f"  Success = {np.mean(stats['success'])*100:.1f}%")
+            print(f"  {labels[k]:15s} = {np.mean(v):.4f}")
+        print(f"  Success = {np.mean(stats['success'])*100:.1f}% " f"(réduction ≥ {self.cfg_rl.rho*100:.0f}%)")
         self._plot_cf_examples(cf_examples)
         return cf_examples
 
