@@ -1,0 +1,18 @@
+{
+    "eta"            : 0.15,
+    "alpha"          : 1.0,
+    "beta"           : 0.5,
+    "gamma"          : 0.3,
+    "entropy_coef"   : 0.01,
+    "direction"      : -1.0,
+
+    "epochs"         : 30,
+    "lr_actor"       : 3e-4,
+    "lr_critic"      : 1e-3,
+    "grad_clip"      : 1.0,
+
+    "plausibility_path": "assets/checkpoints/anomaly detector/plausibility_etth1.pkl",
+    "checkpoint_dir"    : "assets/checkpoints/rl",
+    "figures_dir"       : "figures/rl",
+    "results_dir"       : "assets/results/rl"
+}
