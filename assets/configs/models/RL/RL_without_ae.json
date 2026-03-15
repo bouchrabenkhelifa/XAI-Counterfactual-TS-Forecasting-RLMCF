@@ -1,6 +1,6 @@
 {
     "rho"          : 0.10,
-    "eta_input"    : 0.03,
+    "eta_input"    : 0.20,
     "alpha"        : 1.0,
     "beta"         : 0.5,
     "gamma"        : 0.3,
