@@ -11,7 +11,7 @@ from src.training.RL_val_prox import RLTrainer
 
 CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
 CONFIG_AE         = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_RL         = "assets/configs/models/RL/RL_val_prox.json"
+CONFIG_RL         = "assets/configs/models/RL/rl_val_prox.json"
 
 
 if __name__ == "__main__":
