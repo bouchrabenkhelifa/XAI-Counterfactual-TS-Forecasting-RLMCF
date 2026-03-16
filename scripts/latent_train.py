@@ -7,7 +7,7 @@ from src.training.RL_latent_trainer import RLTrainerLatentPlaus
 
 CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
 CONFIG_AE         = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_RL         = "assets/configs/models/rl/latent.json"
+CONFIG_RL         = "assets/configs/models/RL/latent.json"
 
 if __name__ == "__main__":
     cfg_f  = load_config(CONFIG_FORECASTER)
