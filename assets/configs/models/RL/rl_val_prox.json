@@ -1,0 +1,17 @@
+{
+    "rho": 0.10,
+    "eta": 0.15,
+    "alpha": 1.0,
+    "beta": 0.5,
+    "entropy_coef": 0.05,
+    "direction": -1.0,
+
+    "epochs": 50,
+    "lr_actor": 1e-4,
+    "lr_critic": 1e-4,
+    "grad_clip": 1.0,
+
+    "checkpoint_dir": "assets/checkpoints/rl_valid_prox",
+    "figures_dir": "figures/rl_valid_prox",
+    "results_dir": "assets/results/rl_valid_prox"
+}
