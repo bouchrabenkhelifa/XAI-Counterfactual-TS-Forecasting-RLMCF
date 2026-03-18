@@ -7,7 +7,7 @@
     "entropy_coef" : 0.05,
     "direction"    : -1.0,
 
-    "epochs"       : 30,
+    "epochs"       : 50,
     "lr_actor"     : 1e-4,
     "lr_critic"    : 1e-4,
     "grad_clip"    : 1.0,
