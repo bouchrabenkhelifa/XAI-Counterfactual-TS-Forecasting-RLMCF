@@ -174,7 +174,7 @@ def latent_sanity_check(model, loader, device, n_batches=5):
 
 if __name__ == "__main__":
 
-    config_path = "configs/models/ae/tcn_etth1.json"
+    config_path = "assets/configs/models/ae/tcn_etth1.json"
     cfg         = load_config(config_path)
 
     os.makedirs(cfg.checkpoint_dir, exist_ok=True)

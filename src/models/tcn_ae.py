@@ -1,11 +1,15 @@
 # src/models/ae.py
 # ─────────────────────────────────────────────────────────────
-# TCN Autoencoder for time series representation learning.
+# TCN Autoencoder — Test A : Attention Pooling
+#
+# Seul changement vs version originale :
+#   TCNEncoder.forward() → attention pooling au lieu de mean pooling
+#
+# Objectif : mieux préserver les hautes fréquences (pics locaux)
+# dans l'espace latent → CFs plus réalistes → plausibilité IF/LOF/OC-SVM ↑
 #
 # Receptive field avec n_blocks=6, kernel_size=3 :
 #   RF = 1 + (1+2+4+8+16+32)*(3-1) = 127 > seq_len=96 ✓
-#
-# Compatible avec checkpoint Colab (ae_etth1.pt)
 # ─────────────────────────────────────────────────────────────
 
 import torch
@@ -18,6 +22,7 @@ class CausalConv1d(nn.Module):
         self.pad  = (ks - 1) * dilation
         self.conv = nn.Conv1d(in_ch, out_ch, ks,
                               dilation=dilation, padding=self.pad)
+
     def forward(self, x):
         return self.conv(x)[:, :, :x.shape[2]]
 
@@ -34,12 +39,11 @@ class TCNBlock(nn.Module):
 
     def forward(self, x):
         res = x
-        x = self.act(self.n1(self.c1(x).transpose(1,2)).transpose(1,2))
+        x = self.act(self.n1(self.c1(x).transpose(1, 2)).transpose(1, 2))
         x = self.dr(x)
-        x = self.act(self.n2(self.c2(x).transpose(1,2)).transpose(1,2))
+        x = self.act(self.n2(self.c2(x).transpose(1, 2)).transpose(1, 2))
         x = self.dr(x)
         return x + res
-
 
 class TCNEncoder(nn.Module):
     def __init__(self, seq_len, n_features=1, hidden_dim=64,
@@ -50,22 +54,33 @@ class TCNEncoder(nn.Module):
             TCNBlock(hidden_dim, kernel_size, 2**i, dropout)
             for i in range(n_blocks)
         ])
-        self.fc   = nn.Linear(hidden_dim, latent_dim)
+        # NOUVEAU : fc prend 3*hidden_dim au lieu de hidden_dim
+        self.fc   = nn.Linear(hidden_dim * 3, latent_dim)
         self.tanh = nn.Tanh()
 
     def forward(self, x):
-        out = self.proj(x.transpose(1, 2))
-        for b in self.blocks: out = b(out)
-        return self.tanh(self.fc(out.mean(2)))
+        out = self.proj(x.transpose(1, 2))      # (B, H, T)
+        for b in self.blocks:
+            out = b(out)
+
+        p_mean = out.mean(dim=2)                # (B, H) — tendance globale
+        p_max  = out.max(dim=2).values          # (B, H) — pics locaux
+        p_last = out[:, :, -1]                  # (B, H) — dynamique récente
+
+        pooled = torch.cat([p_mean, p_max, p_last], dim=1)  # (B, 3H)
+        return self.tanh(self.fc(pooled))       # (B, latent_dim)
 
 
+        
 class TCNDecoder(nn.Module):
+    """Décodeur TCN — inchangé."""
+
     def __init__(self, seq_len, n_features=1, hidden_dim=64,
                  latent_dim=64, n_blocks=6, kernel_size=3, dropout=0.1):
         super().__init__()
-        self.T = seq_len
-        self.H = hidden_dim
-        self.fc     = nn.Linear(latent_dim, hidden_dim * seq_len)
+        self.T  = seq_len
+        self.H  = hidden_dim
+        self.fc = nn.Linear(latent_dim, hidden_dim * seq_len)
         self.blocks = nn.ModuleList([
             TCNBlock(hidden_dim, kernel_size, 2**i, dropout)
             for i in range(n_blocks)
@@ -75,20 +90,24 @@ class TCNDecoder(nn.Module):
     def forward(self, z):
         B   = z.shape[0]
         out = self.fc(z).view(B, self.H, self.T)
-        for b in self.blocks: out = b(out)
-        return self.proj(out).transpose(1, 2)
+        for b in self.blocks:
+            out = b(out)
+        return self.proj(out).transpose(1, 2)        # (B, seq_len, n_features)
 
 
 class TCNAutoEncoder(nn.Module):
     """
-    Full TCN Autoencoder.
+    TCN Autoencoder — Test A (attention pooling).
 
-    Usage standard :
+    Interface identique à la version originale :
         ae = TCNAutoEncoder(seq_len=96, ...)
         x_recon, z = ae(x)
 
     Chargement depuis checkpoint :
-        ae = TCNAutoEncoder.from_checkpoint("assets/checkpoints/ae/ae_etth1.pt")
+        ae = TCNAutoEncoder.from_checkpoint("assets/checkpoints/ae/ae_etth1_attn.pt")
+
+    NOTE : checkpoint incompatible avec l'original (nouveau poids attn_pool)
+           → ré-entraînement obligatoire.
     """
 
     def __init__(self, seq_len, n_features=1, hidden_dim=64,
@@ -112,10 +131,33 @@ class TCNAutoEncoder(nn.Module):
     def receptive_field(self):
         n = len(self.encoder.blocks)
         k = self.encoder.blocks[0].c1.conv.kernel_size[0]
-        return 1 + sum(2**i * (k-1) for i in range(n))
+        return 1 + sum(2**i * (k - 1) for i in range(n))
 
     def count_parameters(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
+
+    def compare_pooling(self, x: torch.Tensor):
+        """
+        Utilitaire de diagnostic : compare mean pooling vs attention pooling
+        sur un batch x pour vérifier que l'attention apprend bien
+        à se concentrer sur les timesteps importants (pics).
+
+        Args:
+            x : (B, seq_len, 1)
+
+        Returns:
+            weights : (B, T) — poids d'attention par timestep
+        """
+        self.eval()
+        with torch.no_grad():
+            out = self.encoder.proj(x.transpose(1, 2))
+            for b in self.encoder.blocks:
+                out = b(out)
+            scores  = self.encoder.attn_pool(
+                out.transpose(1, 2)
+            ).squeeze(-1)
+            weights = torch.softmax(scores, dim=-1)
+        return weights                               # (B, T)
 
     @classmethod
     def from_checkpoint(cls, ckpt_path: str,
@@ -125,37 +167,38 @@ class TCNAutoEncoder(nn.Module):
         Compatible Colab (n_feat) et VS Code (n_features).
         """
         if device is None:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            device = torch.device(
+                "cuda" if torch.cuda.is_available() else "cpu")
 
         ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
         cfg  = ckpt["cfg"]
 
-        # compatibilité entre noms Colab et VS Code
-        n_features = cfg.get("n_features", cfg.get("n_feat", 1))
-        hidden_dim = cfg.get("hidden_dim", cfg.get("hidden", 64))
-        latent_dim = cfg.get("latent_dim", cfg.get("latent", 64))
-        n_blocks   = cfg.get("n_blocks",   6)
-        kernel_size= cfg.get("kernel_size", cfg.get("ks", 3))
-        dropout    = cfg.get("dropout",    cfg.get("drop", 0.1))
+        n_features  = cfg.get("n_features", cfg.get("n_feat",   1))
+        hidden_dim  = cfg.get("hidden_dim", cfg.get("hidden",   64))
+        latent_dim  = cfg.get("latent_dim", cfg.get("latent",   64))
+        n_blocks    = cfg.get("n_blocks",   6)
+        kernel_size = cfg.get("kernel_size", cfg.get("ks",      3))
+        dropout     = cfg.get("dropout",    cfg.get("drop",     0.1))
 
         model = cls(
-            seq_len    = cfg["seq_len"],
-            n_features = n_features,
-            hidden_dim = hidden_dim,
-            latent_dim = latent_dim,
-            n_blocks   = n_blocks,
-            kernel_size= kernel_size,
-            dropout    = dropout,
+            seq_len     = cfg["seq_len"],
+            n_features  = n_features,
+            hidden_dim  = hidden_dim,
+            latent_dim  = latent_dim,
+            n_blocks    = n_blocks,
+            kernel_size = kernel_size,
+            dropout     = dropout,
         )
         model.load_state_dict(ckpt["state_dict"])
         model.to(device)
         model.eval()
 
-        print(f"[AE] Loaded from {ckpt_path}")
+        print(f"[AE-Attn] Loaded from {ckpt_path}")
         print(f"  val_loss   = {ckpt.get('val_loss', 'N/A')}")
         print(f"  seq_len    = {cfg['seq_len']}")
         print(f"  hidden_dim = {hidden_dim}")
         print(f"  latent_dim = {latent_dim}")
         print(f"  n_blocks   = {n_blocks}")
+        print(f"  pooling    = attention")
         print(f"  RF         = {model.receptive_field()}/{cfg['seq_len']} ✓")
         return model

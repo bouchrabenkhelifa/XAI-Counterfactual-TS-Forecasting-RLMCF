@@ -1,13 +1,3 @@
-# src/training/ae_trainer.py
-# ─────────────────────────────────────────────────────────────
-# Trainer for TCN Autoencoder.
-#
-# Training strategy :
-#   - MSE reconstruction loss
-#   - Adam optimizer with ReduceLROnPlateau scheduler
-#   - Early stopping on val loss
-#   - Best checkpoint saved automatically
-# ─────────────────────────────────────────────────────────────
 
 import os
 import torch
