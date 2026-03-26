@@ -25,12 +25,21 @@ def prepare_rl_data(cfg_forecaster, cfg_ae, device):
         map_location="cpu",
         weights_only=False
     )
-    scaler          = StandardScaler()
-    scaler.mean_    = np.array(ckpt_ae["scaler_mean"], dtype=np.float64)
-    scaler.scale_   = np.array(ckpt_ae["scaler_std"],  dtype=np.float64)
-    scaler.var_     = scaler.scale_ ** 2
-    scaler.n_features_in_ = 1
-    print("[Data] Scaler loaded ✓")
+
+    scaler = None
+    if "scaler_mean" in ckpt_ae and "scaler_std" in ckpt_ae:
+        scaler = StandardScaler()
+        scaler.mean_ = np.array(ckpt_ae["scaler_mean"], dtype=np.float64)
+        scaler.scale_ = np.array(ckpt_ae["scaler_std"], dtype=np.float64)
+        scaler.var_ = scaler.scale_ ** 2
+        scaler.n_features_in_ = (
+            len(scaler.mean_) if np.ndim(scaler.mean_) > 0 else 1
+        )
+        print("[Data] Scaler loaded from AE checkpoint ✓")
+    else:
+        print("[Warning] 'scaler_mean' / 'scaler_std' not found in AE checkpoint")
+        print("[Warning] Continuing with scaler = None")
+
     return train_loader, test_loader, scaler
 
 
@@ -241,7 +250,7 @@ class RLTrainerUpdated:
                 ep = run_episode(
                     batch, self.ae, self.forecaster,
                     self.agent, self.reward_fn, self.device,
-                    alpha_hf=self.alpha_hf              # FIX : passé ici
+                    alpha_hf=self.alpha_hf
                 )
                 if ep is None:
                     continue
@@ -312,7 +321,7 @@ class RLTrainerUpdated:
         self.agent.eval()
 
         stats = {k: [] for k in ["total", "validity", "proximity",
-                                   "plausibility", "delta_mean", "success"]}
+                                 "plausibility", "delta_mean", "success"]}
         cf_examples = []
 
         for i, batch in enumerate(self.test_loader):
@@ -332,10 +341,10 @@ class RLTrainerUpdated:
 
             if len(cf_examples) < 4:
                 cf_examples.append({
-                    "x_ot" : ep["x_ot"][0].cpu().numpy(),
-                    "x_cf" : ep["x_cf"][0].cpu().numpy(),
+                    "x_ot": ep["x_ot"][0].cpu().numpy(),
+                    "x_cf": ep["x_cf"][0].cpu().numpy(),
                     "y_hat": ep["y_hat"][0].cpu().numpy(),
-                    "y_cf" : ep["y_cf"][0].cpu().numpy(),
+                    "y_cf": ep["y_cf"][0].cpu().numpy(),
                 })
 
         print(f"\n── Résultats RL-Updated ───────────────────────────")
@@ -351,10 +360,10 @@ class RLTrainerUpdated:
     # ──────────────────────────────────────────────
     def _save_checkpoint(self, tag):
         torch.save({
-            "actor_state_dict" : self.agent.actor.state_dict(),
+            "actor_state_dict": self.agent.actor.state_dict(),
             "critic_state_dict": self.agent.critic.state_dict(),
-            "history"          : self.history,
-            "cfg_rl"           : vars(self.cfg_rl),
+            "history": self.history,
+            "cfg_rl": vars(self.cfg_rl),
         }, os.path.join(self.cfg_rl.checkpoint_dir_lp,
                         f"rl_updated_agent_{tag}.pt"))
 
@@ -437,8 +446,8 @@ class RLTrainerUpdated:
             y_hat = ex["y_hat"][:, 0]
             y_cf  = ex["y_cf"][:, 0]
 
-            full_orig = np.concatenate([x_ot,  y_hat])
-            full_cf   = np.concatenate([x_cf,  y_cf])
+            full_orig = np.concatenate([x_ot, y_hat])
+            full_cf   = np.concatenate([x_cf, y_cf])
             t_all     = np.arange(len(full_orig))
             reduction = ((y_hat.mean() - y_cf.mean())
                          / (abs(y_hat.mean()) + 1e-8) * 100)
@@ -450,7 +459,7 @@ class RLTrainerUpdated:
                          lw=1.5, ls="--", label="x_cf+forecast(x_cf)")
             axes[i].axvline(len(x_ot), color="gray", ls="--", lw=1.2)
             axes[i].fill_between(t_all, full_orig, full_cf,
-                                  alpha=0.12, color="coral")
+                                 alpha=0.12, color="coral")
             axes[i].set_title(
                 f"Sample {i+1} — {reduction:+.1f}% {ok} "
                 f"(alpha_hf={self.alpha_hf})", fontsize=11)
