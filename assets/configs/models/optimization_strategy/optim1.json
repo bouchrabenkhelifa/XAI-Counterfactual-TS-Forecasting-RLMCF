@@ -1,0 +1,22 @@
+{
+  "optimization": {
+    "rho": 0.10,
+    "alpha": 1.0,
+    "beta_x": 1.0,
+    "beta_z": 0.1,
+    "gamma": 0.5,
+
+    "lr": 0.05,
+    "steps": 200,
+    "patience": 25,
+    "tol": 1e-5,
+
+    "filter_quantile": 0.75,
+
+    "latent_plaus_path": "checkpoints/latent_plausibility.pt",
+
+    "checkpoint_dir": "outputs/optimization_strategy/checkpoints",
+    "figures_dir": "outputs/optimization_strategy/figures",
+    "results_dir": "outputs/optimization_strategy/results"
+  }
+}

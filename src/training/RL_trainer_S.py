@@ -15,17 +15,30 @@ from src.utils.train_tools         import get_device
 
 def prepare_rl_data(cfg_forecaster, cfg_ae, device):
     from src.data_provider.data_factory import data_provider
+
     train_data, train_loader = data_provider(cfg_forecaster, "train")
     test_data,  test_loader  = data_provider(cfg_forecaster, "test")
 
-    ckpt_ae       = torch.load(cfg_ae.checkpoint_path,
-                                map_location="cpu", weights_only=False)
-    scaler        = StandardScaler()
-    scaler.mean_  = np.array(ckpt_ae["scaler_mean"], dtype=np.float64)
-    scaler.scale_ = np.array(ckpt_ae["scaler_std"],  dtype=np.float64)
-    scaler.var_   = scaler.scale_ ** 2
-    scaler.n_features_in_ = 1
-    print("[Data] Scaler loaded from AE checkpoint ✓")
+    ckpt_ae = torch.load(
+        cfg_ae.checkpoint_path,
+        map_location="cpu",
+        weights_only=False
+    )
+
+    scaler = None
+    if "scaler_mean" in ckpt_ae and "scaler_std" in ckpt_ae:
+        scaler = StandardScaler()
+        scaler.mean_ = np.array(ckpt_ae["scaler_mean"], dtype=np.float64)
+        scaler.scale_ = np.array(ckpt_ae["scaler_std"], dtype=np.float64)
+        scaler.var_ = scaler.scale_ ** 2
+        scaler.n_features_in_ = (
+            len(scaler.mean_) if np.ndim(scaler.mean_) > 0 else 1
+        )
+        print("[Data] Scaler loaded from AE checkpoint ✓")
+    else:
+        print("[Warning] 'scaler_mean' / 'scaler_std' not found in AE checkpoint")
+        print("[Warning] Continuing with scaler = None")
+
     return train_loader, test_loader, scaler
 
 
@@ -90,10 +103,12 @@ class RLTrainer:
         self.ae = TCNAutoEncoder.from_checkpoint(
             cfg_ae.checkpoint_path, device=device)
         self.ae.eval()
-        for p in self.ae.parameters(): p.requires_grad_(False)
+        for p in self.ae.parameters():
+            p.requires_grad_(False)
 
         self.forecaster = ForecasterWrapper(cfg_forecaster, device)
-        for p in self.forecaster.model.parameters(): p.requires_grad_(False)
+        for p in self.forecaster.model.parameters():
+            p.requires_grad_(False)
 
         with open(cfg_rl.plausibility_path, "rb") as f:
             obj = pickle.load(f)
@@ -145,7 +160,8 @@ class RLTrainer:
             for batch in self.train_loader:
                 ep = run_episode(batch, self.ae, self.forecaster,
                                  self.agent, self.reward_fn, self.device)
-                if ep is None: continue
+                if ep is None:
+                    continue
 
                 loss_dict = self.agent.compute_loss(
                     ep["log_prob"], ep["reward"], ep["value"], ep["entropy"])
@@ -177,7 +193,8 @@ class RLTrainer:
 
             means = {k: float(np.mean(v)) if v else 0.0
                      for k, v in stats.items()}
-            for k, v in means.items(): self.history[k].append(v)
+            for k, v in means.items():
+                self.history[k].append(v)
 
             print(f"Epoch {epoch:03d}/{self.cfg_rl.epochs} | "
                   f"R={means['reward_total']:.4f} | "
@@ -203,95 +220,135 @@ class RLTrainer:
     def evaluate(self, n_batches=20):
         print(f"\n[Eval] Test set ({n_batches} batches) ...")
         self.agent.eval()
-        stats = {k: [] for k in ["total","validity","proximity",
-                                   "plausibility","delta_mean","success"]}
+        stats = {k: [] for k in ["total", "validity", "proximity",
+                                 "plausibility", "delta_mean", "success"]}
         cf_examples = []
 
         for i, batch in enumerate(self.test_loader):
-            if i >= n_batches: break
+            if i >= n_batches:
+                break
             ep = run_episode(batch, self.ae, self.forecaster,
                              self.agent, self.reward_fn, self.device)
-            if ep is None: continue
+            if ep is None:
+                continue
             rs = self.reward_fn.stats(ep["reward_dict"])
-            for k in stats: stats[k].append(rs[k])
+            for k in stats:
+                stats[k].append(rs[k])
             if len(cf_examples) < 4:
                 cf_examples.append({
-                    "x_ot" : ep["x_ot"][0].cpu().numpy(),
-                    "x_cf" : ep["x_cf"][0].cpu().numpy(),
+                    "x_ot": ep["x_ot"][0].cpu().numpy(),
+                    "x_cf": ep["x_cf"][0].cpu().numpy(),
                     "y_hat": ep["y_hat"][0].cpu().numpy(),
-                    "y_cf" : ep["y_cf"][0].cpu().numpy(),
+                    "y_cf": ep["y_cf"][0].cpu().numpy(),
                 })
 
-        labels = {"total":"reward", "validity":"validity",
-          "proximity":"proximity", "plausibility":"plausibility",
-          "delta_mean":"delta_mean", "success":"success"}
+        labels = {
+            "total": "reward",
+            "validity": "validity",
+            "proximity": "proximity",
+            "plausibility": "plausibility",
+            "delta_mean": "delta_mean",
+            "success": "success"
+        }
         for k, v in stats.items():
             print(f"  {labels[k]:15s} = {np.mean(v):.4f}")
-        print(f"  Success = {np.mean(stats['success'])*100:.1f}% " f"(réduction ≥ {self.cfg_rl.rho*100:.0f}%)")
+        print(f"  Success = {np.mean(stats['success'])*100:.1f}% "
+              f"(réduction ≥ {self.cfg_rl.rho*100:.0f}%)")
         self._plot_cf_examples(cf_examples)
         return cf_examples
 
     def _save_checkpoint(self, tag):
         torch.save({
-            "actor_state_dict" : self.agent.actor.state_dict(),
+            "actor_state_dict": self.agent.actor.state_dict(),
             "critic_state_dict": self.agent.critic.state_dict(),
-            "history"          : self.history,
-            "cfg_rl"           : vars(self.cfg_rl),
+            "history": self.history,
+            "cfg_rl": vars(self.cfg_rl),
         }, os.path.join(self.cfg_rl.checkpoint_dir, f"rl_agent_{tag}.pt"))
 
     def _save_history(self):
         path = os.path.join(self.cfg_rl.results_dir, "rl_history_S.json")
-        with open(path, "w") as f: json.dump(self.history, f, indent=2)
+        with open(path, "w") as f:
+            json.dump(self.history, f, indent=2)
         print(f"[RL] History → {path}")
 
     def _plot_training(self):
         fig, axes = plt.subplots(2, 3, figsize=(18, 8))
-        axes[0,0].plot(self.history["reward_total"], color="steelblue", lw=1.5)
-        axes[0,0].set_title("Total Reward"); axes[0,0].grid(alpha=0.3)
-        for key, col, lbl in [("r_validity","green","validity"),
-                               ("r_proximity","orange","proximity"),
-                               ("r_plausibility","purple","plausibility")]:
-            axes[0,1].plot(self.history[key], color=col, lw=1.5, label=lbl)
-        axes[0,1].set_title("Sub-Rewards"); axes[0,1].legend(); axes[0,1].grid(alpha=0.3)
-        axes[0,2].plot(self.history["delta_mean"],   color="coral",  lw=1.5, label="Δmean")
-        axes[0,2].plot(self.history["success_rate"], color="green",  lw=1.5, ls="--", label="SR")
-        axes[0,2].axhline(self.cfg_rl.rho, color="gray", ls=":", lw=1.2)
-        axes[0,2].set_title("Δmean & SR"); axes[0,2].legend(); axes[0,2].grid(alpha=0.3)
-        axes[1,0].plot(self.history["loss_actor"],  color="coral",     lw=1.5, label="actor")
-        axes[1,0].plot(self.history["loss_critic"], color="steelblue", lw=1.5, label="critic")
-        axes[1,0].set_title("Losses"); axes[1,0].legend(); axes[1,0].grid(alpha=0.3)
-        axes[1,1].plot(self.history["advantage"], color="gray", lw=1.5)
-        axes[1,1].axhline(0, color="black", ls="--", lw=0.8)
-        axes[1,1].set_title("Advantage"); axes[1,1].grid(alpha=0.3)
-        axes[1,2].plot(self.history["n_valid"], color="steelblue", lw=1.5)
-        axes[1,2].set_title("Samples valides / epoch"); axes[1,2].grid(alpha=0.3)
+
+        axes[0, 0].plot(self.history["reward_total"], color="steelblue", lw=1.5)
+        axes[0, 0].set_title("Total Reward")
+        axes[0, 0].grid(alpha=0.3)
+
+        for key, col, lbl in [
+            ("r_validity", "green", "validity"),
+            ("r_proximity", "orange", "proximity"),
+            ("r_plausibility", "purple", "plausibility")
+        ]:
+            axes[0, 1].plot(self.history[key], color=col, lw=1.5, label=lbl)
+        axes[0, 1].set_title("Sub-Rewards")
+        axes[0, 1].legend()
+        axes[0, 1].grid(alpha=0.3)
+
+        axes[0, 2].plot(self.history["delta_mean"], color="coral", lw=1.5, label="Δmean")
+        axes[0, 2].plot(self.history["success_rate"], color="green", lw=1.5, ls="--", label="SR")
+        axes[0, 2].axhline(self.cfg_rl.rho, color="gray", ls=":", lw=1.2)
+        axes[0, 2].set_title("Δmean & SR")
+        axes[0, 2].legend()
+        axes[0, 2].grid(alpha=0.3)
+
+        axes[1, 0].plot(self.history["loss_actor"], color="coral", lw=1.5, label="actor")
+        axes[1, 0].plot(self.history["loss_critic"], color="steelblue", lw=1.5, label="critic")
+        axes[1, 0].set_title("Losses")
+        axes[1, 0].legend()
+        axes[1, 0].grid(alpha=0.3)
+
+        axes[1, 1].plot(self.history["advantage"], color="gray", lw=1.5)
+        axes[1, 1].axhline(0, color="black", ls="--", lw=0.8)
+        axes[1, 1].set_title("Advantage")
+        axes[1, 1].grid(alpha=0.3)
+
+        axes[1, 2].plot(self.history["n_valid"], color="steelblue", lw=1.5)
+        axes[1, 2].set_title("Samples valides / epoch")
+        axes[1, 2].grid(alpha=0.3)
+
         plt.suptitle(f"RL CF — objectif {self.cfg_rl.rho*100:.0f}%", fontsize=13)
         plt.tight_layout()
         path = os.path.join(self.cfg_rl.figures_dir, "rl_training_curves_S.png")
-        plt.savefig(path, dpi=150, bbox_inches="tight"); plt.close()
+        plt.savefig(path, dpi=150, bbox_inches="tight")
+        plt.close()
         print(f"[RL] Curves → {path}")
 
     def _plot_cf_examples(self, examples):
-        if not examples: return
+        if not examples:
+            return
+
         n = len(examples)
         fig, axes = plt.subplots(n, 1, figsize=(14, 4*n))
-        if n == 1: axes = [axes]
+        if n == 1:
+            axes = [axes]
+
         for i, ex in enumerate(examples):
-            x_ot  = ex["x_ot"][:, 0]; x_cf  = ex["x_cf"][:, 0]
-            y_hat = ex["y_hat"][:, 0]; y_cf  = ex["y_cf"][:, 0]
+            x_ot  = ex["x_ot"][:, 0]
+            x_cf  = ex["x_cf"][:, 0]
+            y_hat = ex["y_hat"][:, 0]
+            y_cf  = ex["y_cf"][:, 0]
+
             full_orig = np.concatenate([x_ot, y_hat])
             full_cf   = np.concatenate([x_cf, y_cf])
             t_all     = np.arange(len(full_orig))
-            reduction = (y_hat.mean()-y_cf.mean()) / (abs(y_hat.mean())+1e-8) * 100
+            reduction = (y_hat.mean() - y_cf.mean()) / (abs(y_hat.mean()) + 1e-8) * 100
             ok = "✓" if reduction >= self.cfg_rl.rho * 100 else "✗"
+
             axes[i].plot(t_all, full_orig, color="steelblue", lw=1.5, label="x+forecast(x)")
-            axes[i].plot(t_all, full_cf,   color="coral",     lw=1.5, ls="--", label="x_cf+forecast(x_cf)")
+            axes[i].plot(t_all, full_cf, color="coral", lw=1.5, ls="--", label="x_cf+forecast(x_cf)")
             axes[i].axvline(len(x_ot), color="gray", ls="--", lw=1.2)
             axes[i].fill_between(t_all, full_orig, full_cf, alpha=0.12, color="coral")
             axes[i].set_title(f"Sample {i+1} — {reduction:+.1f}% {ok}", fontsize=11)
-            axes[i].legend(fontsize=9); axes[i].grid(alpha=0.3)
+            axes[i].legend(fontsize=9)
+            axes[i].grid(alpha=0.3)
+
         plt.suptitle("CF Examples", fontsize=13)
         plt.tight_layout()
         path = os.path.join(self.cfg_rl.figures_dir, "rl_cf_examples_S.png")
-        plt.savefig(path, dpi=150, bbox_inches="tight"); plt.close()
+        plt.savefig(path, dpi=150, bbox_inches="tight")
+        plt.close()
         print(f"[RL] CF examples → {path}")

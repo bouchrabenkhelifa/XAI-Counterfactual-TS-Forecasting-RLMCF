@@ -2,24 +2,54 @@ import os
 import json
 import numpy as np
 import torch
+from sklearn.preprocessing import StandardScaler
 
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
 
-from src.training.RL_up_trainer import RLTrainerUpdated
+from src.training.RL_trainer_S import RLTrainer
 from src.evaluation.evaluator import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
 
 
 CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
 CONFIG_AE = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_RL = "assets/configs/models/RL/latent01.json"
+CONFIG_RL = "assets/configs/models/RL/etth1_rl_S.json"
 
-# Checkpoint RL déjà entraîné
-CHECKPOINT_PATH = "assets/checkpoints/RL_up/rl_updated_agent_best.pt"
-
-# Modèle externe de plausibilité
+CHECKPOINT_PATH = "assets/checkpoints/rl_S/rl_agent_best.pt"
 EXTERNAL_PLAUS_PATH = "assets/checkpoints/anomaly detector/plausibility_etth1.pkl"
+
+
+def safe_prepare_rl_data(cfg_forecaster, cfg_ae):
+    from src.data_provider.data_factory import data_provider
+
+    _, train_loader = data_provider(cfg_forecaster, "train")
+    _, test_loader = data_provider(cfg_forecaster, "test")
+
+    ckpt_ae = torch.load(
+        cfg_ae.checkpoint_path,
+        map_location="cpu",
+        weights_only=False
+    )
+
+    scaler = None
+    if "scaler_mean" in ckpt_ae and "scaler_std" in ckpt_ae:
+        scaler = StandardScaler()
+        scaler.mean_ = np.array(ckpt_ae["scaler_mean"], dtype=np.float64)
+        scaler.scale_ = np.array(ckpt_ae["scaler_std"], dtype=np.float64)
+        scaler.var_ = scaler.scale_ ** 2
+        scaler.n_features_in_ = (
+            len(scaler.mean_) if np.ndim(scaler.mean_) > 0 else 1
+        )
+        print("[Data] Scaler loaded from AE checkpoint ✓")
+    else:
+        print("[Warning] 'scaler_mean' / 'scaler_std' not found in AE checkpoint")
+        print("[Warning] Continuing with scaler = None")
+
+    print("train", len(train_loader.dataset))
+    print("test", len(test_loader.dataset))
+
+    return train_loader, test_loader, scaler
 
 
 def load_checkpoint_into_trainer(trainer, ckpt_path, device):
@@ -36,16 +66,10 @@ def load_checkpoint_into_trainer(trainer, ckpt_path, device):
 
 @torch.no_grad()
 def trainer_run_episode(trainer, batch, filter_quantile=0.75):
-    """
-    Reproduit l'épisode du trainer sans entraînement.
-    Important :
-    - action déterministe (mu au lieu de sample)
-    - HF skip connection reproduite comme pendant le training
-    """
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(trainer.device)
     batch_x_mark = batch_x_mark.float().to(trainer.device)
-    x_ot = batch_x[:, :, -1:]   # (B, seq_len, 1)
+    x_ot = batch_x[:, :, -1:]
 
     z = trainer.ae.encode(x_ot)
     y_hat = trainer.forecaster.predict_ot(batch_x, batch_x_mark)
@@ -63,19 +87,12 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
 
     s = trainer.agent.build_state(z, y_hat)
 
-    # Eval déterministe
+    # évaluation déterministe
     mu, _ = trainer.agent.actor(s)
     a = mu
 
     z_cf = torch.clamp(z + trainer.agent.eta * a, -1.0, 1.0)
-
-    # Décodage du CF
     x_cf = trainer.ae.decode(z_cf)
-
-    # Reproduire exactement le HF skip du training
-    x_lf = trainer.ae.decode(trainer.ae.encode(x_ot))
-    x_hf = x_ot - x_lf
-    x_cf = x_cf + trainer.alpha_hf * x_hf
 
     y_cf = trainer.forecaster.predict_from_ot(
         x_ot=x_cf,
@@ -83,7 +100,7 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
         x_mark=batch_x_mark
     )
 
-    reward_dict = trainer.reward_fn(x_ot, x_cf, y_hat, y_cf, z_cf=z_cf)
+    reward_dict = trainer.reward_fn(x_ot, x_cf, y_hat, y_cf)
 
     return {
         "x_ot": x_ot.detach(),
@@ -105,7 +122,6 @@ def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
     all_x_cf = []
     all_y_hat = []
     all_y_cf = []
-
     cf_examples = []
 
     for i, batch in enumerate(trainer.test_loader):
@@ -169,6 +185,7 @@ def save_examples_plot(examples, out_path, rho=0.10):
         full_orig = np.concatenate([x_ot, y_hat])
         full_cf = np.concatenate([x_cf, y_cf])
         t_all = np.arange(len(full_orig))
+
         reduction = (y_hat.mean() - y_cf.mean()) / (abs(y_hat.mean()) + 1e-8) * 100
         ok = "✓" if reduction >= rho * 100 else "✗"
 
@@ -180,7 +197,7 @@ def save_examples_plot(examples, out_path, rho=0.10):
         axes[i].legend(fontsize=9)
         axes[i].grid(alpha=0.3)
 
-    plt.suptitle("Frozen checkpoint evaluation — RL Updated", fontsize=13)
+    plt.suptitle("Frozen checkpoint evaluation — RL pipeline", fontsize=13)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close()
@@ -195,8 +212,11 @@ def main():
     device = get_device(cfg_f)
     print(f"Device: {device}")
 
-    # Construit le pipeline complet puis charge le checkpoint RL déjà appris
-    trainer = RLTrainerUpdated(cfg_f, cfg_ae, cfg_rl, device)
+    trainer = RLTrainer(cfg_f, cfg_ae, cfg_rl, device)
+
+    # patch scaler-safe si le trainer plante normalement sur scaler_mean
+    trainer.train_loader, trainer.test_loader, trainer.scaler = safe_prepare_rl_data(cfg_f, cfg_ae)
+
     load_checkpoint_into_trainer(trainer, CHECKPOINT_PATH, device)
 
     plaus_model = load_plausibility_model(EXTERNAL_PLAUS_PATH)
@@ -209,7 +229,7 @@ def main():
         trainer=trainer,
         evaluator=evaluator,
         n_batches=20,
-        include_dtw=False,   # mettre True si dtaidistance est installé
+        include_dtw=False,
     )
 
     print("\n── Final Evaluation Metrics ─────────────────────────")
@@ -236,15 +256,15 @@ def main():
         if k in summary:
             print(f"{k:28s}: {summary[k]['mean']:.4f} ± {summary[k]['std']:.4f}")
 
-    os.makedirs(cfg_rl.results_dir_lp, exist_ok=True)
-    os.makedirs(cfg_rl.figures_dir_lp, exist_ok=True)
+    os.makedirs(cfg_rl.results_dir, exist_ok=True)
+    os.makedirs(cfg_rl.figures_dir, exist_ok=True)
 
-    metrics_path = os.path.join(cfg_rl.results_dir_lp, "frozen_eval_metrics.json")
+    metrics_path = os.path.join(cfg_rl.results_dir, "frozen_eval_metrics_pipeline.json")
     with open(metrics_path, "w") as f:
         json.dump(summary, f, indent=2)
     print(f"\n[Eval] Metrics saved -> {metrics_path}")
 
-    fig_path = os.path.join(cfg_rl.figures_dir_lp, "frozen_eval_examples.png")
+    fig_path = os.path.join(cfg_rl.figures_dir, "frozen_eval_examples_pipeline.png")
     save_examples_plot(examples, fig_path, rho=cfg_rl.rho)
 
 
