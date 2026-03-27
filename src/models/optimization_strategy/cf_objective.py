@@ -5,12 +5,10 @@ import torch.nn.functional as F
 
 class CounterfactualObjective(nn.Module):
     """
-    Objectif différentiable pour optimiser directement z_cf.
-
     L = alpha * L_goal
       + beta_x * L_prox_x
       + beta_z * L_prox_z
-      + gamma * L_plaus
+      + gamma * L_plaus_gauss
     """
 
     def __init__(
@@ -20,7 +18,9 @@ class CounterfactualObjective(nn.Module):
         beta_x: float = 1.0,
         beta_z: float = 0.1,
         gamma: float = 0.5,
-        plausibility=None,
+        z_mean: torch.Tensor | None = None,
+        z_std: torch.Tensor | None = None,
+        eps: float = 1e-6,
     ):
         super().__init__()
         self.rho = rho
@@ -28,7 +28,17 @@ class CounterfactualObjective(nn.Module):
         self.beta_x = beta_x
         self.beta_z = beta_z
         self.gamma = gamma
-        self.plausibility = plausibility
+        self.eps = eps
+
+        if z_mean is not None:
+            self.register_buffer("z_mean", z_mean)
+        else:
+            self.z_mean = None
+
+        if z_std is not None:
+            self.register_buffer("z_std", z_std)
+        else:
+            self.z_std = None
 
     @staticmethod
     def _to_univariate(y: torch.Tensor) -> torch.Tensor:
@@ -54,27 +64,24 @@ class CounterfactualObjective(nn.Module):
         return l1 + l2
 
     def proximity_z_loss(self, z: torch.Tensor, z_cf: torch.Tensor) -> torch.Tensor:
-        return ((z_cf - z) ** 2).mean(dim=1)
+        reduce_dims = tuple(range(1, z.dim()))
+        return ((z_cf - z) ** 2).mean(dim=reduce_dims)
 
-    def plausibility_loss(self, x_cf: torch.Tensor) -> torch.Tensor:
-        if self.plausibility is None:
-            return torch.zeros(x_cf.shape[0], device=x_cf.device, dtype=x_cf.dtype)
+    def gaussian_plausibility_loss(self, z_cf: torch.Tensor) -> torch.Tensor:
+        if self.z_mean is None or self.z_std is None:
+            return torch.zeros(z_cf.shape[0], device=z_cf.device, dtype=z_cf.dtype)
 
-        plaus_value = self.plausibility(x_cf)
+        z_mean = self.z_mean.to(z_cf.device)
+        z_std = self.z_std.to(z_cf.device)
 
-        if not torch.is_tensor(plaus_value):
-            plaus_value = torch.tensor(
-                plaus_value, device=x_cf.device, dtype=x_cf.dtype
-            )
+        while z_mean.dim() < z_cf.dim():
+            z_mean = z_mean.unsqueeze(0)
+        while z_std.dim() < z_cf.dim():
+            z_std = z_std.unsqueeze(0)
 
-        if plaus_value.dim() == 0:
-            plaus_value = plaus_value.repeat(x_cf.shape[0])
-
-        if plaus_value.dim() > 1:
-            reduce_dims = tuple(range(1, plaus_value.dim()))
-            plaus_value = plaus_value.mean(dim=reduce_dims)
-
-        return -plaus_value
+        z_norm = (z_cf - z_mean) / (z_std + self.eps)
+        reduce_dims = tuple(range(1, z_cf.dim()))
+        return (z_norm ** 2).mean(dim=reduce_dims)
 
     def forward(
         self,
@@ -88,7 +95,7 @@ class CounterfactualObjective(nn.Module):
         l_goal = self.goal_loss(y_hat, y_cf)
         l_prox_x = self.proximity_x_loss(x, x_cf)
         l_prox_z = self.proximity_z_loss(z, z_cf)
-        l_plaus = self.plausibility_loss(x_cf)
+        l_plaus = self.gaussian_plausibility_loss(z_cf)
 
         total = (
             self.alpha * l_goal

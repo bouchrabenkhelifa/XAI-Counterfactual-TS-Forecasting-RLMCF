@@ -2,10 +2,6 @@ import torch
 
 
 class LatentCounterfactualOptimizer:
-    """
-    Optimise directement z_cf à partir de z.
-    """
-
     def __init__(
         self,
         ae,

@@ -1,0 +1,12 @@
+{
+  "rho"          : 0.10,
+  "lambda_prox"  : 1.0,
+  "lambda_plaus" : 0.5,
+  "n_steps"      : 200,
+  "lr"           : 0.05,
+  "n_restarts"   : 3,
+  "noise_std"    : 0.1,
+  "sigma_plaus"  : 1.0,
+  "figures_dir"  : "assets/figures/optimization_strategy",
+  "results_dir"  : "assets/results/optimization_strategy"
+}

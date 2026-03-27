@@ -1,19 +1,17 @@
 {
   "optimization": {
-    "rho": 0.10,
+    "rho": 0.05,
     "alpha": 1.0,
-    "beta_x": 1.0,
-    "beta_z": 0.1,
-    "gamma": 0.5,
+    "beta_x": 0.5,
+    "beta_z": 0.02,
+    "gamma": 0.2,
 
     "lr": 0.05,
-    "steps": 200,
-    "patience": 25,
+    "steps": 100,
+    "patience": 20,
     "tol": 1e-5,
 
-    "filter_quantile": 0.75,
-
-    "latent_plaus_path": "checkpoints/latent_plausibility.pt",
+    "latent_stat_batches": 80,
 
     "checkpoint_dir": "outputs/optimization_strategy/checkpoints",
     "figures_dir": "outputs/optimization_strategy/figures",

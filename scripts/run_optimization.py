@@ -1,17 +1,19 @@
+from types import SimpleNamespace
+import torch
 from src.training.optim_trainer import OptimizationTrainer
 from src.utils.config import load_config
-from src.utils.train_tools import get_device
+
+CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
+CONFIG_AE = "assets/configs/models/ae/tcn_ae.json"
+CONFIG_OPTIM = "assets/configs/models/optimization_strategy/optim1.json"
 
 
 def main():
-    cfg_forecaster = load_config("assets/configs/etth1_96_48_S.json", "forecaster")
-    cfg_ae = load_config("assets/configs/latent01.json", "autoencoder")
-    cfg_optim = load_config(
-        "assets/configs/optimization_strategy/optim1.json",
-        "optimization",
-    )
+    cfg_forecaster = load_config(CONFIG_FORECASTER)
+    cfg_ae = load_config(CONFIG_AE)
+    cfg_optim = SimpleNamespace(**load_config(CONFIG_OPTIM).optimization)
 
-    device = get_device()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     trainer = OptimizationTrainer(
         cfg_forecaster=cfg_forecaster,
