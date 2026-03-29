@@ -14,12 +14,12 @@
   "dropout"        : 0.1,
 
   "lambda_rec"     : 1.0,
-  "lambda_d1"      : 1.0,
+  "lambda_d1"      : 0.1,
   "lambda_d2"      : 0.5,
 
   "lr"             : 0.005,
   "lr_patience"    : 30,
-  "epochs"         : 200,
+  "epochs"         : 100,
   "patience"       : 50,
   "batch_size"     : 128,
   "grad_clip"      : 1.0,

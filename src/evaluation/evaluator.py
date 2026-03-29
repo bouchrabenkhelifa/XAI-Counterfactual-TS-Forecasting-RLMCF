@@ -62,13 +62,22 @@ class CounterfactualEvaluator:
 
         # Plausibility
         if self.plausibility_model is not None:
-            results["plausibility"] = plausibility_score(
+            # Global / ensemble plausibility
+            results["plausibility_x"] = plausibility_score(
+                self.plausibility_model, x
+            )
+            results["plausibility_cf"] = plausibility_score(
                 self.plausibility_model, x_cf
             )
 
-            all_pl = plausibility_score_all(self.plausibility_model, x_cf)
-            for k, v in all_pl.items():
-                results[f"plausibility_{k}"] = v
+            # All available detector scores
+            all_pl_x = plausibility_score_all(self.plausibility_model, x)
+            for k, v in all_pl_x.items():
+                results[f"plausibility_x_{k}"] = v
+
+            all_pl_cf = plausibility_score_all(self.plausibility_model, x_cf)
+            for k, v in all_pl_cf.items():
+                results[f"plausibility_cf_{k}"] = v
 
         # Realism
         results["roughness_x"] = roughness(x)
@@ -117,6 +126,53 @@ class CounterfactualEvaluator:
                 "n": int(v.size),
             }
         return out
+
+    def pretty_print_summary(self, summary):
+        print("\n===== Counterfactual Evaluation Summary =====")
+
+        print("\n[Validity]")
+        print(f"  Delta mean              : {summary.get('delta_mean', float('nan')):.4f}")
+        print(f"  Relative reduction      : {summary.get('relative_reduction', float('nan')):.4f}")
+        print(f"  Target gap              : {summary.get('target_gap', float('nan')):.4f}")
+        print(f"  Success rate            : {summary.get('success', float('nan')):.4f}")
+
+        print("\n[Proximity]")
+        print(f"  L1(X, Xcf)              : {summary.get('l1', float('nan')):.4f}")
+        print(f"  L2(X, Xcf)              : {summary.get('l2', float('nan')):.4f}")
+        print(f"  Euclidean(X, Xcf)       : {summary.get('euclidean', float('nan')):.4f}")
+        print(f"  Manhattan(X, Xcf)       : {summary.get('manhattan', float('nan')):.4f}")
+        if "dtw" in summary:
+            print(f"  DTW(X, Xcf)             : {summary.get('dtw', float('nan')):.4f}")
+
+        print("\n[Plausibility]")
+        print(f"  Plausibility(X)         : {summary.get('plausibility_x', float('nan')):.4f}")
+        print(f"  Plausibility(Xcf)       : {summary.get('plausibility_cf', float('nan')):.4f}")
+
+        for k in ["if", "lof", "ocsvm", "ensemble"]:
+            key_x = f"plausibility_x_{k}"
+            key_cf = f"plausibility_cf_{k}"
+
+            if key_x in summary:
+                print(f"  Plausibility(X) [{k}]   : {summary[key_x]:.4f}")
+            if key_cf in summary:
+                print(f"  Plausibility(Xcf)[{k}]  : {summary[key_cf]:.4f}")
+
+        print("\n[Realism / Temporal Quality]")
+        print(f"  Roughness(X)            : {summary.get('roughness_x', float('nan')):.4f}")
+        print(f"  Roughness(Xcf)          : {summary.get('roughness_cf', float('nan')):.4f}")
+        print(f"  Roughness ratio         : {summary.get('roughness_ratio', float('nan')):.4f}")
+        print(f"  Derivative distance     : {summary.get('derivative_distance', float('nan')):.4f}")
+        print(f"  2nd-derivative distance : {summary.get('second_derivative_distance', float('nan')):.4f}")
+        print(f"  Temporal consistency    : {summary.get('temporal_consistency', float('nan')):.4f}")
+        print(f"  Autocorr similarity     : {summary.get('autocorrelation_similarity', float('nan')):.4f}")
+        print(f"  Spectral similarity     : {summary.get('spectral_similarity', float('nan')):.4f}")
+
+        print("\n[Sparsity]")
+        print(f"  Sparsity ratio          : {summary.get('sparsity_ratio', float('nan')):.4f}")
+        print(f"  Change magnitude        : {summary.get('change_magnitude', float('nan')):.4f}")
+        print(f"  Segment sparsity        : {summary.get('segment_sparsity', float('nan')):.4f}")
+
+        print("=============================================\n")
 
 
 __all__ = [

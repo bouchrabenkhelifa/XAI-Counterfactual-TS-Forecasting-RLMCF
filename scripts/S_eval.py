@@ -19,11 +19,11 @@ CHECKPOINT_PATH = "assets/checkpoints/rl_S/rl_agent_best.pt"
 EXTERNAL_PLAUS_PATH = "assets/checkpoints/anomaly detector/plausibility_etth1.pkl"
 
 
+# =========================
+# LOAD CHECKPOINT
+# =========================
 def load_checkpoint_into_trainer(trainer, ckpt_path, device):
     ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-
-    if "actor_state_dict" not in ckpt or "critic_state_dict" not in ckpt:
-        raise KeyError("Checkpoint must contain actor_state_dict and critic_state_dict")
 
     trainer.agent.actor.load_state_dict(ckpt["actor_state_dict"])
     trainer.agent.critic.load_state_dict(ckpt["critic_state_dict"])
@@ -31,15 +31,16 @@ def load_checkpoint_into_trainer(trainer, ckpt_path, device):
     print(f"[Eval] Loaded checkpoint: {ckpt_path}")
 
 
+# =========================
+# EPISODE
+# =========================
 @torch.no_grad()
 def trainer_run_episode(trainer, batch, filter_quantile=0.75):
-    """
-    Reproduit un épisode d'évaluation pour RLTrainer_S.
-    Version déterministe pour une évaluation stable.
-    """
+
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(trainer.device)
     batch_x_mark = batch_x_mark.float().to(trainer.device)
+
     x_ot = batch_x[:, :, -1:]
 
     z = trainer.ae.encode(x_ot)
@@ -47,6 +48,7 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
 
     mean_yhat = y_hat[:, :, 0].mean(dim=1)
     mask = mean_yhat >= torch.quantile(mean_yhat, filter_quantile)
+
     if mask.sum() == 0:
         return None
 
@@ -58,7 +60,7 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
 
     s = trainer.agent.build_state(z, y_hat)
 
-    # action déterministe pour l'évaluation
+    # deterministic policy
     mu, _ = trainer.agent.actor(s)
     a = mu
 
@@ -71,7 +73,6 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
         x_mark=batch_x_mark
     )
 
-    # IMPORTANT: ancienne version -> pas de z_cf ici
     reward_dict = trainer.reward_fn(x_ot, x_cf, y_hat, y_cf)
 
     return {
@@ -79,28 +80,28 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
         "x_cf": x_cf.detach(),
         "y_hat": y_hat.detach(),
         "y_cf": y_cf.detach(),
-        "z": z.detach(),
-        "z_cf": z_cf.detach(),
-        "reward_dict": reward_dict,
-        "n_valid": int(mask.sum()),
     }
 
 
+# =========================
+# EVALUATION
+# =========================
 @torch.no_grad()
-def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
+def evaluate_frozen_model(trainer, evaluator, n_batches=20):
+
     trainer.agent.eval()
 
-    all_x = []
-    all_x_cf = []
-    all_y_hat = []
-    all_y_cf = []
-    cf_examples = []
+    all_x, all_x_cf = [], []
+    all_y_hat, all_y_cf = [], []
+    examples = []
 
     for i, batch in enumerate(trainer.test_loader):
+
         if i >= n_batches:
             break
 
         ep = trainer_run_episode(trainer, batch)
+
         if ep is None:
             continue
 
@@ -109,73 +110,30 @@ def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
         all_y_hat.append(ep["y_hat"].cpu().numpy())
         all_y_cf.append(ep["y_cf"].cpu().numpy())
 
-        if len(cf_examples) < 4:
-            cf_examples.append({
+        if len(examples) < 4:
+            examples.append({
                 "x_ot": ep["x_ot"][0].cpu().numpy(),
                 "x_cf": ep["x_cf"][0].cpu().numpy(),
                 "y_hat": ep["y_hat"][0].cpu().numpy(),
                 "y_cf": ep["y_cf"][0].cpu().numpy(),
             })
 
-    if len(all_x) == 0:
-        raise RuntimeError("No valid CFs generated during evaluation.")
+    all_x = np.concatenate(all_x)
+    all_x_cf = np.concatenate(all_x_cf)
+    all_y_hat = np.concatenate(all_y_hat)
+    all_y_cf = np.concatenate(all_y_cf)
 
-    all_x = np.concatenate(all_x, axis=0)
-    all_x_cf = np.concatenate(all_x_cf, axis=0)
-    all_y_hat = np.concatenate(all_y_hat, axis=0)
-    all_y_cf = np.concatenate(all_y_cf, axis=0)
-
-    metrics = evaluator.evaluate_batch(
-        x=all_x,
-        x_cf=all_x_cf,
-        y_hat=all_y_hat,
-        y_cf=all_y_cf,
-        include_dtw=include_dtw,
-    )
-
+    metrics = evaluator.evaluate_batch(all_x, all_x_cf, all_y_hat, all_y_cf)
     summary = evaluator.summarize_with_std(metrics)
-    return summary, cf_examples
+
+    return summary, examples
 
 
-def save_examples_plot(examples, out_path, rho=0.10):
-    import matplotlib.pyplot as plt
-
-    if not examples:
-        return
-
-    n = len(examples)
-    fig, axes = plt.subplots(n, 1, figsize=(14, 4 * n))
-    if n == 1:
-        axes = [axes]
-
-    for i, ex in enumerate(examples):
-        x_ot = ex["x_ot"][:, 0]
-        x_cf = ex["x_cf"][:, 0]
-        y_hat = ex["y_hat"][:, 0]
-        y_cf = ex["y_cf"][:, 0]
-
-        full_orig = np.concatenate([x_ot, y_hat])
-        full_cf = np.concatenate([x_cf, y_cf])
-        t_all = np.arange(len(full_orig))
-        reduction = (y_hat.mean() - y_cf.mean()) / (abs(y_hat.mean()) + 1e-8) * 100
-        ok = "✓" if reduction >= rho * 100 else "✗"
-
-        axes[i].plot(t_all, full_orig, color="steelblue", lw=1.5, label="x + forecast(x)")
-        axes[i].plot(t_all, full_cf, color="coral", lw=1.5, ls="--", label="x_cf + forecast(x_cf)")
-        axes[i].axvline(len(x_ot), color="gray", ls="--", lw=1.2)
-        axes[i].fill_between(t_all, full_orig, full_cf, alpha=0.12, color="coral")
-        axes[i].set_title(f"Sample {i+1} — {reduction:+.1f}% {ok}", fontsize=11)
-        axes[i].legend(fontsize=9)
-        axes[i].grid(alpha=0.3)
-
-    plt.suptitle("Frozen checkpoint evaluation — RL S", fontsize=13)
-    plt.tight_layout()
-    plt.savefig(out_path, dpi=150, bbox_inches="tight")
-    plt.close()
-    print(f"[Eval] Examples plot -> {out_path}")
-
-
+# =========================
+# MAIN
+# =========================
 def main():
+
     cfg_f = load_config(CONFIG_FORECASTER)
     cfg_ae = load_config(CONFIG_AE)
     cfg_rl = load_config(CONFIG_RL)
@@ -187,52 +145,32 @@ def main():
     load_checkpoint_into_trainer(trainer, CHECKPOINT_PATH, device)
 
     plaus_model = load_plausibility_model(EXTERNAL_PLAUS_PATH)
+
     evaluator = CounterfactualEvaluator(
         plausibility_model=plaus_model,
         rho=cfg_rl.rho,
     )
 
-    summary, examples = evaluate_frozen_model(
-        trainer=trainer,
-        evaluator=evaluator,
-        n_batches=20,
-        include_dtw=False,
-    )
+    summary, examples = evaluate_frozen_model(trainer, evaluator)
+
+    # flatten for pretty print
+    summary_flat = {k: v["mean"] for k, v in summary.items()}
 
     print("\n── Final Evaluation Metrics ─────────────────────────")
-    keys_to_show = [
-        "success",
-        "delta_mean",
-        "relative_reduction",
-        "l1",
-        "l2",
-        "plausibility",
-        "plausibility_ensemble",
-        "plausibility_if",
-        "plausibility_lof",
-        "plausibility_ocsvm",
-        "roughness_ratio",
-        "derivative_distance",
-        "second_derivative_distance",
-        "autocorrelation_similarity",
-        "spectral_similarity",
-        "sparsity_ratio",
-    ]
+    evaluator.pretty_print_summary(summary_flat)
 
-    for k in keys_to_show:
-        if k in summary:
-            print(f"{k:28s}: {summary[k]['mean']:.4f} ± {summary[k]['std']:.4f}")
+    print("\n── Mean ± Std ───────────────────────────────────────")
 
+    for k, v in summary.items():
+        print(f"{k:30s}: {v['mean']:.4f} ± {v['std']:.4f}")
+
+    # Save
     os.makedirs(cfg_rl.results_dir, exist_ok=True)
-    os.makedirs(cfg_rl.figures_dir, exist_ok=True)
 
-    metrics_path = os.path.join(cfg_rl.results_dir, "frozen_eval_metrics.json")
-    with open(metrics_path, "w") as f:
+    with open(os.path.join(cfg_rl.results_dir, "metrics.json"), "w") as f:
         json.dump(summary, f, indent=2)
-    print(f"\n[Eval] Metrics saved -> {metrics_path}")
 
-    fig_path = os.path.join(cfg_rl.figures_dir, "frozen_eval_examples.png")
-    save_examples_plot(examples, fig_path, rho=cfg_rl.rho)
+    print("\n[Eval] Saved results ✔")
 
 
 if __name__ == "__main__":
