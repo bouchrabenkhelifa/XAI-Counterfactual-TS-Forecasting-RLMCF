@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def sparsity_ratio(x, x_cf, threshold=1e-3):
+def sparsity_ratio(x, x_cf, threshold=5e-2):
     x = np.asarray(x)
     x_cf = np.asarray(x_cf)
     diff = np.abs(x_cf - x)
@@ -17,7 +17,7 @@ def mean_change_magnitude(x, x_cf):
     return np.mean(np.abs(x_cf - x), axis=axes)
 
 
-def segment_sparsity(x, x_cf, threshold=1e-3):
+def segment_sparsity(x, x_cf, threshold=5e-2):
     x = np.asarray(x)
     x_cf = np.asarray(x_cf)
     diff = np.abs(x_cf - x)
