@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(
 
 from src.utils.config      import load_config
 from src.utils.train_tools import get_device
-from src.training.RL_trainer import RLTrainer
+from src.training.RL_trainers.RL_trainer import RLTrainer
 
 
 CONFIG_FORECASTER = "configs/models/etth1_dataset/itransformer/etth1_96_96.json"

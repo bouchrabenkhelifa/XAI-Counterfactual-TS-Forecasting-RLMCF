@@ -19,7 +19,7 @@ from src.models.anomaly_detector.plausibility import (
     EnsemblePlausibility,
 )
 
-SANITY_THRESHOLD = 0.4  # realistic for time series with distribution shift
+SANITY_THRESHOLD = 0.4  
 
 
 def load_config(config_path):

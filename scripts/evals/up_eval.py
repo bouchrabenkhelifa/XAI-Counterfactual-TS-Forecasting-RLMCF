@@ -2,21 +2,23 @@ import os
 import json
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
 
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
 
-from src.training.RL_mask2_trainer import RLMaskTrainer
+from src.training.RL_trainers.RL_up_trainer import RLTrainerUpdated
 from src.evaluation.evaluator import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
 
 
 CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
 CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
-CONFIG_RL = "assets/configs/models/etth1_dataset/RL/rl_mask2.json"
+CONFIG_RL = "assets/configs/models/etth1_dataset/RL/latent01.json"
 
-CHECKPOINT_PATH = "assets/checkpoints/RL_mask2/rl_mask2_agent_best.pt"
+# Checkpoint RL déjà entraîné
+CHECKPOINT_PATH = "assets/checkpoints/RL_up/rl_updated_agent_best.pt"
+
+# Modèle externe de plausibilité
 EXTERNAL_PLAUS_PATH = "assets/checkpoints/anomaly detector/plausibility_etth1.pkl"
 
 
@@ -33,26 +35,12 @@ def load_checkpoint_into_trainer(trainer, ckpt_path, device):
 
 
 @torch.no_grad()
-def build_temporal_mask(batch_size, seq_len, channels, last_k, ramp_k, device):
-    m = torch.zeros((batch_size, seq_len, channels), device=device)
-
-    start_full = max(0, seq_len - last_k)
-    m[:, start_full:, :] = 1.0
-
-    if ramp_k > 0:
-        start_ramp = max(0, start_full - ramp_k)
-        ramp_len = start_full - start_ramp
-        if ramp_len > 0:
-            ramp = torch.linspace(0.0, 1.0, ramp_len, device=device).view(1, ramp_len, 1)
-            m[:, start_ramp:start_full, :] = ramp
-
-    return m
-
-
-@torch.no_grad()
 def trainer_run_episode(trainer, batch, filter_quantile=0.75):
     """
-    Reproduit exactement l'épisode du RL-Mask trainer en mode déterministe.
+    Reproduit l'épisode du trainer sans entraînement.
+    Important :
+    - action déterministe (mu au lieu de sample)
+    - HF skip connection reproduite comme pendant le training
     """
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(trainer.device)
@@ -63,44 +51,31 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
     y_hat = trainer.forecaster.predict_ot(batch_x, batch_x_mark)
 
     mean_yhat = y_hat[:, :, 0].mean(dim=1)
-    keep = mean_yhat >= torch.quantile(mean_yhat, filter_quantile)
-    if keep.sum() == 0:
+    mask = mean_yhat >= torch.quantile(mean_yhat, filter_quantile)
+    if mask.sum() == 0:
         return None
 
-    x_ot = x_ot[keep]
-    batch_x = batch_x[keep]
-    batch_x_mark = batch_x_mark[keep]
-    y_hat = y_hat[keep]
-    z = z[keep]
+    x_ot = x_ot[mask]
+    batch_x = batch_x[mask]
+    batch_x_mark = batch_x_mark[mask]
+    y_hat = y_hat[mask]
+    z = z[mask]
 
     s = trainer.agent.build_state(z, y_hat)
 
-    # action déterministe
+    # Eval déterministe
     mu, _ = trainer.agent.actor(s)
     a = mu
 
     z_cf = torch.clamp(z + trainer.agent.eta * a, -1.0, 1.0)
 
-    # proposition décodée
-    x_prop = trainer.ae.decode(z_cf)
-    delta = x_prop - x_ot
+    # Décodage du CF
+    x_cf = trainer.ae.decode(z_cf)
 
-    # HF skip identique au training
+    # Reproduire exactement le HF skip du training
     x_lf = trainer.ae.decode(trainer.ae.encode(x_ot))
     x_hf = x_ot - x_lf
-
-    # mask identique au training
-    temp_mask = build_temporal_mask(
-        batch_size=x_ot.shape[0],
-        seq_len=x_ot.shape[1],
-        channels=x_ot.shape[2],
-        last_k=trainer.mask_last_k,
-        ramp_k=trainer.mask_ramp_k,
-        device=trainer.device,
-    )
-
-    masked_delta = delta + trainer.alpha_hf * x_hf
-    x_cf = x_ot + temp_mask * masked_delta
+    x_cf = x_cf + trainer.alpha_hf * x_hf
 
     y_cf = trainer.forecaster.predict_from_ot(
         x_ot=x_cf,
@@ -118,7 +93,7 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
         "z": z.detach(),
         "z_cf": z_cf.detach(),
         "reward_dict": reward_dict,
-        "n_valid": int(keep.sum()),
+        "n_valid": int(mask.sum()),
     }
 
 
@@ -175,6 +150,8 @@ def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
 
 
 def save_examples_plot(examples, out_path, rho=0.10):
+    import matplotlib.pyplot as plt
+
     if not examples:
         return
 
@@ -203,12 +180,11 @@ def save_examples_plot(examples, out_path, rho=0.10):
         axes[i].legend(fontsize=9)
         axes[i].grid(alpha=0.3)
 
-    plt.suptitle("Frozen checkpoint evaluation — RL Mask", fontsize=13)
+    plt.suptitle("Frozen checkpoint evaluation — RL Updated", fontsize=13)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close()
     print(f"[Eval] Examples plot -> {out_path}")
-
 
 def main():
     cfg_f = load_config(CONFIG_FORECASTER)
@@ -218,7 +194,8 @@ def main():
     device = get_device(cfg_f)
     print(f"Device: {device}")
 
-    trainer = RLMaskTrainer(cfg_f, cfg_ae, cfg_rl, device)
+    # Construit le pipeline complet puis charge le checkpoint RL déjà appris
+    trainer = RLTrainerUpdated(cfg_f, cfg_ae, cfg_rl, device)
     load_checkpoint_into_trainer(trainer, CHECKPOINT_PATH, device)
 
     plaus_model = load_plausibility_model(EXTERNAL_PLAUS_PATH)
@@ -234,6 +211,8 @@ def main():
         include_dtw=False,
     )
 
+    # summary contient {metric: {"mean":..., "std":..., "n":...}}
+    # on crée aussi un dict plat pour pretty_print_summary
     summary_flat = {k: v["mean"] for k, v in summary.items()}
 
     print("\n── Final Evaluation Metrics ─────────────────────────")
@@ -286,7 +265,6 @@ def main():
 
     fig_path = os.path.join(cfg_rl.figures_dir_lp, "frozen_eval_examples.png")
     save_examples_plot(examples, fig_path, rho=cfg_rl.rho)
-
 
 if __name__ == "__main__":
     main()

@@ -6,11 +6,9 @@ import matplotlib.pyplot as plt
 
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
-
-from src.training.RL_learned_mask_trainer import RLLearnedMaskTrainer
+from src.training.RL_trainers.RL_mask_trainer import RLLearnedMaskTrainer
 from src.evaluation.evaluator import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
-
 
 CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
 CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"

@@ -19,7 +19,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.utils.config     import load_config
 from src.utils.train_tools import get_device
-from src.training.optimization_trainer import OptimizationTrainer
+from src.training.RL_trainers.wachter_optimization_trainer import OptimizationTrainer
 
 
 # ── Configs ──────────────────────────────────────────────────

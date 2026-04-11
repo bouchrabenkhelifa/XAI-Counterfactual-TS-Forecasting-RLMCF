@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 import torch
-from src.training.optim_trainer import OptimizationTrainer
+from src.training.RL_trainers.optim_trainer import OptimizationTrainer
 from src.utils.config import load_config
 
 CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"

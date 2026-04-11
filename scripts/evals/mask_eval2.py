@@ -8,7 +8,7 @@ from sklearn.neighbors import NearestNeighbors
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
 
-from src.training.RL_mask_trainer import RLMaskTrainer
+from src.training.RL_trainers.RL_mask_trainer import RLMaskTrainer
 from src.evaluation.evaluator2 import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
 
