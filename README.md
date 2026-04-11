@@ -4,19 +4,17 @@ This work proposes an **agnostic XAI framework** to generate **counterfactual ex
 
 ---
 
-# 🧠 Motivation
+# Motivation
 
-Forecasting models are often black-box and lack interpretability.
+Deep learning models, especially Transformers, have significantly improved time series forecasting performance. However, their black-box nature limits interpretability, which is critical in real-world decision-making.
 
-We address the question:
+Existing XAI methods mainly focus on feature attribution, explaining why a prediction was made, but not how to change it. As a result, they lack actionability.
 
-> *What minimal and realistic change to a time series would alter the forecast?*
-
-This is formulated as a **counterfactual explanation problem**.
+Counterfactual explanations address this by answering “what-if” questions, providing actionable insights. However, most existing work focuses on classification tasks, while counterfactual generation for time series forecasting remains underexplored and introduces additional challenges due to temporal dependencies and sequence realism.
 
 ---
 
-# 🏗️ Architecture
+# Architecture
 
 ![Architecture](./figures/Architecture.png)
 
@@ -33,7 +31,7 @@ The pipeline operates as follows:
 
 ---
 
-# 🔍 Contribution
+# Contribution
 
 ## 1. Agnostic XAI Framework
 
@@ -80,7 +78,7 @@ Ensure minimal modification:
 ### ✔ Plausibility
 Ensure realism:
 (using anomaly detection ensemble)
-Plaus = Score(X_cf)
+
 ---
 
 ### 🧠 Final Reward
@@ -94,7 +92,7 @@ Instead of modifying raw time series:
 - We operate in latent space `z`
 - Decode to obtain realistic sequences
 
-👉 This stabilizes learning and avoids unrealistic perturbations.
+This stabilizes learning and avoids unrealistic perturbations.
 
 ---
 
@@ -104,7 +102,7 @@ We propose a comprehensive evaluation using two categories:
 
 ---
 
-### 📊 Optimization Metrics
+### Optimization Metrics
 
 Measure solution quality:
 
@@ -117,7 +115,7 @@ Measure solution quality:
 
 ---
 
-### ⚙️ Actionability Metrics
+### Actionability Metrics
 
 Measure usability of counterfactuals:
 
@@ -141,19 +139,19 @@ The framework is evaluated on multiple datasets:
 
 We demonstrate that:
 
-- The framework generalizes across forecasting architectures
+- The framework generalizes across forecasting architectures : Transformers , LSTM , CNN
 - Works with different models without retraining the XAI method
-- Relies only on model outputs and representations
 
 ---
 
-## 8. Continuous Multi-Objective Setting
+### 8. Multiple Counterfactual Objectives
 
-Unlike discrete counterfactual methods:
+We explore different types of objectives:
 
-- Objectives are continuous
-- Trade-offs are learned dynamically via RL
-- No manual rule-based balancing
+#### ✔ Forecast Reduction
+Encourage decreasing the forecast value
 
 ---
 
+#### ✔ Bounded Forecast
+Impose a range constraint on the forecast 
