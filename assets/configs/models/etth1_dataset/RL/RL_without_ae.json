@@ -1,0 +1,20 @@
+{
+    "rho"          : 0.10,
+    "eta_input"    : 0.20,
+    "alpha"        : 1.0,
+    "beta"         : 0.5,
+    "gamma"        : 0.3,
+    "entropy_coef" : 0.01,
+    "direction"    : -1.0,
+
+    "epochs"       : 30,
+    "lr_actor"     : 3e-4,
+    "lr_critic"    : 1e-3,
+    "grad_clip"    : 1.0,
+
+    "plausibility_path"   : "assets/checkpoints/etth1_chpts/anomaly detector/plausibility_etth1.pkl",
+
+    "checkpoint_dir_input": "assets/checkpoints/etth1_chpts/rl_input_space",
+    "figures_dir_input"   : "figures/rl_input_space",
+    "results_dir_input"   : "assets/results/rl_input_space"
+}

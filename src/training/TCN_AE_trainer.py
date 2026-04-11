@@ -1,15 +1,3 @@
-# src/training/ae_trainer_derivative_loss.py
-# ─────────────────────────────────────────────────────────────
-# Trainer for TCNAutoEncoder with derivative-based loss.
-#
-# Loss :
-#   L = λ_rec * MSE(x, x̂)
-#     + λ_d1  * L1(Δx,  Δx̂)     ← préserve les pentes locales
-#     + λ_d2  * L1(Δ²x, Δ²x̂)    ← préserve les courbures / pics
-#
-# Objectif : forcer l'AE à reconstruire les patterns locaux
-# (pics, creux, variations brusques) que le MSE seul écrase.
-# ─────────────────────────────────────────────────────────────
 
 import os
 import torch

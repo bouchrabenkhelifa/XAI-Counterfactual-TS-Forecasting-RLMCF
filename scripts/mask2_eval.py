@@ -7,16 +7,16 @@ import matplotlib.pyplot as plt
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
 
-from src.training.RL_learned_mask_trainer import RLLearnedMaskTrainer
+from src.training.RL_mask2_trainer import RLMaskTrainer
 from src.evaluation.evaluator import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
 
 
-CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
-CONFIG_AE = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_RL = "assets/configs/models/RL/rl_learned_mask.json"
+CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+CONFIG_RL = "assets/configs/models/etth1_dataset/RL/rl_mask2.json"
 
-CHECKPOINT_PATH = "assets/checkpoints/RL_mask_learned/rl_mask_learned_agent_best.pt"
+CHECKPOINT_PATH = "assets/checkpoints/RL_mask2/rl_mask2_agent_best.pt"
 EXTERNAL_PLAUS_PATH = "assets/checkpoints/anomaly detector/plausibility_etth1.pkl"
 
 
@@ -33,25 +33,26 @@ def load_checkpoint_into_trainer(trainer, ckpt_path, device):
 
 
 @torch.no_grad()
-def _ensure_mask_shape(mask_t, x_ot, mask_min=0.05, mask_max=0.95):
-    if mask_t.dim() == 2:
-        mask_t = mask_t.unsqueeze(2)
-    elif mask_t.dim() != 3:
-        raise ValueError(f"mask_t must have shape [B,T] or [B,T,1], got {mask_t.shape}")
+def build_temporal_mask(batch_size, seq_len, channels, last_k, ramp_k, device):
+    m = torch.zeros((batch_size, seq_len, channels), device=device)
 
-    if mask_t.shape[1] != x_ot.shape[1]:
-        raise ValueError(
-            f"Mask time dimension mismatch: mask_t.shape={mask_t.shape}, x_ot.shape={x_ot.shape}"
-        )
+    start_full = max(0, seq_len - last_k)
+    m[:, start_full:, :] = 1.0
 
-    mask_t = torch.clamp(mask_t, min=mask_min, max=mask_max)
-    return mask_t
+    if ramp_k > 0:
+        start_ramp = max(0, start_full - ramp_k)
+        ramp_len = start_full - start_ramp
+        if ramp_len > 0:
+            ramp = torch.linspace(0.0, 1.0, ramp_len, device=device).view(1, ramp_len, 1)
+            m[:, start_ramp:start_full, :] = ramp
+
+    return m
 
 
 @torch.no_grad()
 def trainer_run_episode(trainer, batch, filter_quantile=0.75):
     """
-    Reproduit exactement l'épisode du trainer learned-mask en mode déterministe.
+    Reproduit exactement l'épisode du RL-Mask trainer en mode déterministe.
     """
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(trainer.device)
@@ -75,7 +76,7 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
     s = trainer.agent.build_state(z, y_hat)
 
     # action déterministe
-    mu, _log_std, mask_t = trainer.agent.actor(s)
+    mu, _ = trainer.agent.actor(s)
     a = mu
 
     z_cf = torch.clamp(z + trainer.agent.eta * a, -1.0, 1.0)
@@ -88,15 +89,18 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
     x_lf = trainer.ae.decode(trainer.ae.encode(x_ot))
     x_hf = x_ot - x_lf
 
-    mask_t = _ensure_mask_shape(
-        mask_t=mask_t,
-        x_ot=x_ot,
-        mask_min=trainer.mask_min,
-        mask_max=trainer.mask_max,
+    # mask identique au training
+    temp_mask = build_temporal_mask(
+        batch_size=x_ot.shape[0],
+        seq_len=x_ot.shape[1],
+        channels=x_ot.shape[2],
+        last_k=trainer.mask_last_k,
+        ramp_k=trainer.mask_ramp_k,
+        device=trainer.device,
     )
 
     masked_delta = delta + trainer.alpha_hf * x_hf
-    x_cf = x_ot + mask_t * masked_delta
+    x_cf = x_ot + temp_mask * masked_delta
 
     y_cf = trainer.forecaster.predict_from_ot(
         x_ot=x_cf,
@@ -104,11 +108,7 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
         x_mark=batch_x_mark
     )
 
-    reward_dict = trainer.reward_fn(
-        x_ot, x_cf, y_hat, y_cf,
-        mask_t=mask_t,
-        z_cf=z_cf
-    )
+    reward_dict = trainer.reward_fn(x_ot, x_cf, y_hat, y_cf, z_cf=z_cf)
 
     return {
         "x_ot": x_ot.detach(),
@@ -117,7 +117,6 @@ def trainer_run_episode(trainer, batch, filter_quantile=0.75):
         "y_cf": y_cf.detach(),
         "z": z.detach(),
         "z_cf": z_cf.detach(),
-        "mask_t": mask_t.detach(),
         "reward_dict": reward_dict,
         "n_valid": int(keep.sum()),
     }
@@ -153,7 +152,6 @@ def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
                 "x_cf": ep["x_cf"][0].cpu().numpy(),
                 "y_hat": ep["y_hat"][0].cpu().numpy(),
                 "y_cf": ep["y_cf"][0].cpu().numpy(),
-                "mask_t": ep["mask_t"][0].cpu().numpy(),
             })
 
     if len(all_x) == 0:
@@ -181,9 +179,9 @@ def save_examples_plot(examples, out_path, rho=0.10):
         return
 
     n = len(examples)
-    fig, axes = plt.subplots(n, 2, figsize=(16, 4 * n))
+    fig, axes = plt.subplots(n, 1, figsize=(14, 4 * n))
     if n == 1:
-        axes = np.array([axes])
+        axes = [axes]
 
     for i, ex in enumerate(examples):
         x_ot = ex["x_ot"][:, 0]
@@ -191,30 +189,21 @@ def save_examples_plot(examples, out_path, rho=0.10):
         y_hat = ex["y_hat"][:, 0]
         y_cf = ex["y_cf"][:, 0]
 
-        mask_t = ex["mask_t"]
-        if mask_t.ndim == 2:
-            mask_t = mask_t[:, 0]
-
         full_orig = np.concatenate([x_ot, y_hat])
         full_cf = np.concatenate([x_cf, y_cf])
         t_all = np.arange(len(full_orig))
         reduction = (y_hat.mean() - y_cf.mean()) / (abs(y_hat.mean()) + 1e-8) * 100
         ok = "✓" if reduction >= rho * 100 else "✗"
 
-        axes[i, 0].plot(t_all, full_orig, color="steelblue", lw=1.5, label="x + forecast(x)")
-        axes[i, 0].plot(t_all, full_cf, color="coral", lw=1.5, ls="--", label="x_cf + forecast(x_cf)")
-        axes[i, 0].axvline(len(x_ot), color="gray", ls="--", lw=1.2)
-        axes[i, 0].fill_between(t_all, full_orig, full_cf, alpha=0.12, color="coral")
-        axes[i, 0].set_title(f"Sample {i+1} — {reduction:+.1f}% {ok}", fontsize=11)
-        axes[i, 0].legend(fontsize=9)
-        axes[i, 0].grid(alpha=0.3)
+        axes[i].plot(t_all, full_orig, color="steelblue", lw=1.5, label="x + forecast(x)")
+        axes[i].plot(t_all, full_cf, color="coral", lw=1.5, ls="--", label="x_cf + forecast(x_cf)")
+        axes[i].axvline(len(x_ot), color="gray", ls="--", lw=1.2)
+        axes[i].fill_between(t_all, full_orig, full_cf, alpha=0.12, color="coral")
+        axes[i].set_title(f"Sample {i+1} — {reduction:+.1f}% {ok}", fontsize=11)
+        axes[i].legend(fontsize=9)
+        axes[i].grid(alpha=0.3)
 
-        axes[i, 1].plot(mask_t, color="purple", lw=1.8)
-        axes[i, 1].set_ylim(-0.05, 1.05)
-        axes[i, 1].set_title("Learned temporal mask", fontsize=11)
-        axes[i, 1].grid(alpha=0.3)
-
-    plt.suptitle("Frozen checkpoint evaluation — RL Learned Mask", fontsize=13)
+    plt.suptitle("Frozen checkpoint evaluation — RL Mask", fontsize=13)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close()
@@ -229,7 +218,7 @@ def main():
     device = get_device(cfg_f)
     print(f"Device: {device}")
 
-    trainer = RLLearnedMaskTrainer(cfg_f, cfg_ae, cfg_rl, device)
+    trainer = RLMaskTrainer(cfg_f, cfg_ae, cfg_rl, device)
     load_checkpoint_into_trainer(trainer, CHECKPOINT_PATH, device)
 
     plaus_model = load_plausibility_model(EXTERNAL_PLAUS_PATH)

@@ -3,12 +3,12 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.training.autoencoder_trainer import AutoEncoderTrainer
+from src.training.ae_trainers.autoencoder_trainer import AutoEncoderTrainer
 from src.utils.config import load_config
 
 
 if __name__ == "__main__":
-    config_path = "configs/models/ae/conv_ae_etth1_96.json"
+    config_path = "configs/models/etth1_dataset/ae/conv_ae_etth1_96.json"
 
     configs = load_config(config_path)
     trainer = AutoEncoderTrainer(configs)

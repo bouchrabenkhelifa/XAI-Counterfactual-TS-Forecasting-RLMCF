@@ -3,9 +3,9 @@ import torch
 from src.training.optim_trainer import OptimizationTrainer
 from src.utils.config import load_config
 
-CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
-CONFIG_AE = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_OPTIM = "assets/configs/models/optimization_strategy/optim1.json"
+CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+CONFIG_OPTIM = "assets/configs/models/etth1_dataset/optimization_strategy/optim1.json"
 
 
 def main():

@@ -1,0 +1,27 @@
+{
+    "dataset_name"   : "ETTh1",
+    "data_path"      : "assets/datasets/ETTh1.csv",
+    "target_col"     : "OT",
+    "results_dir"    : "assets/results/ae",
+    "checkpoint_dir" : "assets/checkpoints/etth1_chpts/ae",
+    "checkpoint_name": "ae_etth1.pt",
+    "figures_dir"    : "figures/ae",
+
+    "train_ratio": 0.70,
+    "val_ratio"  : 0.10,
+
+    "seq_len"    : 96,
+    "n_features" : 1,
+    "hidden_dim" : 32,
+    "latent_dim" : 64,
+    "n_blocks"   : 3,
+    "kernel_size": 3,
+    "dropout"    : 0.1,
+
+    "epochs"     : 50,
+    "batch_size" : 512,
+    "lr"         : 1e-3,
+    "grad_clip"  : 1.0,
+    "patience"   : 15,
+    "lr_patience": 5
+}

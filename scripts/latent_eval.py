@@ -11,9 +11,9 @@ from src.evaluation.evaluator import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
 
 
-CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
-CONFIG_AE = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_RL = "assets/configs/models/RL/latent01.json"
+CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+CONFIG_RL = "assets/configs/models/etth1_dataset/RL/latent01.json"
 
 CHECKPOINT_PATH = "assets/checkpoints/rl_latent_plaus/rl_lp_agent_best.pt"
 EXTERNAL_PLAUS_PATH = "assets/checkpoints/anomaly detector/plausibility_etth1.pkl"

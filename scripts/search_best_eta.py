@@ -10,9 +10,9 @@ from src.models.RL.agent import ActorCritic
 from src.models.forecaster_wrapper import ForecasterWrapper
 from src.data_provider.data_factory import data_provider
 
-cfg_f  = load_config("assets/configs/models/itransformer/etth1_96_48_S.json")
-cfg_ae = load_config("assets/configs/models/ae/tcn_ae.json")
-cfg_rl = load_config("assets/configs/models/rl/etth1_rl_S.json")
+cfg_f  = load_config("assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json")
+cfg_ae = load_config("assets/configs/models/etth1_dataset/ae/tcn_ae.json")
+cfg_rl = load_config("assets/configs/models/etth1_dataset/rl/etth1_rl_S.json")
 device = get_device(cfg_f)
 
 ae = TCNAutoEncoder.from_checkpoint(cfg_ae.checkpoint_path, device=device)

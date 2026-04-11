@@ -23,7 +23,7 @@ from types import SimpleNamespace
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.models.tcn_ae       import TCNAutoEncoder
-from src.training.ae_trainer import AETrainer
+from src.training.ae_trainers.ae_trainer import AETrainer
 
 
 # ══════════════════════════════════════════════════════════════
@@ -174,7 +174,7 @@ def latent_sanity_check(model, loader, device, n_batches=5):
 
 if __name__ == "__main__":
 
-    config_path = "assets/configs/models/ae/tcn_etth1.json"
+    config_path = "assets/configs/models/etth1_dataset/ae/tcn_etth1.json"
     cfg         = load_config(config_path)
 
     os.makedirs(cfg.checkpoint_dir, exist_ok=True)

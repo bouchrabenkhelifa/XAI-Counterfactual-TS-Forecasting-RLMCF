@@ -9,9 +9,9 @@ from src.utils.train_tools import get_device
 from src.training.RL_val_prox import RLTrainer
 
 
-CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
-CONFIG_AE         = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_RL         = "assets/configs/models/RL/rl_val_prox.json"
+CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+CONFIG_AE         = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+CONFIG_RL         = "assets/configs/models/etth1_dataset/RL/rl_val_prox.json"
 
 
 if __name__ == "__main__":

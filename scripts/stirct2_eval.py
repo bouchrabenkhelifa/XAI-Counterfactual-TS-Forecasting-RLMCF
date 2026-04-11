@@ -11,9 +11,9 @@ from src.evaluation.evaluator import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
 
 
-CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
-CONFIG_AE = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_RL = "assets/configs/models/RL/rl_strict2.json"
+CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+CONFIG_RL = "assets/configs/models/etth1_dataset/RL/rl_strict2.json"
 
 # Checkpoint RL strict déjà entraîné
 CHECKPOINT_PATH = "assets/checkpoints/RL_strict/rl_strict2_agent_best.pt"

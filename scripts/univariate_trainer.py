@@ -3,12 +3,12 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.training.itransformer_trainer import ITransformerTrainer
+from src.training.forecasting_trainers.itransformer_trainer import ITransformerTrainer
 from src.utils.config import load_config
 
 
 if __name__ == "__main__":
-    config_path = "configs/models/itransformer/etth1_96_48_S.json"
+    config_path = "configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
 
     configs = load_config(config_path)
     trainer = ITransformerTrainer(configs)

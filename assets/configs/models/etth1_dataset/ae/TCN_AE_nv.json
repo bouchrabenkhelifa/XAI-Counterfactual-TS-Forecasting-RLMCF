@@ -1,0 +1,30 @@
+{
+  "dataset_name"   : "ETTh1",
+  "data_path"      : "assets/datasets/ETTh1.csv",
+  "target_col"     : "OT",
+  "train_ratio"    : 0.6,
+  "val_ratio"      : 0.2,
+
+  "seq_len"        : 96,
+  "n_features"     : 1,
+  "hidden_dim"     : 64,
+  "latent_dim"     : 64,
+  "n_blocks"       : 6,
+  "kernel_size"    : 3,
+  "dropout"        : 0.1,
+
+  "lambda_rec"     : 1.0,
+  "lambda_d1"      : 0.1,
+  "lambda_d2"      : 0.5,
+
+  "lr"             : 0.005,
+  "lr_patience"    : 30,
+  "epochs"         : 100,
+  "patience"       : 50,
+  "batch_size"     : 128,
+  "grad_clip"      : 1.0,
+
+  "checkpoint_dir" : "assets/checkpoints/etth1_chpts/ae",
+  "figures_dir"    : "assets/figures/ae/deriv_loss",
+  "results_dir"    : "assets/results/ae"
+}

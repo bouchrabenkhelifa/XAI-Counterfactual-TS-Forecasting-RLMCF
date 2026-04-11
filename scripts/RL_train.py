@@ -9,9 +9,9 @@ from src.utils.train_tools import get_device
 from src.training.RL_trainer import RLTrainer
 
 
-CONFIG_FORECASTER = "configs/models/itransformer/etth1_96_96.json"
-CONFIG_AE         = "configs/models/ae/tcn_ae.json"
-CONFIG_RL         = "configs/models/RL/RL_etth1.json"
+CONFIG_FORECASTER = "configs/models/etth1_dataset/itransformer/etth1_96_96.json"
+CONFIG_AE         = "configs/models/etth1_dataset/ae/tcn_ae.json"
+CONFIG_RL         = "configs/models/etth1_dataset/RL/RL_etth1.json"
 
 
 if __name__ == "__main__":

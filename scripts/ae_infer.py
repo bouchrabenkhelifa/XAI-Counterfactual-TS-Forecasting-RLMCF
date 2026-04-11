@@ -8,7 +8,7 @@ from src.inference.autoencoder_inference import run_reconstruction_and_plot
 
 if __name__ == "__main__":
 
-    CONFIG_PATH = "configs/models/ae/conv_ae_etth1_96.json"
+    CONFIG_PATH = "configs/models/etth1_dataset/ae/conv_ae_etth1_96.json"
 
     run_reconstruction_and_plot(
         config_path=CONFIG_PATH,

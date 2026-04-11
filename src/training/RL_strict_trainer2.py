@@ -477,9 +477,9 @@ if __name__ == "__main__":
     from src.utils.config import load_config
     from src.utils.train_tools import get_device
 
-    CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
-    CONFIG_AE = "assets/configs/models/ae/tcn_ae.json"
-    CONFIG_RL = "assets/configs/models/RL/rl_strict2.json"
+    CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+    CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+    CONFIG_RL = "assets/configs/models/etth1_dataset/RL/rl_strict2.json"
 
     cfg_f = load_config(CONFIG_FORECASTER)
     cfg_ae = load_config(CONFIG_AE)

@@ -23,9 +23,9 @@ from src.training.optimization_trainer import OptimizationTrainer
 
 
 # ── Configs ──────────────────────────────────────────────────
-CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
-CONFIG_AE         = "assets/configs/models/ae/tcn_ae.json"
-CONFIG_OPT        = "assets/configs/models/optimization_strategy/wachter_latent_etth1.json"
+CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+CONFIG_AE         = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+CONFIG_OPT        = "assets/configs/models/etth1_dataset/optimization_strategy/wachter_latent_etth1.json"
 
 N_BATCHES         = 20     # number of test batches to evaluate
 

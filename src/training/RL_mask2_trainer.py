@@ -385,13 +385,13 @@ class RLMaskTrainer:
             "cfg_rl": vars(self.cfg_rl),
         }, os.path.join(
             self.cfg_rl.checkpoint_dir_lp,
-            f"rl_mask_agent_{tag}.pt"
+            f"rl_mask2_agent_{tag}.pt"
         ))
 
     def _save_history(self):
         path = os.path.join(
             self.cfg_rl.results_dir_lp,
-            "rl_mask_history.json"
+            "rl_mask2_history.json"
         )
         with open(path, "w") as f:
             json.dump(self.history, f, indent=2)
@@ -492,9 +492,9 @@ if __name__ == "__main__":
     from src.utils.config import load_config
     from src.utils.train_tools import get_device
 
-    CONFIG_FORECASTER = "assets/configs/models/itransformer/etth1_96_48_S.json"
-    CONFIG_AE = "assets/configs/models/ae/tcn_ae.json"
-    CONFIG_RL = "assets/configs/models/RL/rl_mask2.json"
+    CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+    CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+    CONFIG_RL = "assets/configs/models/etth1_dataset/RL/rl_mask2.json"
 
     cfg_f = load_config(CONFIG_FORECASTER)
     cfg_ae = load_config(CONFIG_AE)

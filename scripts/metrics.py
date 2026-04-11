@@ -8,7 +8,7 @@ from src.models.forecaster_wrapper import ForecasterWrapper
 from src.data_provider.data_factory import data_provider
 import pandas as pd
 
-cfg    = load_config("assets\configs\models\itransformer\etth1_96_48_S.json")
+cfg    = load_config("assets\configs\models\etth1_dataset\itransformer\etth1_96_48_S.json")
 device = get_device(cfg)
 fw     = ForecasterWrapper(cfg, device)
 
