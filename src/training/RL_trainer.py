@@ -13,7 +13,7 @@ from src.models.autoencoder.tcn_ae             import TCNAutoEncoder
 from src.models.actor_critic       import ActorCritic, build_state
 from src.models.Reward             import CFReward, compute_threshold
 from src.models.forecaster_wrapper import ForecasterWrapper
-from src.models.plausibility       import EnsemblePlausibility
+from src.models.anomaly_detector.plausibility       import EnsemblePlausibility
 from src.utils.config              import load_config
 from src.utils.train_tools         import get_device
 
