@@ -19,21 +19,15 @@ def prepare_rl_data(cfg_forecaster, cfg_ae, device):
     _, train_loader = data_provider(cfg_forecaster, "train")
     _, test_loader = data_provider(cfg_forecaster, "test")
 
-    ckpt_ae = torch.load(
-        cfg_ae.checkpoint_path,
-        map_location="cpu",
-        weights_only=False
-    )
+    ckpt_ae = torch.load(cfg_ae.checkpoint_path, map_location="cpu", weights_only=False)
 
     scaler = None
     if "scaler_mean" in ckpt_ae and "scaler_std" in ckpt_ae:
         scaler = StandardScaler()
         scaler.mean_ = np.array(ckpt_ae["scaler_mean"], dtype=np.float64)
         scaler.scale_ = np.array(ckpt_ae["scaler_std"], dtype=np.float64)
-        scaler.var_ = scaler.scale_ ** 2
-        scaler.n_features_in_ = (
-            len(scaler.mean_) if np.ndim(scaler.mean_) > 0 else 1
-        )
+        scaler.var_ = scaler.scale_**2
+        scaler.n_features_in_ = len(scaler.mean_) if np.ndim(scaler.mean_) > 0 else 1
         print("[Data] Scaler loaded from AE checkpoint ✓")
     else:
         print("[Warning] 'scaler_mean' / 'scaler_std' not found in AE checkpoint")
@@ -63,7 +57,9 @@ def build_temporal_mask(batch_size, seq_len, channels, last_k, ramp_k, device):
         start_ramp = max(0, start_full - ramp_k)
         ramp_len = start_full - start_ramp
         if ramp_len > 0:
-            ramp = torch.linspace(0.0, 1.0, ramp_len, device=device).view(1, ramp_len, 1)
+            ramp = torch.linspace(0.0, 1.0, ramp_len, device=device).view(
+                1, ramp_len, 1
+            )
             m[:, start_ramp:start_full, :] = ramp
 
     return m
@@ -84,7 +80,7 @@ def run_episode(
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(device)
     batch_x_mark = batch_x_mark.float().to(device)
-    x_ot = batch_x[:, :, -1:]   # (B, seq_len, 1)
+    x_ot = batch_x[:, :, -1:]  # (B, seq_len, 1)
 
     with torch.no_grad():
         z = ae.encode(x_ot)
@@ -128,9 +124,7 @@ def run_episode(
 
     with torch.no_grad():
         y_cf = forecaster.predict_from_ot(
-            x_ot=x_cf,
-            x_full=batch_x,
-            x_mark=batch_x_mark
+            x_ot=x_cf, x_full=batch_x, x_mark=batch_x_mark
         )
 
     reward_dict = reward_fn(x_ot, x_cf, y_hat, y_cf, z_cf=z_cf)
@@ -138,9 +132,7 @@ def run_episode(
     V = agent.evaluate(s)
 
     mu, log_std = agent.actor(s)
-    entropy = torch.distributions.Normal(
-        mu, log_std.exp()
-    ).entropy().sum(dim=-1)
+    entropy = torch.distributions.Normal(mu, log_std.exp()).entropy().sum(dim=-1)
 
     return {
         "log_prob": log_prob,
@@ -179,9 +171,7 @@ class RLMaskTrainer:
 
         print("\n[RL-Mask] Loading frozen models ...")
 
-        self.ae = TCNAutoEncoder.from_checkpoint(
-            cfg_ae.checkpoint_path, device=device
-        )
+        self.ae = TCNAutoEncoder.from_checkpoint(cfg_ae.checkpoint_path, device=device)
         self.ae.eval()
         for p in self.ae.parameters():
             p.requires_grad_(False)
@@ -203,7 +193,9 @@ class RLMaskTrainer:
             tau=getattr(cfg_rl, "tau", 0.6),
         ).to(device)
 
-        print(f"[RL-Mask] Objectif      : réduire mean(forecast) de {cfg_rl.rho * 100:.0f}%")
+        print(
+            f"[RL-Mask] Objectif      : réduire mean(forecast) de {cfg_rl.rho * 100:.0f}%"
+        )
         print(f"[RL-Mask] eta           = {cfg_rl.eta}")
         print(f"[RL-Mask] alpha_hf      = {self.alpha_hf}")
         print(f"[RL-Mask] mask_last_k   = {self.mask_last_k}")
@@ -221,20 +213,29 @@ class RLMaskTrainer:
         print(f"[RL-Mask] Actor {params['actor']:,}  Critic {params['critic']:,}")
 
         self.opt_actor = torch.optim.Adam(
-            self.agent.actor.parameters(),
-            lr=cfg_rl.lr_actor
+            self.agent.actor.parameters(), lr=cfg_rl.lr_actor
         )
         self.opt_critic = torch.optim.Adam(
-            self.agent.critic.parameters(),
-            lr=getattr(cfg_rl, "lr_critic", 1e-4)
+            self.agent.critic.parameters(), lr=getattr(cfg_rl, "lr_critic", 1e-4)
         )
 
-        self.history = {k: [] for k in [
-            "loss_total", "loss_actor", "loss_critic", "reward_total",
-            "r_validity", "r_proximity", "r_reconstruction",
-            "r_temporal", "delta_mean", "success_rate",
-            "advantage", "n_valid"
-        ]}
+        self.history = {
+            k: []
+            for k in [
+                "loss_total",
+                "loss_actor",
+                "loss_critic",
+                "reward_total",
+                "r_validity",
+                "r_proximity",
+                "r_reconstruction",
+                "r_temporal",
+                "delta_mean",
+                "success_rate",
+                "advantage",
+                "n_valid",
+            ]
+        }
 
     def train(self):
         print(f"\n{'=' * 60}")
@@ -268,8 +269,7 @@ class RLMaskTrainer:
                     continue
 
                 loss_dict = self.agent.compute_loss(
-                    ep["log_prob"], ep["reward"],
-                    ep["value"], ep["entropy"]
+                    ep["log_prob"], ep["reward"], ep["value"], ep["entropy"]
                 )
 
                 self.opt_actor.zero_grad()
@@ -333,10 +333,18 @@ class RLMaskTrainer:
         print(f"\n[Eval] Test set ({n_batches} batches) ...")
         self.agent.eval()
 
-        stats = {k: [] for k in [
-            "total", "validity", "proximity", "reconstruction",
-            "temporal", "delta_mean", "success"
-        ]}
+        stats = {
+            k: []
+            for k in [
+                "total",
+                "validity",
+                "proximity",
+                "reconstruction",
+                "temporal",
+                "delta_mean",
+                "success",
+            ]
+        }
         cf_examples = []
 
         for i, batch in enumerate(self.test_loader):
@@ -362,12 +370,14 @@ class RLMaskTrainer:
                 stats[k].append(rs[k])
 
             if len(cf_examples) < 4:
-                cf_examples.append({
-                    "x_ot": ep["x_ot"][0].cpu().numpy(),
-                    "x_cf": ep["x_cf"][0].cpu().numpy(),
-                    "y_hat": ep["y_hat"][0].cpu().numpy(),
-                    "y_cf": ep["y_cf"][0].cpu().numpy(),
-                })
+                cf_examples.append(
+                    {
+                        "x_ot": ep["x_ot"][0].cpu().numpy(),
+                        "x_cf": ep["x_cf"][0].cpu().numpy(),
+                        "y_hat": ep["y_hat"][0].cpu().numpy(),
+                        "y_cf": ep["y_cf"][0].cpu().numpy(),
+                    }
+                )
 
         print(f"\n── Résultats RL-Mask ───────────────────────────")
         for k, v in stats.items():
@@ -378,21 +388,18 @@ class RLMaskTrainer:
         return cf_examples
 
     def _save_checkpoint(self, tag):
-        torch.save({
-            "actor_state_dict": self.agent.actor.state_dict(),
-            "critic_state_dict": self.agent.critic.state_dict(),
-            "history": self.history,
-            "cfg_rl": vars(self.cfg_rl),
-        }, os.path.join(
-            self.cfg_rl.checkpoint_dir_lp,
-            f"rl_mask_agent_{tag}.pt"
-        ))
+        torch.save(
+            {
+                "actor_state_dict": self.agent.actor.state_dict(),
+                "critic_state_dict": self.agent.critic.state_dict(),
+                "history": self.history,
+                "cfg_rl": vars(self.cfg_rl),
+            },
+            os.path.join(self.cfg_rl.checkpoint_dir_lp, f"rl_mask_agent_{tag}.pt"),
+        )
 
     def _save_history(self):
-        path = os.path.join(
-            self.cfg_rl.results_dir_lp,
-            "rl_mask_history.json"
-        )
+        path = os.path.join(self.cfg_rl.results_dir_lp, "rl_mask_history.json")
         with open(path, "w") as f:
             json.dump(self.history, f, indent=2)
         print(f"[RL-Mask] History → {path}")
@@ -406,7 +413,9 @@ class RLMaskTrainer:
 
         axes[0, 1].plot(self.history["r_validity"], lw=1.5, label="validity")
         axes[0, 1].plot(self.history["r_proximity"], lw=1.5, label="proximity")
-        axes[0, 1].plot(self.history["r_reconstruction"], lw=1.5, label="reconstruction")
+        axes[0, 1].plot(
+            self.history["r_reconstruction"], lw=1.5, label="reconstruction"
+        )
         axes[0, 1].plot(self.history["r_temporal"], lw=1.5, label="temporal")
         axes[0, 1].set_title("Sub-Rewards")
         axes[0, 1].legend()
@@ -421,7 +430,9 @@ class RLMaskTrainer:
         axes[1, 0].grid(alpha=0.3)
 
         axes[1, 1].plot(self.history["delta_mean"], lw=1.5, label="Δmean")
-        axes[1, 1].plot(self.history["success_rate"], lw=1.5, linestyle="--", label="SR")
+        axes[1, 1].plot(
+            self.history["success_rate"], lw=1.5, linestyle="--", label="SR"
+        )
         axes[1, 1].axhline(self.cfg_rl.rho, linestyle=":", lw=1.2)
         axes[1, 1].set_title("Δmean & SR")
         axes[1, 1].legend()
@@ -434,13 +445,10 @@ class RLMaskTrainer:
         plt.suptitle(
             f"RL Mask — rho={self.cfg_rl.rho} | eta={self.cfg_rl.eta} | "
             f"mask_last_k={self.mask_last_k} | ramp={self.mask_ramp_k}",
-            fontsize=13
+            fontsize=13,
         )
         plt.tight_layout()
-        path = os.path.join(
-            self.cfg_rl.figures_dir_lp,
-            "rl_mask_training_curves.png"
-        )
+        path = os.path.join(self.cfg_rl.figures_dir_lp, "rl_mask_training_curves.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")
         plt.close()
         print(f"[RL-Mask] Curves → {path}")
@@ -463,26 +471,20 @@ class RLMaskTrainer:
             full_orig = np.concatenate([x_ot, y_hat])
             full_cf = np.concatenate([x_cf, y_cf])
             t_all = np.arange(len(full_orig))
-            reduction = ((y_hat.mean() - y_cf.mean()) / (abs(y_hat.mean()) + 1e-8) * 100)
+            reduction = (y_hat.mean() - y_cf.mean()) / (abs(y_hat.mean()) + 1e-8) * 100
             ok = "✓" if reduction >= self.cfg_rl.rho * 100 else "✗"
 
             axes[i].plot(t_all, full_orig, lw=1.5, label="x+forecast(x)")
             axes[i].plot(t_all, full_cf, lw=1.5, ls="--", label="x_cf+forecast(x_cf)")
             axes[i].axvline(len(x_ot), linestyle="--", lw=1.2)
             axes[i].fill_between(t_all, full_orig, full_cf, alpha=0.12)
-            axes[i].set_title(
-                f"Sample {i+1} — {reduction:+.1f}% {ok}",
-                fontsize=11
-            )
+            axes[i].set_title(f"Sample {i+1} — {reduction:+.1f}% {ok}", fontsize=11)
             axes[i].legend(fontsize=9)
             axes[i].grid(alpha=0.3)
 
         plt.suptitle("CF RL-Mask — ETTh1", fontsize=13)
         plt.tight_layout()
-        path = os.path.join(
-            self.cfg_rl.figures_dir_lp,
-            "rl_mask_cf_examples.png"
-        )
+        path = os.path.join(self.cfg_rl.figures_dir_lp, "rl_mask_cf_examples.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")
         plt.close()
         print(f"[RL-Mask] CF examples → {path}")
@@ -492,7 +494,9 @@ if __name__ == "__main__":
     from src.utils.config import load_config
     from src.utils.train_tools import get_device
 
-    CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+    CONFIG_FORECASTER = (
+        "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
+    )
     CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
     CONFIG_RL = "assets/configs/models/etth1_dataset/RL/rl_mask.json"
 
