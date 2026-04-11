@@ -29,7 +29,7 @@ sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..")
 ))
 
-from src.models.tcn_ae import TCNAutoEncoder
+from src.models.autoencoder.tcn_ae import TCNAutoEncoder
 
 
 # ── Config ────────────────────────────────────────────────────

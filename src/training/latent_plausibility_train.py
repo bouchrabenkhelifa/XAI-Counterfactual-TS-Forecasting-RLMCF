@@ -7,7 +7,7 @@ import pandas as pd
 
 from src.utils.config      import load_config
 from src.utils.train_tools import get_device
-from src.models.tcn_ae     import TCNAutoEncoder
+from src.models.autoencoder.tcn_ae     import TCNAutoEncoder
 from src.models.RL_without_ae.latent_plausibility import LatentPlausibility
 
 

@@ -6,7 +6,7 @@ import numpy as np
 from torch.utils.data import DataLoader
 from types import SimpleNamespace
 
-from src.models.tcn_ae import TCNAutoEncoder
+from src.models.autoencoder.tcn_ae import TCNAutoEncoder
 
 
 class AETrainer:

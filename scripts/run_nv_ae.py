@@ -14,7 +14,7 @@ from types import SimpleNamespace
 sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..")))
 
-from src.models.tcn_ae import TCNAutoEncoder
+from src.models.autoencoder.tcn_ae import TCNAutoEncoder
 from src.training.ae_trainers.TCN_AE_trainer import AETrainerDerivativeLoss
 
 

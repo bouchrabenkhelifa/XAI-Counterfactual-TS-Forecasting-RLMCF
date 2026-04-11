@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
-from src.models.tcn_ae import TCNAutoEncoder
+from src.models.autoencoder.tcn_ae import TCNAutoEncoder
 from src.models.RL.agent import ActorCritic
 from src.models.forecaster_wrapper import ForecasterWrapper
 from src.data_provider.data_factory import data_provider

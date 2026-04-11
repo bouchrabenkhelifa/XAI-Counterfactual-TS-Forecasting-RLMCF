@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import StandardScaler
 
-from src.models.tcn_ae             import TCNAutoEncoder
+from src.models.autoencoder.tcn_ae             import TCNAutoEncoder
 from src.models.actor_critic       import ActorCritic, build_state
 from src.models.Reward             import CFReward, compute_threshold
 from src.models.forecaster_wrapper import ForecasterWrapper

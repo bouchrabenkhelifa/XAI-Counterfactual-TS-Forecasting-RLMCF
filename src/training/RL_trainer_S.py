@@ -5,7 +5,7 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
-from src.models.tcn_ae             import TCNAutoEncoder
+from src.models.autoencoder.tcn_ae             import TCNAutoEncoder
 from src.models.RL.agent           import ActorCritic
 from src.models.RL.reward          import CFReward
 from src.models.forecaster_wrapper import ForecasterWrapper

@@ -7,7 +7,7 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
-from src.models.tcn_ae import TCNAutoEncoder
+from src.models.autoencoder.tcn_ae import TCNAutoEncoder
 from src.models.RL_up.agent import ActorCritic
 from src.models.RL_up.reward import CFReward
 from src.models.RL_up.latent_plausibility import LatentPlausibility
