@@ -7,16 +7,16 @@ import matplotlib.pyplot as plt
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
 
-from src.training.RL_trainers.RL_trainer import RLMaskTrainer
+from src.training.RL_trainers.RL_mask_trainer import RLMaskTrainer
 from src.evaluation.evaluator import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
 
 
 CONFIG_FORECASTER = "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json"
 CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
-CONFIG_RL = "assets/configs/models/etth1_dataset/RL_ablations/full.json"
+CONFIG_RL = "assets/configs/models/etth1_dataset/RL_ablations/rl_mask.json"
 
-CHECKPOINT_PATH = "assets/checkpoints/etth1_chpts/RL_ablations/full/full_agent_best.pt"
+CHECKPOINT_PATH = "assets/checkpoints/etth1_chpts/RL_mask/rl_mask_agent_best.pt"
 EXTERNAL_PLAUS_PATH = "assets/checkpoints/etth1_chpts/anomaly detector/plausibility_etth1.pkl"
 
 
@@ -49,88 +49,17 @@ def build_temporal_mask(batch_size, seq_len, channels, last_k, ramp_k, device):
     return m
 
 
-def forecast_monotonicity_with_context(
-    x_ot,
-    x_cf,
-    x_full,
-    x_mark,
-    forecaster,
-    threshold=5e-2,
-):
-    device = next(forecaster.model.parameters()).device
-
-    x_ot_np = x_ot.detach().cpu().numpy()
-    x_cf_np = x_cf.detach().cpu().numpy()
-
-    x_full = x_full.detach().to(device)
-    x_mark = x_mark.detach().to(device)
-
-    B = x_ot_np.shape[0]
-    scores = []
-
-    for i in range(B):
-        xi = x_ot_np[i:i + 1]
-        xi_cf = x_cf_np[i:i + 1]
-
-        xfull_i = x_full[i:i + 1]
-        xmark_i = x_mark[i:i + 1]
-
-        diff = np.abs(xi_cf - xi)
-        if diff.ndim == 3:
-            mask = np.where(np.max(diff[0], axis=-1) > threshold)[0]
-        else:
-            mask = np.where(diff[0] > threshold)[0]
-
-        if len(mask) == 0:
-            scores.append(1.0)
-            continue
-
-        xi_t = torch.from_numpy(xi).float().to(device)
-        xi_cf_t = torch.from_numpy(xi_cf).float().to(device)
-
-        with torch.no_grad():
-            baseline_forecast = forecaster.predict_from_ot(
-                x_ot=xi_t,
-                x_full=xfull_i,
-                x_mark=xmark_i,
-            )
-        baseline_mean = baseline_forecast.mean().item()
-
-        contributions = []
-        for t in mask:
-            x_ablated = xi_cf_t.clone()
-            x_ablated[0, t, :] = xi_t[0, t, :]
-
-            with torch.no_grad():
-                ablated_forecast = forecaster.predict_from_ot(
-                    x_ot=x_ablated,
-                    x_full=xfull_i,
-                    x_mark=xmark_i,
-                )
-
-            contribution = baseline_mean - ablated_forecast.mean().item()
-            contributions.append(contribution)
-
-        scores.append(float(np.mean(np.array(contributions) > 0)))
-
-    return np.asarray(scores, dtype=np.float32)
-
-
 @torch.no_grad()
-def trainer_run_episode(trainer, batch, filter_quantile=None):
+def trainer_run_episode(trainer, batch, filter_quantile=0.75):
     """
     Reproduit exactement l'épisode du RL-Mask trainer en mode déterministe.
     """
-    if filter_quantile is None:
-        filter_quantile = getattr(trainer, "filter_quantile", 0.75)
-
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(trainer.device)
     batch_x_mark = batch_x_mark.float().to(trainer.device)
-    x_ot = batch_x[:, :, -1:]  # (B, seq_len, 1)
+    x_ot = batch_x[:, :, -1:]   # (B, seq_len, 1)
 
-    # IMPORTANT: use ae_arch, not ae
-    z = trainer.ae_arch.encode(x_ot)
+    z = trainer.ae.encode(x_ot)
     y_hat = trainer.forecaster.predict_ot(batch_x, batch_x_mark)
 
     mean_yhat = y_hat[:, :, 0].mean(dim=1)
@@ -146,20 +75,21 @@ def trainer_run_episode(trainer, batch, filter_quantile=None):
 
     s = trainer.agent.build_state(z, y_hat)
 
-    # deterministic action
+    # action déterministe
     mu, _ = trainer.agent.actor(s)
     a = mu
+
     z_cf = torch.clamp(z + trainer.agent.eta * a, -1.0, 1.0)
 
-    # decoded proposal
-    x_prop = trainer.ae_arch.decode(z_cf)
+    # proposition décodée
+    x_prop = trainer.ae.decode(z_cf)
     delta = x_prop - x_ot
 
-    # same HF skip as training
-    x_lf = trainer.ae_arch.decode(trainer.ae_arch.encode(x_ot))
+    # HF skip identique au training
+    x_lf = trainer.ae.decode(trainer.ae.encode(x_ot))
     x_hf = x_ot - x_lf
 
-    # same temporal mask as training
+    # mask identique au training
     temp_mask = build_temporal_mask(
         batch_size=x_ot.shape[0],
         seq_len=x_ot.shape[1],
@@ -175,7 +105,7 @@ def trainer_run_episode(trainer, batch, filter_quantile=None):
     y_cf = trainer.forecaster.predict_from_ot(
         x_ot=x_cf,
         x_full=batch_x,
-        x_mark=batch_x_mark,
+        x_mark=batch_x_mark
     )
 
     reward_dict = trainer.reward_fn(x_ot, x_cf, y_hat, y_cf, z_cf=z_cf)
@@ -185,8 +115,6 @@ def trainer_run_episode(trainer, batch, filter_quantile=None):
         "x_cf": x_cf.detach(),
         "y_hat": y_hat.detach(),
         "y_cf": y_cf.detach(),
-        "batch_x": batch_x.detach(),
-        "batch_x_mark": batch_x_mark.detach(),
         "z": z.detach(),
         "z_cf": z_cf.detach(),
         "reward_dict": reward_dict,
@@ -202,7 +130,6 @@ def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
     all_x_cf = []
     all_y_hat = []
     all_y_cf = []
-    all_monot = []
 
     cf_examples = []
 
@@ -219,24 +146,13 @@ def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
         all_y_hat.append(ep["y_hat"].cpu().numpy())
         all_y_cf.append(ep["y_cf"].cpu().numpy())
 
-        mono = forecast_monotonicity_with_context(
-            x_ot=ep["x_ot"],
-            x_cf=ep["x_cf"],
-            x_full=ep["batch_x"],
-            x_mark=ep["batch_x_mark"],
-            forecaster=trainer.forecaster,
-        )
-        all_monot.append(mono)
-
         if len(cf_examples) < 4:
-            cf_examples.append(
-                {
-                    "x_ot": ep["x_ot"][0].cpu().numpy(),
-                    "x_cf": ep["x_cf"][0].cpu().numpy(),
-                    "y_hat": ep["y_hat"][0].cpu().numpy(),
-                    "y_cf": ep["y_cf"][0].cpu().numpy(),
-                }
-            )
+            cf_examples.append({
+                "x_ot": ep["x_ot"][0].cpu().numpy(),
+                "x_cf": ep["x_cf"][0].cpu().numpy(),
+                "y_hat": ep["y_hat"][0].cpu().numpy(),
+                "y_cf": ep["y_cf"][0].cpu().numpy(),
+            })
 
     if len(all_x) == 0:
         raise RuntimeError("No valid CFs generated during evaluation.")
@@ -245,7 +161,6 @@ def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
     all_x_cf = np.concatenate(all_x_cf, axis=0)
     all_y_hat = np.concatenate(all_y_hat, axis=0)
     all_y_cf = np.concatenate(all_y_cf, axis=0)
-    all_monot = np.concatenate(all_monot, axis=0)
 
     metrics = evaluator.evaluate_batch(
         x=all_x,
@@ -253,10 +168,7 @@ def evaluate_frozen_model(trainer, evaluator, n_batches=20, include_dtw=False):
         y_hat=all_y_hat,
         y_cf=all_y_cf,
         include_dtw=include_dtw,
-        include_reachability=True,
-        forecaster=None,
     )
-    metrics["forecast_monotonicity"] = all_monot
 
     summary = evaluator.summarize_with_std(metrics)
     return summary, cf_examples
@@ -287,7 +199,7 @@ def save_examples_plot(examples, out_path, rho=0.10):
         axes[i].plot(t_all, full_cf, color="coral", lw=1.5, ls="--", label="x_cf + forecast(x_cf)")
         axes[i].axvline(len(x_ot), color="gray", ls="--", lw=1.2)
         axes[i].fill_between(t_all, full_orig, full_cf, alpha=0.12, color="coral")
-        axes[i].set_title(f"Sample {i + 1} — {reduction:+.1f}% {ok}", fontsize=11)
+        axes[i].set_title(f"Sample {i+1} — {reduction:+.1f}% {ok}", fontsize=11)
         axes[i].legend(fontsize=9)
         axes[i].grid(alpha=0.3)
 
@@ -309,17 +221,10 @@ def main():
     trainer = RLMaskTrainer(cfg_f, cfg_ae, cfg_rl, device)
     load_checkpoint_into_trainer(trainer, CHECKPOINT_PATH, device)
 
-    plaus_model = None
-    if os.path.exists(EXTERNAL_PLAUS_PATH):
-        plaus_model = load_plausibility_model(EXTERNAL_PLAUS_PATH)
-        print(f"[Eval] Plausibility model loaded: {EXTERNAL_PLAUS_PATH}")
-    else:
-        print("[Eval] No plausibility model found.")
-
+    plaus_model = load_plausibility_model(EXTERNAL_PLAUS_PATH)
     evaluator = CounterfactualEvaluator(
         plausibility_model=plaus_model,
         rho=cfg_rl.rho,
-        x_train=trainer.x_train_eval,
     )
 
     summary, examples = evaluate_frozen_model(
@@ -365,11 +270,6 @@ def main():
         "sparsity_ratio",
         "change_magnitude",
         "segment_sparsity",
-        "rate_of_change_feasibility",
-        "action_efficiency_ratio",
-        "reachability_score",
-        "causal_compactness",
-        "forecast_monotonicity",
     ]
 
     for k in keys_to_show:
@@ -380,7 +280,7 @@ def main():
     os.makedirs(cfg_rl.figures_dir_lp, exist_ok=True)
 
     metrics_path = os.path.join(cfg_rl.results_dir_lp, "frozen_eval_metrics.json")
-    with open(metrics_path, "w", encoding="utf-8") as f:
+    with open(metrics_path, "w") as f:
         json.dump(summary, f, indent=2)
     print(f"\n[Eval] Metrics saved -> {metrics_path}")
 

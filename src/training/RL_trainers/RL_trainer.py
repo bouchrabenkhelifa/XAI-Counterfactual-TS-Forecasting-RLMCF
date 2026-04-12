@@ -73,7 +73,7 @@ def run_episode_train(
     mask_last_k=24,
     mask_ramp_k=8,
     filter_quantile=0.75,
-    alpha_hf=0.2,
+    alpha_hf=0.25,
 ):
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(device)
@@ -173,7 +173,7 @@ def run_episode_eval(
     mask_last_k=24,
     mask_ramp_k=8,
     filter_quantile=0.75,
-    alpha_hf=0.2,
+    alpha_hf=0.25,
 ):
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(device)
