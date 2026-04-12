@@ -29,7 +29,7 @@ def prepare_rl_data(cfg_forecaster, cfg_ae, device):
         scaler = StandardScaler()
         scaler.mean_ = np.array(ckpt_ae["scaler_mean"], dtype=np.float64)
         scaler.scale_ = np.array(ckpt_ae["scaler_std"], dtype=np.float64)
-        scaler.var_ = scaler.scale_**2
+        scaler.var_ = scaler.scale_ ** 2
         scaler.n_features_in_ = len(scaler.mean_) if np.ndim(scaler.mean_) > 0 else 1
         print("[Data] Scaler loaded from AE checkpoint ✓")
     else:
@@ -54,9 +54,7 @@ def build_temporal_mask(batch_size, seq_len, channels, last_k, ramp_k, device):
         start_ramp = max(0, start_full - ramp_k)
         ramp_len = start_full - start_ramp
         if ramp_len > 0:
-            ramp = torch.linspace(0.0, 1.0, ramp_len, device=device).view(
-                1, ramp_len, 1
-            )
+            ramp = torch.linspace(0.0, 1.0, ramp_len, device=device).view(1, ramp_len, 1)
             m[:, start_ramp:start_full, :] = ramp
 
     return m
@@ -73,7 +71,7 @@ def run_episode_train(
     mask_last_k=24,
     mask_ramp_k=8,
     filter_quantile=0.75,
-    alpha_hf=0.25,
+    alpha_hf=0.2,
 ):
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(device)
@@ -173,7 +171,7 @@ def run_episode_eval(
     mask_last_k=24,
     mask_ramp_k=8,
     filter_quantile=0.75,
-    alpha_hf=0.25,
+    alpha_hf=0.2,
 ):
     batch_x, _, batch_x_mark, _ = batch
     batch_x = batch_x.float().to(device)
@@ -259,11 +257,11 @@ def forecast_monotonicity_with_context(
     scores = []
 
     for i in range(B):
-        xi = x_ot_np[i : i + 1]
-        xi_cf = x_cf_np[i : i + 1]
+        xi = x_ot_np[i:i + 1]
+        xi_cf = x_cf_np[i:i + 1]
 
-        xfull_i = x_full[i : i + 1]
-        xmark_i = x_mark[i : i + 1]
+        xfull_i = x_full[i:i + 1]
+        xmark_i = x_mark[i:i + 1]
 
         diff = np.abs(xi_cf - xi)
         if diff.ndim == 3:
@@ -313,6 +311,8 @@ class RLMaskTrainer:
         self.cfg_rl = cfg_rl
         self.device = device
 
+        self.exp_name = getattr(cfg_rl, "name", "exp").replace(" ", "_")
+
         self.alpha_hf = getattr(cfg_rl, "alpha_hf", 0.2)
         self.mask_last_k = getattr(cfg_rl, "mask_last_k", 24)
         self.mask_ramp_k = getattr(cfg_rl, "mask_ramp_k", 8)
@@ -328,9 +328,7 @@ class RLMaskTrainer:
         print("\n[RL-Mask] Loading frozen models ...")
 
         # AE kept in architecture
-        self.ae_arch = TCNAutoEncoder.from_checkpoint(
-            cfg_ae.checkpoint_path, device=device
-        )
+        self.ae_arch = TCNAutoEncoder.from_checkpoint(cfg_ae.checkpoint_path, device=device)
         self.ae_arch.eval()
         for p in self.ae_arch.parameters():
             p.requires_grad_(False)
@@ -346,9 +344,7 @@ class RLMaskTrainer:
 
         reward_ae = self.ae_arch if getattr(cfg_rl, "use_autoencoder", True) else None
         if reward_ae is None:
-            print(
-                "[RL-Mask] use_autoencoder=False -> reconstruction reward disabled, but AE kept in mask architecture."
-            )
+            print("[RL-Mask] use_autoencoder=False -> reconstruction reward disabled, but AE kept in mask architecture.")
 
         self.reward_fn = CFReward(
             ae=reward_ae,
@@ -363,15 +359,13 @@ class RLMaskTrainer:
             use_temporal=getattr(cfg_rl, "use_temporal", True),
         ).to(device)
 
-        print(
-            f"[RL-Mask] Objectif      : réduire mean(forecast) de {cfg_rl.rho * 100:.0f}%"
-        )
+        print(f"[RL-Mask] Objectif      : réduire mean(forecast) de {cfg_rl.rho * 100:.0f}%")
         print(f"[RL-Mask] eta           = {cfg_rl.eta}")
         print(f"[RL-Mask] alpha_hf      = {self.alpha_hf}")
         print(f"[RL-Mask] mask_last_k   = {self.mask_last_k}")
         print(f"[RL-Mask] mask_ramp_k   = {self.mask_ramp_k}")
         print(f"[RL-Mask] use_rl        = {getattr(cfg_rl, 'use_rl', True)}")
-        print(f"[RL-Mask] name          = {getattr(cfg_rl, 'name', 'unnamed')}")
+        print(f"[RL-Mask] name          = {self.exp_name}")
 
         self.agent = ActorCritic(
             latent_dim=cfg_ae.latent_dim,
@@ -417,9 +411,7 @@ class RLMaskTrainer:
             if i + 1 >= max_train_batches:
                 break
         self.x_train_eval = (
-            np.concatenate(x_train_batches, axis=0)
-            if len(x_train_batches) > 0
-            else None
+            np.concatenate(x_train_batches, axis=0) if len(x_train_batches) > 0 else None
         )
 
         plausibility_model = None
@@ -447,6 +439,7 @@ class RLMaskTrainer:
 
         best_reward = -float("inf")
         use_rl = getattr(self.cfg_rl, "use_rl", True)
+        plot_train_examples = getattr(self.cfg_rl, "plot_train_examples", False)
 
         for epoch in range(1, self.cfg_rl.epochs + 1):
             t0 = time.time()
@@ -533,21 +526,17 @@ class RLMaskTrainer:
                 f"{time.time() - t0:.1f}s"
             )
 
-            is_best = False
             if means["reward_total"] > best_reward:
                 best_reward = means["reward_total"]
                 self._save_checkpoint("best")
                 print(f"  ✅ best = {best_reward:.4f}")
-                is_best = True
 
-            if epoch == 1 or epoch == self.cfg_rl.epochs or is_best:
+            if plot_train_examples and (epoch == 1 or epoch == self.cfg_rl.epochs):
                 train_fig_path = os.path.join(
                     self.cfg_rl.figures_dir_lp,
-                    f"{getattr(self.cfg_rl, 'name', 'exp')}_train_examples_epoch_{epoch:03d}.png",
+                    f"{self.exp_name}_train_examples_epoch_{epoch:03d}.png",
                 )
-                self._plot_cf_examples(
-                    train_examples, train_fig_path, title_prefix="Train"
-                )
+                self._plot_cf_examples(train_examples, train_fig_path, title_prefix="Train")
 
         self._save_checkpoint("final")
         self._save_history()
@@ -641,7 +630,7 @@ class RLMaskTrainer:
 
         metrics_path = os.path.join(
             self.cfg_rl.results_dir_lp,
-            f"{getattr(self.cfg_rl, 'name', 'exp')}_evaluation.json",
+            f"{self.exp_name}_evaluation.json",
         )
         with open(metrics_path, "w", encoding="utf-8") as f:
             json.dump(summary_std, f, indent=2)
@@ -649,13 +638,18 @@ class RLMaskTrainer:
 
         fig_path = os.path.join(
             self.cfg_rl.figures_dir_lp,
-            f"{getattr(self.cfg_rl, 'name', 'exp')}_cf_examples.png",
+            f"{self.exp_name}_cf_examples.png",
         )
         self._plot_cf_examples(cf_examples, fig_path, title_prefix="Eval")
 
         return summary_std, cf_examples
 
     def _save_checkpoint(self, tag):
+        path = os.path.join(
+            self.cfg_rl.checkpoint_dir_lp,
+            f"{self.exp_name}_agent_{tag}.pt",
+        )
+
         torch.save(
             {
                 "actor_state_dict": self.agent.actor.state_dict(),
@@ -663,16 +657,14 @@ class RLMaskTrainer:
                 "history": self.history,
                 "cfg_rl": vars(self.cfg_rl),
             },
-            os.path.join(
-                self.cfg_rl.checkpoint_dir_lp,
-                f"{getattr(self.cfg_rl, 'name', 'exp')}_agent_{tag}.pt",
-            ),
+            path,
         )
+        print(f"[RL-Mask] Checkpoint saved → {path}")
 
     def _save_history(self):
         path = os.path.join(
             self.cfg_rl.results_dir_lp,
-            f"{getattr(self.cfg_rl, 'name', 'exp')}_history.json",
+            f"{self.exp_name}_history.json",
         )
         with open(path, "w", encoding="utf-8") as f:
             json.dump(self.history, f, indent=2)
@@ -686,12 +678,17 @@ class RLMaskTrainer:
         axes[0, 0].grid(alpha=0.3)
 
         axes[0, 1].plot(self.history["r_validity"], lw=1.5, label="validity")
-        axes[0, 1].plot(self.history["r_proximity"], lw=1.5, label="proximity")
-        axes[0, 1].plot(
-            self.history["r_reconstruction"], lw=1.5, label="reconstruction"
-        )
-        axes[0, 1].plot(self.history["r_temporal"], lw=1.5, label="temporal")
-        axes[0, 1].set_title("Sub-Rewards")
+
+        if getattr(self.cfg_rl, "use_proximity", True):
+            axes[0, 1].plot(self.history["r_proximity"], lw=1.5, label="proximity")
+
+        if getattr(self.cfg_rl, "use_reconstruction", True):
+            axes[0, 1].plot(self.history["r_reconstruction"], lw=1.5, label="reconstruction")
+
+        if getattr(self.cfg_rl, "use_temporal", True):
+            axes[0, 1].plot(self.history["r_temporal"], lw=1.5, label="temporal")
+
+        axes[0, 1].set_title("Active Sub-Rewards")
         axes[0, 1].legend()
         axes[0, 1].grid(alpha=0.3)
 
@@ -717,7 +714,7 @@ class RLMaskTrainer:
         axes[1, 2].grid(alpha=0.3)
 
         plt.suptitle(
-            f"RL Mask — {getattr(self.cfg_rl, 'name', 'exp')} | "
+            f"RL Mask — {self.exp_name} | "
             f"rho={self.cfg_rl.rho} | eta={self.cfg_rl.eta} | "
             f"mask_last_k={self.mask_last_k} | ramp={self.mask_ramp_k}",
             fontsize=13,
@@ -725,7 +722,7 @@ class RLMaskTrainer:
         plt.tight_layout()
         path = os.path.join(
             self.cfg_rl.figures_dir_lp,
-            f"{getattr(self.cfg_rl, 'name', 'exp')}_training_curves.png",
+            f"{self.exp_name}_training_curves.png",
         )
         plt.savefig(path, dpi=150, bbox_inches="tight")
         plt.close()
@@ -761,7 +758,7 @@ class RLMaskTrainer:
             axes[i].grid(alpha=0.3)
 
         plt.suptitle(
-            f"{title_prefix} RL-Mask — {getattr(self.cfg_rl, 'name', 'exp')}",
+            f"{title_prefix} RL-Mask — {self.exp_name}",
             fontsize=13,
         )
         plt.tight_layout()

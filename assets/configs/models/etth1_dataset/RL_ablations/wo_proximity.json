@@ -1,7 +1,7 @@
 {
-    "name": "full",
+    "name": "wo_proximity",
     "rho": 0.10,
-    "eta": 0.08,
+    "eta": 0.03,
     "alpha": 1.0,
     "beta": 0.7,
     "gamma": 0.8,
@@ -12,7 +12,7 @@
     "lr_actor": 3e-4,
     "lr_critic": 1e-4,
     "grad_clip": 1.0,
-    "alpha_hf": 0.2,
+    "alpha_hf": 0.25,
     "mask_last_k": 24,
     "mask_ramp_k": 8,
     "use_validity": true,
