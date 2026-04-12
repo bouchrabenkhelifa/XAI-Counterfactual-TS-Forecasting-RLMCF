@@ -2,7 +2,7 @@ import os
 import torch
 
 from src.models.autoencoder.tcn_ae import TCNAutoEncoder
-from src.models.forecaster_wrapper import ForecasterWrapper
+from src.models.Forecaster.forecaster_wrapper import ForecasterWrapper
 from src.models.optimization_strategy.cf_objective import CounterfactualObjective
 from src.models.optimization_strategy.latent_optimizer import (
     LatentCounterfactualOptimizer,

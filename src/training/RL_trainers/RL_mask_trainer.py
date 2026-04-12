@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from src.models.autoencoder.tcn_ae import TCNAutoEncoder
 from src.models.RL_mask.agent import ActorCritic
 from src.models.RL_mask.reward import CFReward
-from src.models.forecaster_wrapper import ForecasterWrapper
+from src.models.Forecaster.forecaster_wrapper import ForecasterWrapper
 
 
 def prepare_rl_data(cfg_forecaster, cfg_ae, device):

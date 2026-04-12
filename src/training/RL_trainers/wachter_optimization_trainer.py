@@ -16,7 +16,7 @@ from sklearn.neighbors import LocalOutlierFactor
 from sklearn.svm import OneClassSVM
 
 from src.models.autoencoder.tcn_ae import TCNAutoEncoder
-from src.models.forecaster_wrapper import ForecasterWrapper
+from src.models.Forecaster.forecaster_wrapper import ForecasterWrapper
 from src.models.optimization_strategy.wachter_latent import (
     WachterLatent,
     WachterLatentConfig,

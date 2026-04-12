@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from src.models.autoencoder.tcn_ae import TCNAutoEncoder
 from src.models.RL.agent import ActorCritic
 from src.models.RL.reward import CFReward
-from src.models.forecaster_wrapper import ForecasterWrapper
+from src.models.Forecaster.forecaster_wrapper import ForecasterWrapper
 
 from src.evaluation.evaluator import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model

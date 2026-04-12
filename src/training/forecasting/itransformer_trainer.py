@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch import optim
 
 from src.data_provider.data_factory import data_provider
-from src.models.forecaster_wrapper import build_itransformer
+from src.models.Forecaster.forecaster_wrapper import build_itransformer
 from src.utils.train_tools import (
     EarlyStopping,
     adjust_learning_rate,

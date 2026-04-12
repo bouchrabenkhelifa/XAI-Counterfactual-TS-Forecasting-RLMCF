@@ -1,6 +1,6 @@
 import torch
 
-from src.models.iTransformer import Model
+from src.models.Forecaster.iTransformer import Model
 
 
 def build_itransformer(configs, device):
