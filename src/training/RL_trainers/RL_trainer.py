@@ -12,7 +12,7 @@ from src.models.RL.agent import ActorCritic
 from src.models.RL.reward import CFReward
 from src.models.forecaster_wrapper import ForecasterWrapper
 
-from src.evaluation.evaluator import CounterfactualEvaluator
+from src.evaluation.evaluator2 import CounterfactualEvaluator
 from src.evaluation.plausibility_metrics import load_plausibility_model
 
 
@@ -29,7 +29,7 @@ def prepare_rl_data(cfg_forecaster, cfg_ae, device):
         scaler = StandardScaler()
         scaler.mean_ = np.array(ckpt_ae["scaler_mean"], dtype=np.float64)
         scaler.scale_ = np.array(ckpt_ae["scaler_std"], dtype=np.float64)
-        scaler.var_ = scaler.scale_ ** 2
+        scaler.var_ = scaler.scale_**2
         scaler.n_features_in_ = len(scaler.mean_) if np.ndim(scaler.mean_) > 0 else 1
         print("[Data] Scaler loaded from AE checkpoint ✓")
     else:
@@ -54,7 +54,9 @@ def build_temporal_mask(batch_size, seq_len, channels, last_k, ramp_k, device):
         start_ramp = max(0, start_full - ramp_k)
         ramp_len = start_full - start_ramp
         if ramp_len > 0:
-            ramp = torch.linspace(0.0, 1.0, ramp_len, device=device).view(1, ramp_len, 1)
+            ramp = torch.linspace(0.0, 1.0, ramp_len, device=device).view(
+                1, ramp_len, 1
+            )
             m[:, start_ramp:start_full, :] = ramp
 
     return m
@@ -245,19 +247,23 @@ def forecast_monotonicity_with_context(
     forecaster,
     threshold=5e-2,
 ):
-    x_ot = x_ot.detach().cpu().numpy()
-    x_cf = x_cf.detach().cpu().numpy()
-    x_full = x_full.detach().cpu()
-    x_mark = x_mark.detach().cpu()
+    device = next(forecaster.model.parameters()).device
 
-    B = x_ot.shape[0]
+    x_ot_np = x_ot.detach().cpu().numpy()
+    x_cf_np = x_cf.detach().cpu().numpy()
+
+    x_full = x_full.detach().to(device)
+    x_mark = x_mark.detach().to(device)
+
+    B = x_ot_np.shape[0]
     scores = []
 
     for i in range(B):
-        xi = x_ot[i:i+1]
-        xi_cf = x_cf[i:i+1]
-        xfull_i = x_full[i:i+1]
-        xmark_i = x_mark[i:i+1]
+        xi = x_ot_np[i : i + 1]
+        xi_cf = x_cf_np[i : i + 1]
+
+        xfull_i = x_full[i : i + 1]
+        xmark_i = x_mark[i : i + 1]
 
         diff = np.abs(xi_cf - xi)
         if diff.ndim == 3:
@@ -269,14 +275,14 @@ def forecast_monotonicity_with_context(
             scores.append(1.0)
             continue
 
-        xi_t = torch.from_numpy(xi).float().to(xfull_i.device)
-        xi_cf_t = torch.from_numpy(xi_cf).float().to(xfull_i.device)
+        xi_t = torch.from_numpy(xi).float().to(device)
+        xi_cf_t = torch.from_numpy(xi_cf).float().to(device)
 
         with torch.no_grad():
             baseline_forecast = forecaster.predict_from_ot(
                 x_ot=xi_t,
-                x_full=xfull_i.to(xi_t.device),
-                x_mark=xmark_i.to(xi_t.device),
+                x_full=xfull_i,
+                x_mark=xmark_i,
             )
         baseline_mean = baseline_forecast.mean().item()
 
@@ -288,8 +294,8 @@ def forecast_monotonicity_with_context(
             with torch.no_grad():
                 ablated_forecast = forecaster.predict_from_ot(
                     x_ot=x_ablated,
-                    x_full=xfull_i.to(xi_t.device),
-                    x_mark=xmark_i.to(xi_t.device),
+                    x_full=xfull_i,
+                    x_mark=xmark_i,
                 )
 
             contribution = baseline_mean - ablated_forecast.mean().item()
@@ -321,8 +327,10 @@ class RLMaskTrainer:
 
         print("\n[RL-Mask] Loading frozen models ...")
 
-        # AE is always loaded because the RL-mask architecture depends on it
-        self.ae_arch = TCNAutoEncoder.from_checkpoint(cfg_ae.checkpoint_path, device=device)
+        # AE kept in architecture
+        self.ae_arch = TCNAutoEncoder.from_checkpoint(
+            cfg_ae.checkpoint_path, device=device
+        )
         self.ae_arch.eval()
         for p in self.ae_arch.parameters():
             p.requires_grad_(False)
@@ -336,11 +344,11 @@ class RLMaskTrainer:
             cfg_forecaster, cfg_ae, device
         )
 
-        # reward-side AE switch only
         reward_ae = self.ae_arch if getattr(cfg_rl, "use_autoencoder", True) else None
         if reward_ae is None:
-            print("[RL-Mask] use_autoencoder=False -> reconstruction reward disabled, "
-                  "but AE is kept in the mask architecture.")
+            print(
+                "[RL-Mask] use_autoencoder=False -> reconstruction reward disabled, but AE kept in mask architecture."
+            )
 
         self.reward_fn = CFReward(
             ae=reward_ae,
@@ -401,7 +409,6 @@ class RLMaskTrainer:
             ]
         }
 
-        # evaluator assets
         x_train_batches = []
         max_train_batches = getattr(cfg_rl, "eval_train_batches", 20)
         for i, batch in enumerate(self.train_loader):
@@ -410,7 +417,9 @@ class RLMaskTrainer:
             if i + 1 >= max_train_batches:
                 break
         self.x_train_eval = (
-            np.concatenate(x_train_batches, axis=0) if len(x_train_batches) > 0 else None
+            np.concatenate(x_train_batches, axis=0)
+            if len(x_train_batches) > 0
+            else None
         )
 
         plausibility_model = None
@@ -443,6 +452,7 @@ class RLMaskTrainer:
             t0 = time.time()
             self.agent.train()
             stats = {k: [] for k in self.history}
+            train_examples = []
 
             for batch in self.train_loader:
                 ep = run_episode_train(
@@ -460,6 +470,16 @@ class RLMaskTrainer:
                 )
                 if ep is None:
                     continue
+
+                if len(train_examples) < 4:
+                    train_examples.append(
+                        {
+                            "x_ot": ep["x_ot"][0].cpu().numpy(),
+                            "x_cf": ep["x_cf"][0].cpu().numpy(),
+                            "y_hat": ep["y_hat"][0].cpu().numpy(),
+                            "y_cf": ep["y_cf"][0].cpu().numpy(),
+                        }
+                    )
 
                 rs = self.reward_fn.stats(ep["reward_dict"])
                 stats["reward_total"].append(rs["total"])
@@ -513,10 +533,21 @@ class RLMaskTrainer:
                 f"{time.time() - t0:.1f}s"
             )
 
+            is_best = False
             if means["reward_total"] > best_reward:
                 best_reward = means["reward_total"]
                 self._save_checkpoint("best")
                 print(f"  ✅ best = {best_reward:.4f}")
+                is_best = True
+
+            if epoch == 1 or epoch == self.cfg_rl.epochs or is_best:
+                train_fig_path = os.path.join(
+                    self.cfg_rl.figures_dir_lp,
+                    f"{getattr(self.cfg_rl, 'name', 'exp')}_train_examples_epoch_{epoch:03d}.png",
+                )
+                self._plot_cf_examples(
+                    train_examples, train_fig_path, title_prefix="Train"
+                )
 
         self._save_checkpoint("final")
         self._save_history()
@@ -620,7 +651,7 @@ class RLMaskTrainer:
             self.cfg_rl.figures_dir_lp,
             f"{getattr(self.cfg_rl, 'name', 'exp')}_cf_examples.png",
         )
-        self._plot_cf_examples(cf_examples, fig_path)
+        self._plot_cf_examples(cf_examples, fig_path, title_prefix="Eval")
 
         return summary_std, cf_examples
 
@@ -656,7 +687,9 @@ class RLMaskTrainer:
 
         axes[0, 1].plot(self.history["r_validity"], lw=1.5, label="validity")
         axes[0, 1].plot(self.history["r_proximity"], lw=1.5, label="proximity")
-        axes[0, 1].plot(self.history["r_reconstruction"], lw=1.5, label="reconstruction")
+        axes[0, 1].plot(
+            self.history["r_reconstruction"], lw=1.5, label="reconstruction"
+        )
         axes[0, 1].plot(self.history["r_temporal"], lw=1.5, label="temporal")
         axes[0, 1].set_title("Sub-Rewards")
         axes[0, 1].legend()
@@ -698,7 +731,7 @@ class RLMaskTrainer:
         plt.close()
         print(f"[RL-Mask] Curves → {path}")
 
-    def _plot_cf_examples(self, examples, out_path):
+    def _plot_cf_examples(self, examples, out_path, title_prefix="CF"):
         if not examples:
             return
 
@@ -719,15 +752,18 @@ class RLMaskTrainer:
             reduction = (y_hat.mean() - y_cf.mean()) / (abs(y_hat.mean()) + 1e-8) * 100
             ok = "✓" if reduction >= self.cfg_rl.rho * 100 else "✗"
 
-            axes[i].plot(t_all, full_orig, lw=1.5, label="x+forecast(x)")
-            axes[i].plot(t_all, full_cf, lw=1.5, ls="--", label="x_cf+forecast(x_cf)")
+            axes[i].plot(t_all, full_orig, lw=1.5, label="x + forecast(x)")
+            axes[i].plot(t_all, full_cf, lw=1.5, ls="--", label="x_cf + forecast(x_cf)")
             axes[i].axvline(len(x_ot), linestyle="--", lw=1.2)
             axes[i].fill_between(t_all, full_orig, full_cf, alpha=0.12)
             axes[i].set_title(f"Sample {i+1} — {reduction:+.1f}% {ok}", fontsize=11)
             axes[i].legend(fontsize=9)
             axes[i].grid(alpha=0.3)
 
-        plt.suptitle(f"CF RL-Mask — {getattr(self.cfg_rl, 'name', 'exp')}", fontsize=13)
+        plt.suptitle(
+            f"{title_prefix} RL-Mask — {getattr(self.cfg_rl, 'name', 'exp')}",
+            fontsize=13,
+        )
         plt.tight_layout()
         plt.savefig(out_path, dpi=150, bbox_inches="tight")
         plt.close()
