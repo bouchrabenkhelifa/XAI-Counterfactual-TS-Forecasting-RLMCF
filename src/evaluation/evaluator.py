@@ -36,41 +36,61 @@ from .sparsity_metrics import (
     segment_sparsity,
 )
 
+from .actionability_metrics import (
+    rate_of_change_feasibility,
+    action_efficiency_ratio,
+    reachability_score,
+    causal_compactness,
+    forecast_monotonicity,
+)
+
 
 class CounterfactualEvaluator:
-    def __init__(self, plausibility_model=None, rho=0.10):
+    def __init__(self, plausibility_model=None, rho=0.10, x_train=None):
+    
         self.plausibility_model = plausibility_model
         self.rho = rho
+        self.x_train = x_train
 
-    def evaluate_batch(self, x, x_cf, y_hat, y_cf, include_dtw=False):
+    def evaluate_batch(
+        self,
+        x,
+        x_cf,
+        y_hat,
+        y_cf,
+        include_dtw=False,
+        forecaster=None,
+        include_reachability=False,
+    ):
+    
         results = {}
 
+        # ------------------------------------------------------------------
         # Validity
-        results["delta_mean"] = delta_mean(y_hat, y_cf)
+        # ------------------------------------------------------------------
+        results["delta_mean"]         = delta_mean(y_hat, y_cf)
         results["relative_reduction"] = relative_reduction(y_hat, y_cf)
-        results["target_gap"] = target_gap(y_hat, y_cf, rho=self.rho)
-        results["success"] = success_indicator(y_hat, y_cf, rho=self.rho)
+        results["target_gap"]         = target_gap(y_hat, y_cf, rho=self.rho)
+        results["success"]            = success_indicator(y_hat, y_cf, rho=self.rho)
 
+        # ------------------------------------------------------------------
         # Proximity
-        results["l1"] = l1_distance(x, x_cf)
-        results["l2"] = l2_distance(x, x_cf)
+        # ------------------------------------------------------------------
+        results["l1"]        = l1_distance(x, x_cf)
+        results["l2"]        = l2_distance(x, x_cf)
         results["euclidean"] = euclidean_distance(x, x_cf)
         results["manhattan"] = manhattan_distance(x, x_cf)
 
         if include_dtw:
             results["dtw"] = dtw_distance(x, x_cf)
 
+        # ------------------------------------------------------------------
         # Plausibility
+        # ------------------------------------------------------------------
         if self.plausibility_model is not None:
-            # Global / ensemble plausibility
-            results["plausibility_x"] = plausibility_score(
-                self.plausibility_model, x
-            )
-            results["plausibility_cf"] = plausibility_score(
-                self.plausibility_model, x_cf
-            )
+            results["plausibility_x"]  = plausibility_score(self.plausibility_model, x)
+            results["plausibility_cf"] = plausibility_score(self.plausibility_model, x_cf)
 
-            # All available detector scores
             all_pl_x = plausibility_score_all(self.plausibility_model, x)
             for k, v in all_pl_x.items():
                 results[f"plausibility_x_{k}"] = v
@@ -79,22 +99,54 @@ class CounterfactualEvaluator:
             for k, v in all_pl_cf.items():
                 results[f"plausibility_cf_{k}"] = v
 
+        # ------------------------------------------------------------------
         # Realism
-        results["roughness_x"] = roughness(x)
-        results["roughness_cf"] = roughness(x_cf)
-        results["roughness_ratio"] = roughness_ratio(x, x_cf)
-        results["derivative_distance"] = derivative_distance(x, x_cf)
+        # ------------------------------------------------------------------
+        results["roughness_x"]               = roughness(x)
+        results["roughness_cf"]              = roughness(x_cf)
+        results["roughness_ratio"]           = roughness_ratio(x, x_cf)
+        results["derivative_distance"]       = derivative_distance(x, x_cf)
         results["second_derivative_distance"] = second_derivative_distance(x, x_cf)
-        results["temporal_consistency"] = temporal_consistency(x_cf)
+        results["temporal_consistency"]      = temporal_consistency(x_cf)
         results["autocorrelation_similarity"] = autocorrelation_preservation(x, x_cf)
-        results["spectral_similarity"] = spectral_similarity(x, x_cf)
+        results["spectral_similarity"]       = spectral_similarity(x, x_cf)
 
+        # ------------------------------------------------------------------
         # Sparsity
-        results["sparsity_ratio"] = sparsity_ratio(x, x_cf)
+        # ------------------------------------------------------------------
+        results["sparsity_ratio"]   = sparsity_ratio(x, x_cf)
         results["change_magnitude"] = mean_change_magnitude(x, x_cf)
         results["segment_sparsity"] = segment_sparsity(x, x_cf)
 
+        # ------------------------------------------------------------------
+        # Actionability
+        # ------------------------------------------------------------------
+        if self.x_train is not None:
+            results["rate_of_change_feasibility"] = rate_of_change_feasibility(
+                x, x_cf, self.x_train
+            )
+
+        results["action_efficiency_ratio"] = action_efficiency_ratio(
+            x, x_cf, y_hat, y_cf
+        )
+
+        results["causal_compactness"] = causal_compactness(x, x_cf)
+
+        if self.x_train is not None and include_reachability:
+            results["reachability_score"] = reachability_score(
+                x, x_cf, self.x_train
+            )
+
+        if forecaster is not None:
+            results["forecast_monotonicity"] = forecast_monotonicity(
+                x, x_cf, forecaster
+            )
+
         return results
+
+    # ------------------------------------------------------------------
+    # Aggregation helpers
+    # ------------------------------------------------------------------
 
     def summarize(self, results_dict):
         summary = {}
@@ -109,8 +161,8 @@ class CounterfactualEvaluator:
             v = np.asarray(v)
             summary[k] = {
                 "mean": float(np.mean(v)),
-                "std": float(np.std(v)),
-                "n": int(v.size),
+                "std":  float(np.std(v)),
+                "n":    int(v.size),
             }
         return summary
 
@@ -122,10 +174,14 @@ class CounterfactualEvaluator:
             v = np.asarray(results_dict[k])
             out[k] = {
                 "mean": float(np.mean(v)),
-                "std": float(np.std(v)),
-                "n": int(v.size),
+                "std":  float(np.std(v)),
+                "n":    int(v.size),
             }
         return out
+
+    # ------------------------------------------------------------------
+    # Pretty print
+    # ------------------------------------------------------------------
 
     def pretty_print_summary(self, summary):
         print("\n===== Counterfactual Evaluation Summary =====")
@@ -149,9 +205,8 @@ class CounterfactualEvaluator:
         print(f"  Plausibility(Xcf)       : {summary.get('plausibility_cf', float('nan')):.4f}")
 
         for k in ["if", "lof", "ocsvm", "ensemble"]:
-            key_x = f"plausibility_x_{k}"
+            key_x  = f"plausibility_x_{k}"
             key_cf = f"plausibility_cf_{k}"
-
             if key_x in summary:
                 print(f"  Plausibility(X) [{k}]   : {summary[key_x]:.4f}")
             if key_cf in summary:
@@ -171,6 +226,13 @@ class CounterfactualEvaluator:
         print(f"  Sparsity ratio          : {summary.get('sparsity_ratio', float('nan')):.4f}")
         print(f"  Change magnitude        : {summary.get('change_magnitude', float('nan')):.4f}")
         print(f"  Segment sparsity        : {summary.get('segment_sparsity', float('nan')):.4f}")
+
+        print("\n[Actionability]")
+        print(f"  Rate of change feasib.  : {summary.get('rate_of_change_feasibility', float('nan')):.4f}")
+        print(f"  Action efficiency ratio : {summary.get('action_efficiency_ratio', float('nan')):.4f}")
+        print(f"  Reachability score      : {summary.get('reachability_score', float('nan')):.4f}")
+        print(f"  Causal compactness      : {summary.get('causal_compactness', float('nan')):.4f}")
+        print(f"  Forecast monotonicity   : {summary.get('forecast_monotonicity', float('nan')):.4f}")
 
         print("=============================================\n")
 

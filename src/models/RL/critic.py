@@ -3,16 +3,22 @@ import torch.nn as nn
 
 
 class Critic(nn.Module):
-
-    def __init__(self, state_dim=69):
+    def __init__(self, state_dim: int, hidden_dim: int = 256):
         super().__init__()
+
         self.net = nn.Sequential(
-            nn.Linear(state_dim, 256), nn.LayerNorm(256), nn.GELU(),
-            nn.Linear(256, 128),       nn.LayerNorm(128), nn.GELU(),
-            nn.Linear(128, 1),
+            nn.Linear(state_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.ReLU(),
+
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.ReLU(),
+
+            nn.Linear(hidden_dim, 1),
         )
 
-    def forward(self, s):
+    def forward(self, s: torch.Tensor):
         return self.net(s)
 
     def count_parameters(self):
