@@ -1,5 +1,5 @@
 {
-    "name": "wo_proximity",
+    "name": "validity_only",
     "rho": 0.10,
     "eta": 0.06,
     "alpha": 1.0,
