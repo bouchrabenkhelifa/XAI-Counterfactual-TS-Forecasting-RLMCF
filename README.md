@@ -148,7 +148,7 @@ We demonstrate that:
 
 We explore different types of objectives:
 
-#### ✔ Forecast Reduction
+#### ✔ ρ minimum reduction objective
 Encourage decreasing the forecast value
 
 ---
