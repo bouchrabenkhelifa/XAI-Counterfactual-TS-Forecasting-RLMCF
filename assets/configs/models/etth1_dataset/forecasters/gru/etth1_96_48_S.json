@@ -30,6 +30,7 @@
   "lradj": "type1",
   "use_amp": false,
 
+  "embed": "timeF",
   "use_gpu": true,
   "gpu": 0,
   "inverse": false,
