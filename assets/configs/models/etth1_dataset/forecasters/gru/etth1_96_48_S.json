@@ -17,8 +17,8 @@
   "dec_in": 1,
   "c_out": 1,
 
-  "d_model": 256,
-  "e_layers": 2,
+  "d_model": 512,
+  "e_layers": 3,
   "dropout": 0.1,
 
   "batch_size": 32,
@@ -27,7 +27,7 @@
   "patience": 10,
   "learning_rate": 0.001,
   "loss": "MSE",
-  "lradj": "type1",
+  "lradj": "type2",
   "use_amp": false,
 
   "embed": "timeF",
