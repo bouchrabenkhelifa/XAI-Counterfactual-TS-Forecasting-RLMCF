@@ -1,5 +1,5 @@
 {
-  "model_name": "iTransformer",
+  "model_type": "TimesNet",
   "dataset_name": "ETTh1",
 
   "root_path": "assets/datasets",
@@ -17,20 +17,12 @@
   "dec_in": 1,
   "c_out": 1,
 
-  "d_model": 512,
-  "n_heads": 8,
-  "e_layers": 3,
-  "d_layers": 1,
-  "d_ff": 512,
-  "factor": 1,
+  "d_model": 64,
+  "d_ff": 64,
+  "e_layers": 2,
   "dropout": 0.1,
-  "embed": "timeF",
-  "activation": "gelu",
-  "output_attention": false,
-
-  "moving_avg": 25,
-  "distil": true,
-  "class_strategy": "projection",
+  "top_k": 5,
+  "num_kernels": 6,
 
   "batch_size": 32,
   "num_workers": 0,
@@ -43,13 +35,11 @@
 
   "use_gpu": true,
   "gpu": 0,
-  "use_norm": true,
   "inverse": false,
-  "channel_independence": false,
 
   "checkpoint_dir": "assets/checkpoints/etth1_chpts/forecaster",
-  "checkpoint_name": "chpt_etth1_96_48_S.pth",
-  "history_name": "history_etth1_96_48_S.json",
+  "checkpoint_name": "chpt_etth1_96_48_timesnet_S.pth",
+  "history_name": "history_etth1_96_48_timesnet_S.json",
   "results_dir": "assets/results/forecaster",
   "figures_dir": "assets/figures/forecaster"
 }

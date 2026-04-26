@@ -52,5 +52,5 @@
   "checkpoint_name": "chpt_etth1_192_96.pth",
   "history_name": "history_etth1_192_96.json",
   "results_dir": "assets/results/forecaster",
-  "figures_dir": "figures/forecaster"
+  "figures_dir": "assets/figures/forecaster"
 }

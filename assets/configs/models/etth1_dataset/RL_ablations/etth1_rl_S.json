@@ -14,6 +14,6 @@
 
     "plausibility_path" : "assets/checkpoints/etth1_chpts/anomaly detector/plausibility_etth1.pkl",
     "checkpoint_dir"    : "assets/checkpoints/etth1_chpts/rl_S",
-    "figures_dir"       : "figures/rl_S",
+    "figures_dir"       : "assets/figures/rl_S",
     "results_dir"       : "assets/results/rl_S"
 }

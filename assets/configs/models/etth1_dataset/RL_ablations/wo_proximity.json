@@ -22,7 +22,7 @@
     "use_autoencoder": true,
     "use_rl": true,
     "checkpoint_dir_lp": "assets/checkpoints/etth1_chpts/RL_ablations/wo_proximity",
-    "figures_dir_lp": "figures/etth1_ablations_visualizations/wo_proximity",
+    "figures_dir_lp": "assets/figures/etth1_ablations_visualizations/wo_proximity",
     "results_dir_lp": "assets/results/etth1_ablations_results/wo_proximity",
     "plausibility_model_path": "assets/checkpoints/etth1_chpts/anomaly detector/plausibility_etth1.pkl",
     "eval_train_batches": 20

@@ -3,7 +3,7 @@
     "data_path"      : "assets/datasets/ETTh1.csv",
     "target_col"     : "OT",
     "checkpoint_path": "assets/checkpoints/etth1_chpts/ae/ae_etth1.pt",
-    "figures_dir"    : "figures/ae",
+    "figures_dir"    : "assets/figures/ae",
     "results_dir"    : "assets/results/ae",
 
     "train_ratio"    : 0.70,

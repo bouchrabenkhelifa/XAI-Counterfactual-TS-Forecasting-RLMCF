@@ -5,7 +5,7 @@
     "results_dir": "assets/results/anomaly detector",
     "checkpoint_dir": "assets/checkpoints/etth1_chpts/anomaly detector",
     "checkpoint_name": "plausibility_etth1.pkl",
-    "figures_dir": "figures/anomaly detector",
+    "figures_dir": "assets/figures/anomaly detector",
 
     "train_ratio": 0.70,
     "val_ratio": 0.10,

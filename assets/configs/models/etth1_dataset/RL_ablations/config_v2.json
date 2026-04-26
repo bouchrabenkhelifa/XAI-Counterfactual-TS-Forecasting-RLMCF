@@ -22,7 +22,7 @@
     "filter_quantile": 0.0,
     "use_rl": true,
     "checkpoint_dir_lp": "assets/checkpoints/etth1_chpts/RL_v2",
-    "figures_dir_lp":    "figures/etth1_v2",
+    "figures_dir_lp":    "assets/figures/etth1_v2",
     "results_dir_lp":    "assets/results/etth1_v2",
     "eval_train_batches": 50
 }

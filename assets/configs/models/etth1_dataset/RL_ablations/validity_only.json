@@ -22,7 +22,7 @@
     "use_autoencoder": true,
     "use_rl": true,
     "checkpoint_dir_lp": "assets/checkpoints/etth1_chpts/RL_ablations/validity_only",
-    "figures_dir_lp": "figures/etth1_ablations_visualizations/validity_only",
+    "figures_dir_lp": "assets/figures/etth1_ablations_visualizations/validity_only",
     "results_dir_lp": "assets/results/etth1_ablations_results/validity_only",
     "plausibility_model_path": "assets/checkpoints/etth1_chpts/anomaly detector/plausibility_etth1.pkl",
     "eval_train_batches": 20
