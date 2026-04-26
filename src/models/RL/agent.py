@@ -81,8 +81,12 @@ class ActorCritic(nn.Module):
         V = value.squeeze(1)
         advantage = reward - V.detach()
 
+        # Normaliser seulement si la variance est significative
+        # (évite d'écraser le signal quand advantage ≈ constante)
         if advantage.shape[0] > 1:
-            advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+            adv_std = advantage.std()
+            if adv_std > 1e-4:
+                advantage = (advantage - advantage.mean()) / (adv_std + 1e-8)
 
         loss_actor = -(advantage * log_prob).mean()
         loss_critic = nn.functional.mse_loss(V, reward.detach())
