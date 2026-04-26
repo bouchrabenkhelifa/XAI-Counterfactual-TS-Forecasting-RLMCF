@@ -16,7 +16,7 @@ Counterfactual explanations address this by answering "what-if" questions, provi
 
 ## Architecture
 
-![Architecture](./figures/Architecture.png)
+![Architecture](assets/figures/Architecture.png)
 
 The pipeline consists of three **frozen** components and one **trainable** agent:
 
