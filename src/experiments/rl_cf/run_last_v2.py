@@ -66,7 +66,7 @@ def main():
     parser.add_argument(
         "--forecast_config",
         type=str,
-        default="assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json",
+        default="assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
     )
     parser.add_argument(
         "--ae_config",

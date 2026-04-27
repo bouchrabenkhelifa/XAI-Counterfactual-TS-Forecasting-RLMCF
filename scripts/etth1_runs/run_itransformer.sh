@@ -10,7 +10,7 @@
 # itransformer_192_96.json   → multivariate,longer input window
 # ==========================================
 
-CONFIG=${1:-assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json}
+CONFIG=${1:-assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json}
 
 echo "Running config: $CONFIG"
 

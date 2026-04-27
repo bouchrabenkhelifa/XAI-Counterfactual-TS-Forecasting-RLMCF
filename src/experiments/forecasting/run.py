@@ -25,10 +25,10 @@ def main():
     model_type = getattr(configs, "model_type", "iTransformer").lower()
 
     if model_type == "itransformer":
-        from src.training.forecasting.itransformer_trainer import ITransformerTrainer
+        from src.training.forecast_trainers.itransformer_trainer import ITransformerTrainer
         trainer = ITransformerTrainer(configs)
     elif model_type in ("gru", "dlinear", "timesnet"):
-        from src.training.forecaster_trainers.generic_forecaster_trainer import GenericForecasterTrainer
+        from src.training.forecast_trainers.generic_forecaster_trainer import GenericForecasterTrainer
         trainer = GenericForecasterTrainer(configs)
     else:
         raise ValueError(f"Unknown model_type: '{model_type}'. "

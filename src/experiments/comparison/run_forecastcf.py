@@ -4,7 +4,7 @@ Run ForecastCF baseline (PyTorch) on ETTh1.
 Usage:
     python -m src.experiments.comparison.run_forecastcf \
         --rl_config   assets/configs/models/etth1_dataset/RL_ablations/config_v2.json \
-        --fcf_config  assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json \
+        --fcf_config  assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json \
         --ae_config   assets/configs/models/etth1_dataset/ae/tcn_ae.json
 """
 
@@ -17,7 +17,7 @@ from src.experiments.comparison.forecastcf_pytorch import run_forecastcf_etth1
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--rl_config",  default="assets/configs/models/etth1_dataset/RL_ablations/config_v2.json")
-    parser.add_argument("--fcf_config", default="assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json")
+    parser.add_argument("--fcf_config", default="assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json")
     parser.add_argument("--ae_config",  default="assets/configs/models/etth1_dataset/ae/tcn_ae.json")
     # ForecastCF hyperparameters (paper defaults)
     parser.add_argument("--desired_change",  type=float, default=-0.1)

@@ -26,7 +26,7 @@ from src.evaluation.unified_evaluator import validity_ratio, stepwise_validity_a
 MODELS = {
     "itransformer": {
         "rl_config":       "assets/configs/models/etth1_dataset/RL_ablations/config_v2.json",
-        "forecast_config": "assets/configs/models/etth1_dataset/itransformer/etth1_96_48_S.json",
+        "forecast_config": "assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
         "ae_config":       "assets/configs/models/etth1_dataset/ae/tcn_ae.json",
         "checkpoint":      "assets/checkpoints/etth1_chpts/RL_v2/rl_cf_v2_etth1_agent_best.pt",
         "trainer":         "v1",
