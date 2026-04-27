@@ -26,6 +26,8 @@ def _build_model(configs, device):
         from src.models.Forecaster.GRU import Model
     elif mt == "dlinear":
         from src.models.Forecaster.DLinear import Model
+    elif mt == "patchtst":
+        from src.models.Forecaster.PatchTST import Model
     elif mt == "timesnet":
         from src.models.Forecaster.TimesNet import Model
     else:

@@ -27,7 +27,7 @@ def main():
     if model_type == "itransformer":
         from src.training.forecast_trainers.itransformer_trainer import ITransformerTrainer
         trainer = ITransformerTrainer(configs)
-    elif model_type in ("gru", "dlinear", "timesnet"):
+    elif model_type in ("gru", "dlinear", "timesnet", "patchtst"):
         from src.training.forecast_trainers.generic_forecaster_trainer import GenericForecasterTrainer
         trainer = GenericForecasterTrainer(configs)
     else:

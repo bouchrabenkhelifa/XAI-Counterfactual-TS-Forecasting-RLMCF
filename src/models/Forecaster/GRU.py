@@ -4,7 +4,8 @@ import torch.nn as nn
 
 class Model(nn.Module):
     """
-    GRU forecaster — univariate (features='S').
+    GRU forecaster with Instance Normalization (RevIN).
+    Univariate (features='S').
     Input  : (B, seq_len, enc_in)
     Output : (B, pred_len, c_out)
     """
@@ -25,13 +26,21 @@ class Model(nn.Module):
             batch_first=True,
             dropout=self.dropout if self.num_layers > 1 else 0.0,
         )
-        self.proj = nn.Linear(self.hidden_dim, c_out * self.pred_len)
+        self.proj  = nn.Linear(self.hidden_dim, c_out * self.pred_len)
         self.c_out = c_out
 
     def forward(self, x_enc, x_mark_enc=None, x_dec=None, x_mark_dec=None):
-        # x_enc : (B, seq_len, enc_in)
-        out, _ = self.gru(x_enc)          # (B, seq_len, hidden)
-        last    = out[:, -1, :]           # (B, hidden)
-        pred    = self.proj(last)         # (B, pred_len * c_out)
+        # ── Instance Normalization (RevIN) ────────────────────────────────
+        mean = x_enc.mean(dim=1, keepdim=True)          # (B, 1, C)
+        std  = x_enc.std(dim=1, keepdim=True) + 1e-5    # (B, 1, C)
+        x_enc = (x_enc - mean) / std
+
+        # ── GRU forward ───────────────────────────────────────────────────
+        out, _ = self.gru(x_enc)           # (B, seq_len, hidden)
+        last    = out[:, -1, :]            # (B, hidden)
+        pred    = self.proj(last)          # (B, pred_len * c_out)
         pred    = pred.view(pred.shape[0], self.pred_len, self.c_out)
+
+        # ── Denormalize ───────────────────────────────────────────────────
+        pred = pred * std + mean
         return pred
