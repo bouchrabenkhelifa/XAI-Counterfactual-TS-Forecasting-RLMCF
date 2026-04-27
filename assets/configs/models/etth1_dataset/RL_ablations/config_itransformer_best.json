@@ -1,10 +1,10 @@
 {
-    "name": "rl_cf_final_prox_etth1",
+    "name": "rl_cf_itransformer_best_etth1",
     "rho": 0.20,
-    "fr": 0.60,
-    "w_validity": 3.0,
-    "w_proximity": 2.0,
-    "w_hard_bonus": 2.0,
+    "fr": 0.50,
+    "w_validity": 3.5,
+    "w_proximity": 1.5,
+    "w_hard_bonus": 2.5,
     "w_smooth": 0.5,
     "use_validity": true,
     "use_proximity": true,
@@ -21,8 +21,8 @@
     "mask_ramp_k": 4,
     "filter_quantile": 0.0,
     "use_rl": true,
-    "checkpoint_dir_lp": "assets/checkpoints/etth1_chpts/RL_final_prox",
-    "figures_dir_lp":    "assets/figures/etth1_final_prox",
-    "results_dir_lp":    "assets/results/etth1_final_prox",
+    "checkpoint_dir_lp": "assets/checkpoints/etth1_chpts/RL_itransformer_best",
+    "figures_dir_lp":    "assets/figures/etth1_itransformer_best",
+    "results_dir_lp":    "assets/results/etth1_itransformer_best",
     "eval_train_batches": 50
 }

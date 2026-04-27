@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\caption{Evaluation metrics for counterfactual generation on ETTh1 dataset}
+\label{tab:cf_evaluation}
+\begin{tabular}{l|cccccc}
+\toprule
+\textbf{Model} & \textbf{Validity} $\uparrow$ & \textbf{Step AUC} $\uparrow$ & \textbf{Proximity} $\downarrow$ & \textbf{Compactness} $\uparrow$ & \textbf{Temp. Cons.} $\uparrow$ & \textbf{Plausibility} $\downarrow$ \\
+\midrule
+iTransformer & \textbf{0.9833} & \textbf{0.9875} & 0.8296 & 0.6807 & 0.9334 $\pm$ 0.0107 & 0.5150 $\pm$ 0.2090 \\
+DLinear & 0.9490 & 0.9542 & 0.7670 & 0.6781 & 0.9308 $\pm$ 0.0150 & 0.4541 $\pm$ 0.1615 \\
+GRU & 0.9823 & 0.9844 & \textbf{0.7201} & 0.6776 & 0.9309 $\pm$ 0.0153 & 0.4810 $\pm$ 0.1802 \\
+PatchTST & 0.7854 & 0.7927 & 0.7913 & \textbf{0.7833} & \textbf{0.9464 $\pm$ 0.0128} & 0.5070 $\pm$ 0.1434 \\
+TimesNet & 0.5490 & 0.5594 & 0.7308 & 0.6781 & 0.9400 $\pm$ 0.0103 & \textbf{0.4386 $\pm$ 0.1648} \\
+\bottomrule
+\end{tabular}
+\end{table}
