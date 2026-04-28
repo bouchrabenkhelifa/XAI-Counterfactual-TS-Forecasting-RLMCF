@@ -46,7 +46,8 @@ class PyTorchModelWrapper:
             grad_fn: function to compute gradients
         """
         # Convert to PyTorch tensor with gradient tracking
-        x_torch = torch.FloatTensor(x_np).to(self.device)
+        # Clone to avoid in-place modification issues
+        x_torch = torch.FloatTensor(x_np.copy()).to(self.device)
         x_torch.requires_grad = True
         
         # Create dummy time features
@@ -96,14 +97,18 @@ class PyTorchModelWrapper:
                 dy: gradient from TensorFlow (shape [B, H, N])
                 """
                 # Convert TensorFlow gradient to PyTorch
-                dy_torch = torch.FloatTensor(dy.numpy()).to(self.device)
+                dy_np = dy.numpy().copy()  # Copy to avoid in-place issues
+                dy_torch = torch.FloatTensor(dy_np).to(self.device)
                 
-                # Compute gradients
-                output_torch.backward(dy_torch, retain_graph=False)
+                # Compute gradients with retain_graph for multiple backward passes
+                if output_torch.grad_fn is not None:
+                    output_torch.backward(dy_torch, retain_graph=True)
                 
                 # Get input gradients
                 if x_torch.grad is not None:
-                    dx_np = x_torch.grad.cpu().numpy()
+                    dx_np = x_torch.grad.detach().cpu().numpy().copy()
+                    # Clear gradients for next iteration
+                    x_torch.grad.zero_()
                 else:
                     dx_np = np.zeros_like(x_input.numpy())
                 
