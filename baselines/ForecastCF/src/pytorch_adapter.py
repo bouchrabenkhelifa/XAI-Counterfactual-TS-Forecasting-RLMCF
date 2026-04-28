@@ -44,10 +44,13 @@ class PyTorchModelWrapper:
             numpy array of shape [B, H, N]
         """
         # Convert to numpy if TensorFlow tensor
-        if isinstance(x, tf.Tensor):
-            x_np = x.numpy()
-        elif isinstance(x, tf.Variable):
-            x_np = x.numpy()
+        if TF_AVAILABLE:
+            if isinstance(x, tf.Tensor):
+                x_np = x.numpy()
+            elif isinstance(x, tf.Variable):
+                x_np = x.numpy()
+            else:
+                x_np = np.array(x)
         else:
             x_np = np.array(x)
         
