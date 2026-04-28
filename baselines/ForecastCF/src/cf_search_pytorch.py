@@ -170,9 +170,9 @@ def main():
     import tensorflow as tf
     
     cf_model = ForecastCF(
-        max_iter=100,
-        optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=0.001),
-        pred_margin_weight=0.25,
+        max_iter=1000,  # Augmenté de 100 à 1000
+        optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=0.01),  # Augmenté de 0.001 à 0.01
+        pred_margin_weight=0.5,  # Augmenté de 0.25 à 0.5 pour forcer plus de changement
         step_weights=np.ones((1, A.back_horizon, 1)),
         random_state=A.random_seed,
     )
