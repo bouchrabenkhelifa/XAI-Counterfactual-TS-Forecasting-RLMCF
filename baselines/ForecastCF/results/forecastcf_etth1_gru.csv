@@ -1,0 +1,4 @@
+dataset,random_seed,forecast_model,cf_model,horizon,desired_change,fraction_std,forecast_smape,forecast_mase,validity_ratio,proximity,compactness,step_validity_auc
+etth1,1,gru,ForecastCF,48,-0.1,1.0,0.0,0.0,0.6611111111111112,2.448403613892582,0.36041666666666666,0.6225694444444446
+etth1,9,gru,ForecastCF,48,-0.1,1.0,0.0,0.0,0.5,2.398095253842156,0.39652777777777776,0.4895833333333333
+etth1,30,gru,ForecastCF,48,-0.1,1.0,0.0,0.0,0.6666666666666666,2.4781997160585876,0.2642361111111111,0.6527777777777779
