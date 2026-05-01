@@ -67,17 +67,17 @@ python src/experiments/ae/run.py --config assets/configs/models/{DATASET}_datase
 
 | Dataset | Command |
 |---------|---------|
-| ETTh1 | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/etth1_dataset/RL_ablations --ae_config assets/configs/models/etth1_dataset/ae/tcn_ae.json` |
-| ETTh2 | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/etth2_dataset/RL --ae_config assets/configs/models/etth2_dataset/ae/tcn_ae.json` |
-| Weather | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/weather_dataset/RL --ae_config assets/configs/models/weather_dataset/ae/tcn_ae.json` |
+| ETTh1 | `python src/experiments/rl_cf/run.py --config_dir assets/configs/models/etth1_dataset/RL_ablations --ae_config assets/configs/models/etth1_dataset/ae/tcn_ae.json` |
+| ETTh2 | `python src/experiments/rl_cf/run.py --config_dir assets/configs/models/etth2_dataset/RL --ae_config assets/configs/models/etth2_dataset/ae/tcn_ae.json` |
+| Weather | `python src/experiments/rl_cf/run.py --config_dir assets/configs/models/weather_dataset/RL --ae_config assets/configs/models/weather_dataset/ae/tcn_ae.json` |
 
 ### Train Single RL Agent
 
 | Dataset | Command |
 |---------|---------|
-| ETTh1 | `python src/experiments/rl_cf/run_last_v2.py --config assets/configs/models/etth1_dataset/RL_ablations/config_final.json --ae_config assets/configs/models/etth1_dataset/ae/tcn_ae.json` |
-| ETTh2 | `python src/experiments/rl_cf/run_last_v2.py --config assets/configs/models/etth2_dataset/RL/config_{MODEL}.json --ae_config assets/configs/models/etth2_dataset/ae/tcn_ae.json` |
-| Weather | `python src/experiments/rl_cf/run_last_v2.py --config assets/configs/models/weather_dataset/RL/config_{MODEL}.json --ae_config assets/configs/models/weather_dataset/ae/tcn_ae.json` |
+| ETTh1 | `python src/experiments/rl_cf/run.py --config assets/configs/models/etth1_dataset/RL_ablations/config_final.json --ae_config assets/configs/models/etth1_dataset/ae/tcn_ae.json` |
+| ETTh2 | `python src/experiments/rl_cf/run.py --config assets/configs/models/etth2_dataset/RL/config_{MODEL}.json --ae_config assets/configs/models/etth2_dataset/ae/tcn_ae.json` |
+| Weather | `python src/experiments/rl_cf/run.py --config assets/configs/models/weather_dataset/RL/config_{MODEL}.json --ae_config assets/configs/models/weather_dataset/ae/tcn_ae.json` |
 
 **Models**: Replace `{MODEL}` with `itransformer`, `gru`, `dlinear`, `patchtst`, or `timesnet`
 
@@ -85,9 +85,9 @@ python src/experiments/ae/run.py --config assets/configs/models/{DATASET}_datase
 
 | Dataset | Command |
 |---------|---------|
-| ETTh1 | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/etth1_dataset/RL_ablations --ae_config assets/configs/models/etth1_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
-| ETTh2 | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/etth2_dataset/RL --ae_config assets/configs/models/etth2_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
-| Weather | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/weather_dataset/RL --ae_config assets/configs/models/weather_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
+| ETTh1 | `python src/experiments/rl_cf/run.py --config_dir assets/configs/models/etth1_dataset/RL_ablations --ae_config assets/configs/models/etth1_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
+| ETTh2 | `python src/experiments/rl_cf/run.py --config_dir assets/configs/models/etth2_dataset/RL --ae_config assets/configs/models/etth2_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
+| Weather | `python src/experiments/rl_cf/run.py --config_dir assets/configs/models/weather_dataset/RL --ae_config assets/configs/models/weather_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
 
 ## Pipeline
 

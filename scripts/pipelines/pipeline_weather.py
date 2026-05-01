@@ -80,7 +80,7 @@ def main():
 
     if not args.eval_only and not args.skip_rl:
         for model, rl_cfg, f_cfg in RL_MODELS:
-            run(["src/experiments/rl_cf/run_last.py",
+            run(["src/experiments/rl_cf/run.py",
                  "--config", rl_cfg, "--forecast_config", f_cfg, "--ae_config", AE_CONFIG],
                 f"Train RL agent — {model} / Weather")
     else:
