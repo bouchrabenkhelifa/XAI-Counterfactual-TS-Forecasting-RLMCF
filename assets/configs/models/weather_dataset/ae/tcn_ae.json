@@ -1,19 +1,17 @@
 {
-    "dataset_name"   : "custom",
-    "data_path"      : "assets/datasets/weather.csv",
-    "target_col"     : "T (degC)",
-    "checkpoint_path": "assets/checkpoints/weather_chpts/ae/ae_weather.pt",
-    "figures_dir"    : "assets/figures/weather/ae",
-    "results_dir"    : "assets/results/weather/ae",
-
-    "train_ratio"    : 0.70,
-    "val_ratio"      : 0.10,
-
-    "seq_len"        : 96,
-    "n_features"     : 1,
-    "hidden_dim"     : 64,
-    "latent_dim"     : 64,
-    "n_blocks"       : 6,
-    "kernel_size"    : 3,
-    "dropout"        : 0.1
+  "dataset_name": "custom",
+  "data_path": "assets/datasets/weather.csv",
+  "target_col": "T (degC)",
+  "checkpoint_path": "assets/checkpoints/weather_chpts/ae/ae_weather.pt",
+  "figures_dir": "assets/figures/etth2/ae",
+  "results_dir": "assets/results/etth2/ae",
+  "train_ratio": 0.7,
+  "val_ratio": 0.1,
+  "seq_len": 96,
+  "n_features": 1,
+  "hidden_dim": 64,
+  "latent_dim": 64,
+  "n_blocks": 6,
+  "kernel_size": 3,
+  "dropout": 0.1
 }

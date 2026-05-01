@@ -1,19 +1,17 @@
 {
-    "dataset_name"   : "ETTh1",
-    "data_path"      : "assets/datasets/ETTh1.csv",
-    "target_col"     : "OT",
-    "checkpoint_path": "assets/checkpoints/etth1_chpts/ae/ae_etth1.pt",
-    "figures_dir"    : "assets/figures/ae",
-    "results_dir"    : "assets/results/ae",
-
-    "train_ratio"    : 0.70,
-    "val_ratio"      : 0.10,
-
-    "seq_len"        : 96,
-    "n_features"     : 1,
-    "hidden_dim"     : 64,
-    "latent_dim"     : 64,
-    "n_blocks"       : 6,
-    "kernel_size"    : 3,
-    "dropout"        : 0.1
+  "dataset_name": "ETTh1",
+  "data_path": "assets/datasets/ETTh1.csv",
+  "target_col": "OT",
+  "checkpoint_path": "assets/checkpoints/etth1_chpts/ae/ae_etth1.pt",
+  "figures_dir": "assets/figures/etth1/ae",
+  "results_dir": "assets/results/etth1/ae",
+  "train_ratio": 0.7,
+  "val_ratio": 0.1,
+  "seq_len": 96,
+  "n_features": 1,
+  "hidden_dim": 64,
+  "latent_dim": 64,
+  "n_blocks": 6,
+  "kernel_size": 3,
+  "dropout": 0.1
 }
