@@ -45,7 +45,7 @@ set PYTHONPATH=.
 
 ## Step 5: Run Commands
 
-### Train Forecasters
+### Train a Single Forecaster
 
 ```bash
 python src/experiments/forecasting/run.py --config assets/configs/models/{DATASET}_dataset/forecasters/{MODEL}/{DATASET}_96_48_S.json
@@ -57,14 +57,6 @@ python src/experiments/forecasting/run.py --config assets/configs/models/{DATASE
 
 ```bash
 python src/experiments/ae/run.py --config assets/configs/models/{DATASET}_dataset/ae/tcn_ae.json
-```
-
-**Replace**: `{DATASET}` with `etth1`, `etth2`, or `weather`
-
-### Train All RL Agents
-
-```bash
-python src/experiments/rl_cf/run.py --config_dir assets/configs/models/{DATASET}_dataset/RL --ae_config assets/configs/models/{DATASET}_dataset/ae/tcn_ae.json
 ```
 
 **Replace**: `{DATASET}` with `etth1`, `etth2`, or `weather`
