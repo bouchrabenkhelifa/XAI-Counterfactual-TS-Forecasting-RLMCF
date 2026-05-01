@@ -1,0 +1,55 @@
+{
+  "model_name": "iTransformer",
+  "dataset_name": "custom",
+
+  "root_path": "assets/datasets",
+  "data_path": "weather.csv",
+
+  "features": "S",
+  "target": "T (degC)",
+  "freq": "t",
+
+  "seq_len": 96,
+  "label_len": 48,
+  "pred_len": 48,
+
+  "enc_in": 1,
+  "dec_in": 1,
+  "c_out": 1,
+
+  "d_model": 512,
+  "n_heads": 8,
+  "e_layers": 3,
+  "d_layers": 1,
+  "d_ff": 512,
+  "factor": 1,
+  "dropout": 0.1,
+  "embed": "timeF",
+  "activation": "gelu",
+  "output_attention": false,
+
+  "moving_avg": 25,
+  "distil": true,
+  "class_strategy": "projection",
+
+  "batch_size": 32,
+  "num_workers": 0,
+  "train_epochs": 50,
+  "patience": 10,
+  "learning_rate": 0.0001,
+  "loss": "MSE",
+  "lradj": "type1",
+  "use_amp": false,
+
+  "use_gpu": true,
+  "gpu": 0,
+  "use_norm": true,
+  "inverse": false,
+  "channel_independence": false,
+
+  "checkpoint_dir": "assets/checkpoints/weather_chpts/forecaster",
+  "checkpoint_name": "chpt_weather_96_48_S.pth",
+  "history_name": "history_weather_96_48_S.json",
+  "results_dir": "assets/results/weather/forecaster",
+  "figures_dir": "assets/figures/weather/forecaster"
+}
