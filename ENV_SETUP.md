@@ -63,6 +63,8 @@ set PYTHONPATH=.
 | ETTh2 | `python src/experiments/ae/run.py --config assets/configs/models/etth2_dataset/ae/tcn_ae.json` |
 | Weather | `python src/experiments/ae/run.py --config assets/configs/models/weather_dataset/ae/tcn_ae.json` |
 
+**What varies**: `{DATASET}` in path — replace with `etth1`, `etth2`, or `weather`
+
 ### Train All RL Agents
 
 | Dataset | Command |
