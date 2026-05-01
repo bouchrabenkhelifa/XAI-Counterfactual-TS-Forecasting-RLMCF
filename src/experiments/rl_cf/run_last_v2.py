@@ -14,13 +14,18 @@ def run_one(
     eval_batches=20,
     eval_only=False,
 ):
+    cfg_rl = load_config(rl_config_path)
+    
+    # Use forecast_config_path from RL config if available, otherwise use command-line arg
+    if hasattr(cfg_rl, 'forecast_config_path') and cfg_rl.forecast_config_path:
+        forecast_config_path = cfg_rl.forecast_config_path
+    
     print("\n" + "=" * 70)
     print(f"RL config       : {rl_config_path}")
     print(f"Forecast config : {forecast_config_path}")
     print(f"AE config       : {ae_config_path}")
     print("=" * 70)
 
-    cfg_rl = load_config(rl_config_path)
     cfg_f = load_config(forecast_config_path)
     cfg_ae = load_config(ae_config_path)
     device = get_device(cfg_f)

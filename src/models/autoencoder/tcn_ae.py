@@ -157,5 +157,5 @@ class TCNAutoEncoder(nn.Module):
         print(f"  hidden_dim = {hidden_dim}")
         print(f"  latent_dim = {latent_dim}")
         print(f"  n_blocks   = {n_blocks}")
-        print(f"  RF         = {model.receptive_field()}/{cfg['seq_len']} ✓")
+        print(f"  RF         = {model.receptive_field()}/{cfg['seq_len']} OK")
         return model

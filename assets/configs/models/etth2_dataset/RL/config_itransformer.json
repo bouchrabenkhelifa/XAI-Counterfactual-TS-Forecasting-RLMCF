@@ -24,5 +24,6 @@
     "checkpoint_dir_lp": "assets/checkpoints/etth2_chpts/RL/RL_itransformer",
     "figures_dir_lp": "assets/figures/etth2/forecaster/itransformer",
     "results_dir_lp": "assets/results/etth2/RL_itransformer",
+    "forecast_config_path": "assets/configs/models/etth2_dataset/forecasters/itransformer/etth2_96_48_S.json",
     "eval_train_batches": 50
 }
