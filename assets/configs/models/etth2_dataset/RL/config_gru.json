@@ -21,7 +21,7 @@
     "mask_ramp_k": 8,
     "filter_quantile": 0.0,
     "use_rl": true,
-    "checkpoint_dir_lp": "assets/checkpoints/etth2_chpts/RL_gru",
+    "checkpoint_dir_lp": "assets/checkpoints/etth2_chpts/RL/RL_gru",
     "figures_dir_lp": "assets/figures/etth2/forecaster/gru",
     "results_dir_lp": "assets/results/etth2/RL_gru",
     "eval_train_batches": 50

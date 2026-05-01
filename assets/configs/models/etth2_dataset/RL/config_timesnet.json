@@ -21,7 +21,7 @@
     "mask_ramp_k": 8,
     "filter_quantile": 0.0,
     "use_rl": true,
-    "checkpoint_dir_lp": "assets/checkpoints/etth2_chpts/RL_timesnet",
+    "checkpoint_dir_lp": "assets/checkpoints/etth2_chpts/RL/RL_timesnet",
     "figures_dir_lp": "assets/figures/etth2/forecaster/timesnet",
     "results_dir_lp": "assets/results/etth2/RL_timesnet",
     "eval_train_batches": 50
