@@ -1,154 +1,94 @@
-# RL-MCF: Reinforcement Learning for Masked Counterfactual Forecasting
+# Counterfactual Explanations for Time Series Forecasting via Reinforcement Learning
 
-A reinforcement learning framework for generating counterfactual explanations in time series forecasting. An Actor-Critic agent learns a global policy in the latent space of a pre-trained autoencoder, enabling efficient counterfactual generation in a single forward pass.
+This work proposes an **agnostic XAI framework** to generate **counterfactual explanations** for time series forecasting models using **reinforcement learning (RL)** in latent space.
+
+> See [STRUCTURE.md](STRUCTURE.md) for the full project structure, dataset details, and usage guide.
+
+---
+
+## Motivation
+
+Deep learning models, especially Transformers, have significantly improved time series forecasting performance in high-stakes domains such as healthcare, finance, and energy. However, their black-box nature limits interpretability, which is critical in real-world decision-making.
+
+Existing XAI methods mainly focus on feature attribution — explaining *why* a prediction was made, but not *how to change it*. As a result, they lack actionability.
+
+Counterfactual explanations address this by answering "what-if" questions, providing actionable insights. However, most existing work focuses on **classification tasks**, while counterfactual generation for **time series forecasting** remains largely underexplored. The main existing approach, ForecastCF, relies on instance-specific gradient-based optimization that is computationally expensive and may produce temporally inconsistent perturbations.
 
 ---
 
 ## Architecture
 
-```
-x → TCN-AE Encoder → z → Actor-Critic Agent → z_cf → TCN-AE Decoder → x̃
-                                                                          ↓
-x_cf = x + mask ⊙ (x̃ − x)  →  Forecaster f  →  ŷ_cf  →  Reward
-```
+![Architecture](assets/figures/Architecture.png)
 
-**Three frozen components + one trainable agent:**
-- **TCN-AE** — encodes input into latent space, constrains perturbations to data manifold
-- **Forecasting model** — any black-box forecaster (iTransformer, PatchTST, TimesNet, GRU, DLinear)
-- **Temporal mask** — localizes perturbations to the most recent k timesteps
-- **Actor-Critic agent** — learns to navigate the latent space toward valid counterfactuals
+The pipeline consists of three **frozen** components and one **trainable** agent:
 
----
-
-## Quick Start
-
-```bash
-# Full pipeline for a dataset (train forecasters → AE → RL → eval)
-python scripts/pipelines/pipeline_etth1.py
-
-# Eval only (checkpoints already trained)
-python scripts/pipelines/pipeline_etth1.py --eval_only
-
-# Skip specific steps
-python scripts/pipelines/pipeline_etth2.py --skip_forecasters
-python scripts/pipelines/pipeline_weather.py --skip_rl
-```
+1. Input time series `X` is encoded into latent representation `z` via a pre-trained **Temporal Convolutional Autoencoder (TCN-AE)**
+2. **Actor-Critic RL agent** perturbs `z → z_cf` in latent space
+3. Decoder reconstructs counterfactual time series `X_cf = ψ(z_cf)`
+4. A **temporal mask** `m` is applied to localize perturbations to the most recent timesteps: `X_cf = X + m ⊙ (X̃ − X)`
+5. Forecasting model evaluates `Ŷ_cf = f(X_cf)`
+6. Reward is computed based on **validity** and **proximity**
 
 ---
 
-## Project Structure
+## Contributions
+
+### 1. RL Framework for Counterfactual Forecasting
+
+We introduce the first reinforcement learning framework for counterfactual explanations in time series forecasting. An Actor-Critic agent learns a **global policy** that generalizes across all instances — once trained, counterfactuals are generated in a **single forward pass**, unlike per-instance gradient optimization.
+
+### 2. Forecast-Anchored Validity Bounds
+
+Unlike ForecastCF which centers bounds on `median(x)`, we anchor bounds directly on the original forecast `ŷ`:
 
 ```
-├── assets/
-│   ├── checkpoints/          # Trained model checkpoints
-│   │   ├── etth1_chpts/      # AE, forecasters, RL agents for ETTh1
-│   │   ├── etth2_chpts/      # ETTh2
-│   │   └── weather_chpts/    # Weather
-│   ├── configs/
-│   │   └── models/
-│   │       ├── etth1_dataset/    # Forecaster + AE + RL configs for ETTh1
-│   │       ├── etth2_dataset/    # ETTh2
-│   │       └── weather_dataset/  # Weather
-│   ├── datasets/             # Raw CSV datasets (ETTh1.csv, ETTh2.csv, weather.csv)
-│   ├── figures/              # Training curves, CF examples
-│   └── results/              # Evaluation JSONs, summary tables
-│
-├── baselines/
-│   ├── ForecastCF/           # ForecastCF baseline (Wang et al., ICDM 2023)
-│   ├── BaseShift/            # BaseShift naive baseline
-│   └── BaseNN/               # BaseNN nearest-neighbour baseline
-│
-├── scripts/
-│   ├── pipelines/
-│   │   ├── pipeline_etth1.py     # Full ETTh1 pipeline
-│   │   ├── pipeline_etth2.py     # Full ETTh2 pipeline
-│   │   └── pipeline_weather.py   # Full Weather pipeline
-│   ├── evals/
-│   │   ├── eval_etth1_all_models.py   # Eval 5 models on ETTh1
-│   │   ├── eval_etth2_all_models.py   # Eval 5 models on ETTh2
-│   │   ├── eval_weather_all_models.py # Eval 5 models on Weather
-│   │   ├── eval_forecasters.py        # Forecaster quality (MSE/MAE + plots)
-│   │   └── build_results_table.py     # Build comparison table
-│   └── generate_latex_table.py        # Generate LaTeX table for paper
-│
-├── src/
-│   ├── data_provider/        # Dataset loaders (ETT, Custom)
-│   ├── evaluation/           # Metrics (validity, proximity, compactness, ...)
-│   ├── experiments/
-│   │   ├── ablations/
-│   │   │   └── RLP/          # Random Latent Perturbation ablation
-│   │   │   └── wo_mask/      # Without temporal mask ablation
-│   │   ├── autoencoder/      # AE training
-│   │   ├── forecasting/      # Forecaster training
-│   │   └── rl_cf/            # RL counterfactual training
-│   ├── models/
-│   │   ├── autoencoder/      # TCN-AE
-│   │   ├── Forecaster/       # iTransformer, PatchTST, TimesNet, GRU, DLinear
-│   │   └── RL/               # Actor, Critic, Agent, Reward
-│   ├── training/
-│   │   ├── ae_trainers/
-│   │   ├── forecast_trainers/
-│   │   └── RL_trainers/      # trainer_last.py (main), trainer_wo_mask.py (ablation)
-│   └── utils/
-│
-└── requirements.txt
+β = ŷ − ρ · σx,   α = β − fr · σx
 ```
 
----
+This guarantees by construction that `ŷ ∉ [α, β]`, ensuring a non-trivial counterfactual objective.
 
-## Datasets
+### 3. Latent-Space Optimization
 
-| Dataset | Domain | L | H | Loader |
-|---|---|---|---|---|
-| ETTh1 | Energy (oil temperature) | 96 | 48 | `Dataset_ETT_hour` |
-| ETTh2 | Energy (oil temperature) | 96 | 48 | `Dataset_ETT_hour` |
-| Weather | Meteorology (temperature) | 96 | 48 | `Dataset_Custom` |
+Instead of modifying raw time series directly, the agent operates in the **latent space** of a pre-trained autoencoder:
 
----
-
-## Evaluation Metrics
-
-| Metric | Description | ↑/↓ |
-|---|---|---|
-| Validity Ratio | Proportion of CF forecast steps within target bounds | ↑ |
-| Stepwise AUC | AUC of cumulative per-instance validity curve | ↑ |
-| Proximity L2 | L2 distance between CF and original input | ↓ |
-| Compactness | Proportion of unchanged timesteps (ε=1e-3) | ↑ |
-| Roughness Ratio | Roughness(CF) / Roughness(original) | ≈1 |
-| Temporal Consistency | Pearson correlation of first-order differences | ↑ |
-| Plausibility | Ensemble anomaly score (IF + LOF + OC-SVM) | ↓ |
-
----
-
-## Ablations
-
-| Variant | Description |
-|---|---|
-| **RLP** | Random Latent Perturbation — same pipeline, random action instead of learned policy |
-| **w/o Mask** | Temporal masking disabled — full sequence modified |
-
-```bash
-# RLP ablation
-python src/experiments/ablations/RLP/run_rlp.py
-
-# Without mask ablation
-python src/experiments/ablations/wo_mask/run_wo_mask.py
+```
+a ~ π_θ(s),   z_cf = clip(z + η · a, −1, 1)
 ```
 
----
+This implicitly constrains perturbations to the data manifold, enforcing **plausibility** without an explicit plausibility term in the reward.
 
-## Baselines
+### 4. Temporal Masking Mechanism
 
-```bash
-# ForecastCF (Wang et al., ICDM 2023) — GRU on ETTh1
-python baselines/ForecastCF/run_etth1_gru.py
+A ramp-based temporal mask encourages **sparse and localized** perturbations, modifying only the `k` most recent timesteps:
 
-# BaseShift
-python baselines/BaseShift/run_baseshift_etth1_gru.py
-
-# BaseNN
-python baselines/BaseNN/run_basenn_etth1_gru.py
 ```
+mt = 0               if t < L − k − r
+     (t−(L−k−r))/r  if L − k − r ≤ t < L − k
+     1               if t ≥ L − k
+```
+
+This directly improves compactness and temporal consistency.
+
+### 5. Reward Function
+
+The reward combines validity and proximity:
+
+```
+R = wv · Validity + wp · Proximity
+```
+
+- **Validity**: `r_valid = (1/H) Σ exp(−2 · dt / (βt − αt))` — penalizes forecasts outside target bounds
+- **Proximity**: `r_prox = exp(−(1/L) Σ |x_cf_t − x_t|)` — penalizes large input perturbations
+
+### 6. Model-Agnostic Design
+
+The framework is compatible with any black-box forecasting architecture. We validate across four representative model families:
+
+- **iTransformer** (Transformer-based)
+- **PatchTST** (Patch-based Transformer)
+- **TimesNet** (CNN-based)
+- **GRU** (Recurrent)
+- **DLinear** (Linear decomposition)
 
 ---
 
