@@ -21,7 +21,7 @@
     "mask_ramp_k":  4,
     "filter_quantile":  0.0,
     "use_rl":  true,
-    "checkpoint_dir_lp":  "assets/checkpoints/etth2_chpts/RL/itransformer",
+    "checkpoint_dir_lp":  "assets/checkpoints/etth2_chpts/RL_itransformer",
     "figures_dir_lp":  "assets/figures/etth2/RL/itransformer",
     "results_dir_lp":  "assets/results/etth2/RL/itransformer",
     "forecast_config_path":  "assets/configs/models/etth2_dataset/forecasters/itransformer/etth2_96_48_S.json",

@@ -21,7 +21,7 @@
     "mask_ramp_k":  6,
     "filter_quantile":  0.0,
     "use_rl":  true,
-    "checkpoint_dir_lp":  "assets/checkpoints/etth2_chpts/RL/patchtst",
+    "checkpoint_dir_lp":  "assets/checkpoints/etth2_chpts/RL_patchtst",
     "figures_dir_lp":  "assets/figures/etth2/RL/patchtst",
     "results_dir_lp":  "assets/results/etth2/RL/patchtst",
     "forecast_config_path":  "assets/configs/models/etth2_dataset/forecasters/patchtst/etth2_96_48_S.json",

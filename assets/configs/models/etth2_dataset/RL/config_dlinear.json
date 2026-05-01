@@ -21,7 +21,7 @@
     "mask_ramp_k":  8,
     "filter_quantile":  0.0,
     "use_rl":  true,
-    "checkpoint_dir_lp":  "assets/checkpoints/etth2_chpts/RL/dlinear",
+    "checkpoint_dir_lp":  "assets/checkpoints/etth2_chpts/RL_dlinear",
     "figures_dir_lp":  "assets/figures/etth2/RL/dlinear",
     "results_dir_lp":  "assets/results/etth2/RL/dlinear",
     "forecast_config_path":  "assets/configs/models/etth2_dataset/forecasters/dlinear/etth2_96_48_S.json",
