@@ -521,7 +521,7 @@ class RLMaskTrainer:
             betas=all_betas,
         )
 
-        print("\n── Evaluation Metrics ───────────────────────────────")
+        print("\n-- Evaluation Metrics -------------------------------------------")
         CounterfactualEvaluator.print_table(summary_std, label=self.exp_name)
 
         path = os.path.join(
@@ -529,7 +529,7 @@ class RLMaskTrainer:
         )
         with open(path, "w") as f:
             json.dump(summary_std, f, indent=2)
-        print(f"[Eval] Saved → {path}")
+        print(f"[Eval] Saved -> {path}")
 
         self._plot_cf_examples(
             cf_examples,
@@ -553,7 +553,7 @@ class RLMaskTrainer:
             },
             path,
         )
-        print(f"[RL] Checkpoint → {path}")
+        print(f"[RL] Checkpoint -> {path}")
 
     def _save_history(self):
         path = os.path.join(self.cfg_rl.results_dir_lp, f"{self.exp_name}_history.json")
@@ -604,7 +604,7 @@ class RLMaskTrainer:
         )
         plt.savefig(path, dpi=150, bbox_inches="tight")
         plt.close()
-        print(f"[RL] Curves → {path}")
+        print(f"[RL] Curves -> {path}")
 
     def _plot_cf_examples(self, examples, out_path):
         if not examples:
@@ -651,4 +651,4 @@ class RLMaskTrainer:
         plt.tight_layout()
         plt.savefig(out_path, dpi=150, bbox_inches="tight")
         plt.close()
-        print(f"[RL] CF examples → {out_path}")
+        print(f"[RL] CF examples -> {out_path}")

@@ -314,24 +314,24 @@ class CounterfactualEvaluator:
             (
                 "ForecastCF Paper Metrics",
                 [
-                    ("validity_ratio",   "Validity Ratio  ↑", True),
-                    ("stepwise_auc",     "Step AUC        ↑", True),
-                    ("proximity_l2",     "Proximity L2    ↓", False),
-                    ("compactness",      "Compactness     ↑", True),
+                    ("validity_ratio",   "Validity Ratio  UP", True),
+                    ("stepwise_auc",     "Step AUC        UP", True),
+                    ("proximity_l2",     "Proximity L2    DOWN", False),
+                    ("compactness",      "Compactness     UP", True),
                 ],
             ),
             (
                 "Temporal Quality",
                 [
-                    ("roughness_ratio",       "Roughness ratio      ↓", False),
-                    ("temporal_consistency",  "Temporal Consistency ↑", True),
-                    ("relative_reduction",    "Relative Reduction   ↑", True),
+                    ("roughness_ratio",       "Roughness ratio      DOWN", False),
+                    ("temporal_consistency",  "Temporal Consistency UP", True),
+                    ("relative_reduction",    "Relative Reduction   UP", True),
                 ],
             ),
             (
-                "Plausibility  (↓ = more realistic)",
+                "Plausibility  (DOWN = more realistic)",
                 [
-                    ("plausibility_ensemble", "Ensemble ↓", False),
+                    ("plausibility_ensemble", "Ensemble DOWN", False),
                 ],
             ),
         ]
@@ -351,10 +351,10 @@ class CounterfactualEvaluator:
                 s    = results[key]["std"]
                 flag = ""
                 if higher_better is True  and m > 0.75:
-                    flag = "  ✓"
+                    flag = "  OK"
                 elif higher_better is False and m < 0.25:
-                    flag = "  ✓"
-                print(f"  {display:36s}: {m:.4f}  ± {s:.4f}{flag}")
+                    flag = "  OK"
+                print(f"  {display:36s}: {m:.4f}  +/- {s:.4f}{flag}")
 
         print(f"\n{'=' * width}\n")
 
@@ -368,14 +368,14 @@ class CounterfactualEvaluator:
         col_w     = 12
         SEP       = "-" * width
         key_display = [
-            ("validity_ratio",        "Validity Ratio  ↑"),
-            ("stepwise_auc",          "Step AUC        ↑"),
-            ("proximity_l2",          "Proximity L2    ↓"),
-            ("compactness",           "Compactness     ↑"),
-            ("roughness_ratio",       "Roughness ratio ↓"),
-            ("temporal_consistency",  "Temp. Consist.  ↑"),
-            ("relative_reduction",    "Rel. Reduction  ↑"),
-            ("plausibility_ensemble", "Plausibility ↓  "),
+            ("validity_ratio",        "Validity Ratio  UP"),
+            ("stepwise_auc",          "Step AUC        UP"),
+            ("proximity_l2",          "Proximity L2    DOWN"),
+            ("compactness",           "Compactness     UP"),
+            ("roughness_ratio",       "Roughness ratio DOWN"),
+            ("temporal_consistency",  "Temp. Consist.  UP"),
+            ("relative_reduction",    "Rel. Reduction  UP"),
+            ("plausibility_ensemble", "Plausibility DOWN  "),
         ]
 
         header = f"  {'Metric':<36}" + "".join(f"{m:>{col_w}}" for m in methods)

@@ -23,7 +23,7 @@ from src.utils.config import load_config
 from src.utils.train_tools import get_device
 from src.training.RL_trainers.trainer_last import RLMaskTrainer
 
-# Patch ForecasterWrapper → V2
+# Patch ForecasterWrapper -> V2
 import src.training.RL_trainers.trainer_last as _trainer_mod
 from src.models.Forecaster.forecaster_wrapper_v2 import ForecasterWrapperV2
 _trainer_mod.ForecasterWrapper = ForecasterWrapperV2
@@ -87,7 +87,7 @@ def eval_one(label, rl_config_path, forecast_config_path, ae_config_path, device
         ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
         trainer.agent.actor.load_state_dict(ckpt["actor_state_dict"])
         trainer.agent.critic.load_state_dict(ckpt["critic_state_dict"])
-        print(f"  Loaded checkpoint → {ckpt_path}")
+        print(f"  Loaded checkpoint -> {ckpt_path}")
     else:
         print(f"  WARNING: no checkpoint at {ckpt_path}, using random weights")
 
@@ -148,7 +148,7 @@ def plot_radar(results, out_dir):
     p = os.path.join(out_dir, "etth2_radar_5models.png")
     fig.savefig(p, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved → {p}")
+    print(f"Saved -> {p}")
 
 
 def plot_barplot(results, out_dir):
@@ -175,7 +175,7 @@ def plot_barplot(results, out_dir):
     p = os.path.join(out_dir, "etth2_barplot_5models.png")
     fig.savefig(p, dpi=150)
     plt.close(fig)
-    print(f"Saved → {p}")
+    print(f"Saved -> {p}")
 
 
 def main():
@@ -192,7 +192,7 @@ def main():
     out_json = os.path.join(OUTPUT_DIR, "etth2_all_models_eval.json")
     with open(out_json, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"Saved → {out_json}")
+    print(f"Saved -> {out_json}")
 
     plot_radar(results, OUTPUT_DIR)
     plot_barplot(results, OUTPUT_DIR)
