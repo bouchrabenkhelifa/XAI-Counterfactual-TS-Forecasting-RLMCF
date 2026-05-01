@@ -24,6 +24,9 @@ Usage:
 import argparse
 import subprocess
 import sys
+import os
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # ── Configs ───────────────────────────────────────────────────────────────────
 
@@ -72,7 +75,9 @@ EVAL_SCRIPT    = "scripts/evals/eval_etth1_all_models.py"
 
 def run(cmd, label, stop_on_error=True):
     print(f"\n{'='*60}\n  {label}\n{'='*60}")
-    result = subprocess.run([sys.executable] + cmd)
+    env = os.environ.copy()
+    env["PYTHONPATH"] = ROOT
+    result = subprocess.run([sys.executable] + cmd, cwd=ROOT, env=env)
     if result.returncode != 0:
         print(f"[ERROR] {label} failed (code {result.returncode})")
         if stop_on_error:

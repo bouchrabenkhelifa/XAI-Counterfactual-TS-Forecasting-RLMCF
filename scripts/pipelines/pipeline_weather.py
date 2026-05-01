@@ -2,14 +2,16 @@
 Pipeline complet Weather — train + eval + plots
 
 Usage:
-    python scripts/pipelines/pipeline_weather.py              # tout
+    python scripts/pipelines/pipeline_weather.py
     python scripts/pipelines/pipeline_weather.py --eval_only
     python scripts/pipelines/pipeline_weather.py --skip_forecasters
     python scripts/pipelines/pipeline_weather.py --skip_ae
     python scripts/pipelines/pipeline_weather.py --skip_rl
 """
 
-import argparse, subprocess, sys
+import argparse, subprocess, sys, os
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 AE_CONFIG = "assets/configs/models/weather_dataset/ae/tcn_ae.json"
 
@@ -44,7 +46,9 @@ EVAL_SCRIPT = "scripts/evals/eval_weather_all_models.py"
 
 def run(cmd, label, stop_on_error=True):
     print(f"\n{'='*60}\n  {label}\n{'='*60}")
-    result = subprocess.run([sys.executable] + cmd)
+    env = os.environ.copy()
+    env["PYTHONPATH"] = ROOT
+    result = subprocess.run([sys.executable] + cmd, cwd=ROOT, env=env)
     if result.returncode != 0:
         print(f"[ERROR] {label} failed (code {result.returncode})")
         if stop_on_error:
@@ -76,12 +80,9 @@ def main():
 
     if not args.eval_only and not args.skip_rl:
         for model, rl_cfg, f_cfg in RL_MODELS:
-            run([
-                "src/experiments/rl_cf/run_last.py",
-                "--config",          rl_cfg,
-                "--forecast_config", f_cfg,
-                "--ae_config",       AE_CONFIG,
-            ], f"Train RL agent — {model} / Weather")
+            run(["src/experiments/rl_cf/run_last.py",
+                 "--config", rl_cfg, "--forecast_config", f_cfg, "--ae_config", AE_CONFIG],
+                f"Train RL agent — {model} / Weather")
     else:
         print("\n[Skip] RL training")
 
