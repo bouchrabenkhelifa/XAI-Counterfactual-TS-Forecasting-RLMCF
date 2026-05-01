@@ -30,7 +30,7 @@ _trainer_mod.ForecasterWrapper = ForecasterWrapperV2
 
 AE_CONFIG = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
 EVAL_BATCHES = 20
-OUTPUT_DIR = "assets/results/etth1_summary"
+OUTPUT_DIR = "assets/results/etth1/summary"
 
 # 5 modèles : (label, rl_config, forecast_config)
 MODELS = [
@@ -96,9 +96,9 @@ def eval_one(label, rl_config_path, forecast_config_path, ae_config_path, device
         cfg_rl.checkpoint_dir_lp,
         f"{cfg_rl.name}_agent_best.pt"
     )
-    # Override checkpoint pour iTransformer → RL_v2
+    # Override checkpoint pour iTransformer → RL/itransformer
     if label == "iTransformer":
-        ckpt_path = "assets/checkpoints/etth1_chpts/RL_v2/rl_cf_v2_etth1_agent_best.pt"
+        ckpt_path = "assets/checkpoints/etth1_chpts/RL/itransformer/rl_cf_v2_etth1_agent_best.pt"
     if os.path.exists(ckpt_path):
         ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
         trainer.agent.actor.load_state_dict(ckpt["actor_state_dict"])

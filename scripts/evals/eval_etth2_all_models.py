@@ -30,7 +30,7 @@ _trainer_mod.ForecasterWrapper = ForecasterWrapperV2
 
 AE_CONFIG    = "assets/configs/models/etth2_dataset/ae/tcn_ae.json"
 EVAL_BATCHES = 20
-OUTPUT_DIR   = "assets/results/etth2_summary"
+OUTPUT_DIR   = "assets/results/etth2/summary"
 
 MODELS = [
     (

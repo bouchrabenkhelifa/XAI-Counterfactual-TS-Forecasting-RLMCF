@@ -27,7 +27,7 @@ def prepare_rl_data(cfg_forecaster, cfg_ae, device):
         scaler.scale_ = np.array(ckpt_ae["scaler_std"], dtype=np.float64)
         scaler.var_ = scaler.scale_**2
         scaler.n_features_in_ = len(scaler.mean_) if np.ndim(scaler.mean_) > 0 else 1
-        print("[Data] Scaler loaded ✓")
+        print("[Data] Scaler loaded OK")
     else:
         print("[Warning] No scaler in AE checkpoint")
     return train_loader, test_loader, scaler
@@ -315,7 +315,7 @@ class RLMaskTrainer:
 
         fit_plaus = self.x_train_eval is not None
         if fit_plaus:
-            print("[RL] Plausibility will be fitted from x_train ✓")
+            print("[RL] Plausibility will be fitted from x_train OK")
         else:
             print("[RL] No plausibility (no x_train)")
 

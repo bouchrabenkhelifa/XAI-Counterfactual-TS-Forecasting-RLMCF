@@ -78,7 +78,7 @@ class ForecasterWrapperV2:
         self.model.load_state_dict(state)
         self.model.eval()
 
-        print(f"[Forecaster-v2] {model_type} loaded ✓  "
+        print(f"[Forecaster-v2] {model_type} loaded OK  "
               f"seq={cfg.seq_len}  pred={cfg.pred_len}")
 
     # ─────────────────────────────────────────────────────────────────────────

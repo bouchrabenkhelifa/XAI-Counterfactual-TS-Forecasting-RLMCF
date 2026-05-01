@@ -196,7 +196,7 @@ class PlausibilityEvaluator:
             nu=self.contamination, kernel="rbf"
         ).fit(xs)
         self._fitted = True
-        print("[Plausibility] Detectors ready ✓")
+        print("[Plausibility] Detectors ready OK")
         return self
 
     def score(self, X_cf: np.ndarray) -> dict[str, np.ndarray]:
