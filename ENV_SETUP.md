@@ -57,13 +57,11 @@ set PYTHONPATH=.
 
 ### Train AutoEncoder
 
-| Dataset | Command |
-|---------|---------|
-| ETTh1 | `python src/experiments/ae/run.py --config assets/configs/models/etth1_dataset/ae/tcn_ae.json` |
-| ETTh2 | `python src/experiments/ae/run.py --config assets/configs/models/etth2_dataset/ae/tcn_ae.json` |
-| Weather | `python src/experiments/ae/run.py --config assets/configs/models/weather_dataset/ae/tcn_ae.json` |
+```bash
+python src/experiments/ae/run.py --config assets/configs/models/{DATASET}_dataset/ae/tcn_ae.json
+```
 
-**What varies**: `{DATASET}` in path — replace with `etth1`, `etth2`, or `weather`
+**Replace**: `{DATASET}` with `etth1`, `etth2`, or `weather`
 
 ### Train All RL Agents
 
@@ -90,6 +88,22 @@ set PYTHONPATH=.
 | ETTh1 | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/etth1_dataset/RL_ablations --ae_config assets/configs/models/etth1_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
 | ETTh2 | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/etth2_dataset/RL --ae_config assets/configs/models/etth2_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
 | Weather | `python src/experiments/rl_cf/run_last_v2.py --config_dir assets/configs/models/weather_dataset/RL --ae_config assets/configs/models/weather_dataset/ae/tcn_ae.json --eval_only --eval_batches 50` |
+
+## Pipeline
+
+The pipeline automates the full workflow: train forecasters → train AE → train RL agents → evaluate.
+
+```bash
+python scripts/pipelines/pipeline_{DATASET}.py
+```
+
+**Replace**: `{DATASET}` with `etth1`, `etth2`, or `weather`
+
+**Options**:
+- `--eval_only` - Skip training, only evaluate RL agents
+- `--skip_forecasters` - Skip forecaster training
+- `--skip_ae` - Skip AutoEncoder training
+- `--skip_rl` - Skip RL agent training
 
 ## Results
 
