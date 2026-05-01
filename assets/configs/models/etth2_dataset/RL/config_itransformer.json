@@ -1,7 +1,7 @@
 {
     "name": "rl_cf_itransformer_etth2",
-    "rho": 0.20,
-    "fr": 0.50,
+    "rho": 0.2,
+    "fr": 0.5,
     "w_validity": 3.5,
     "w_proximity": 1.5,
     "w_hard_bonus": 2.5,
@@ -13,8 +13,8 @@
     "eta": 0.15,
     "entropy_coef": 0.02,
     "epochs": 30,
-    "lr_actor": 3e-4,
-    "lr_critic": 1e-4,
+    "lr_actor": 0.0003,
+    "lr_critic": 0.0001,
     "lr_decay": 0.5,
     "grad_clip": 1.0,
     "mask_last_k": 12,
@@ -22,7 +22,7 @@
     "filter_quantile": 0.0,
     "use_rl": true,
     "checkpoint_dir_lp": "assets/checkpoints/etth2_chpts/RL_itransformer",
-    "figures_dir_lp":    "assets/figures/etth2/RL_itransformer",
-    "results_dir_lp":    "assets/results/etth2/RL_itransformer",
+    "figures_dir_lp": "assets/figures/etth2/forecaster/itransformer",
+    "results_dir_lp": "assets/results/etth2/RL_itransformer",
     "eval_train_batches": 50
 }
