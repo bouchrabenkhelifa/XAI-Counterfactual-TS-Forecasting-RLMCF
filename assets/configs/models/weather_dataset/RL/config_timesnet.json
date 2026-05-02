@@ -5,7 +5,7 @@
     "use_validity": true, "use_proximity": true, "use_smooth": true,
     "direction": -1.0, "eta": 0.15, "entropy_coef": 0.02,
     "epochs": 30, "lr_actor": 3e-4, "lr_critic": 1e-4, "lr_decay": 0.5, "grad_clip": 1.0,
-    "mask_last_k": 24, "mask_ramp_k": 8, "filter_quantile": 0.0, "use_rl": true,
+    "mask_last_k": 6, "mask_ramp_k": 2, "filter_quantile": 0.0, "use_rl": true,
     "checkpoint_dir_lp": "assets/checkpoints/weather_chpts/RL_timesnet",
     "figures_dir_lp":    "assets/figures/weather/RL_timesnet",
     "results_dir_lp":    "assets/results/weather/RL_timesnet",
