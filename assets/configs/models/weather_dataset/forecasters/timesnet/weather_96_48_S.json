@@ -7,8 +7,8 @@
   "target": "T (degC)",
   "freq": "t",
   "seq_len": 576,
-  "label_len": 192,
-  "pred_len": 48,
+  "label_len": 48,
+  "pred_len": 144,
   "enc_in": 1,
   "dec_in": 1,
   "c_out": 1,
@@ -29,10 +29,10 @@
   "embed": "timeF",
   "use_gpu": true,
   "gpu": 0,
-  "inverse": false,
+  "inverse": true,
   "checkpoint_dir": "assets/checkpoints/weather_chpts/forecaster",
   "checkpoint_name": "chpt_weather_96_48_timesnet_S.pth",
   "history_name": "history_weather_96_48_timesnet_S.json",
-  "results_dir": "assets/results/weather/forecaster",
-  "figures_dir": "assets/figures/weather/forecaster"
+  "results_dir": "assets/results/weather/forecaster/TimesNet",
+  "figures_dir": "assets/figures/weather/forecaster/TimesNet"
 }
