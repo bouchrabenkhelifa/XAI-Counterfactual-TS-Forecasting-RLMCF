@@ -41,6 +41,6 @@ class Model(nn.Module):
         pred    = self.proj(last)          # (B, pred_len * c_out)
         pred    = pred.view(pred.shape[0], self.pred_len, self.c_out)
 
-        # ── Denormalize ───────────────────────────────────────────────────
-        pred = pred * std + mean
+        # ── Return normalized predictions ───────────────────────────────
+        # Denormalization is handled by trainer with inverse: true
         return pred

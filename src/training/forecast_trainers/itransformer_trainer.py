@@ -221,6 +221,13 @@ class ITransformerTrainer:
         targets = batch_y[:, -self.configs.pred_len:, f_dim:].cpu().numpy()
         inputs = batch_x[:, :, f_dim:].cpu().numpy()
         
+        # Denormalize if inverse: true
+        if getattr(self.configs, "inverse", False):
+            scaler = self.test_data.scaler
+            preds = scaler.inverse_transform(preds.reshape(-1, 1)).reshape(preds.shape)
+            targets = scaler.inverse_transform(targets.reshape(-1, 1)).reshape(targets.shape)
+            inputs = scaler.inverse_transform(inputs.reshape(-1, 1)).reshape(inputs.shape)
+        
         n_plot = min(n, preds.shape[0])
         seq_len = inputs.shape[1]
         pred_len = preds.shape[1]

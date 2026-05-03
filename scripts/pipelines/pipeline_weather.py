@@ -1,12 +1,13 @@
 """
-Pipeline complet Weather — train + eval + plots
+Pipeline complet Weather — train forecasters + eval + plots
+(AE and RL training skipped by default)
 
 Usage:
-    python scripts/pipelines/pipeline_weather.py
-    python scripts/pipelines/pipeline_weather.py --eval_only
-    python scripts/pipelines/pipeline_weather.py --skip_forecasters
-    python scripts/pipelines/pipeline_weather.py --skip_ae
-    python scripts/pipelines/pipeline_weather.py --skip_rl
+    python scripts/pipelines/pipeline_weather.py                    # Train forecasters only
+    python scripts/pipelines/pipeline_weather.py --eval_only        # Eval only
+    python scripts/pipelines/pipeline_weather.py --skip_forecasters # Skip forecaster training
+    python scripts/pipelines/pipeline_weather.py --train_ae         # Include AE training
+    python scripts/pipelines/pipeline_weather.py --train_rl         # Include RL training
 """
 
 import argparse, subprocess, sys, os
@@ -15,12 +16,13 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 AE_CONFIG = "assets/configs/models/weather_dataset/ae/tcn_ae.json"
 
+# Updated configs with corrected seq_len/pred_len (96/96)
 FORECASTER_CONFIGS = [
     "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_48_S.json",
-    "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_48_S.json",
-    "assets/configs/models/weather_dataset/forecasters/timesnet/weather_96_48_S.json",
-    "assets/configs/models/weather_dataset/forecasters/gru/weather_96_48_S.json",
-    "assets/configs/models/weather_dataset/forecasters/dlinear/weather_96_48_S.json",
+    "assets/configs/models/weather_dataset/forecasters/gru/weather_96_96_S.json",
+    "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_96_S.json",
+    "assets/configs/models/weather_dataset/forecasters/timesnet/weather_96_96_S.json",
+    "assets/configs/models/weather_dataset/forecasters/dlinear/weather_96_96_S.json",
 ]
 
 RL_MODELS = [
@@ -29,16 +31,16 @@ RL_MODELS = [
      "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_48_S.json"),
     ("PatchTST",
      "assets/configs/models/weather_dataset/RL/config_patchtst.json",
-     "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_48_S.json"),
+     "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_96_S.json"),
     ("TimesNet",
      "assets/configs/models/weather_dataset/RL/config_timesnet.json",
-     "assets/configs/models/weather_dataset/forecasters/timesnet/weather_96_48_S.json"),
+     "assets/configs/models/weather_dataset/forecasters/timesnet/weather_96_96_S.json"),
     ("GRU",
      "assets/configs/models/weather_dataset/RL/config_gru.json",
-     "assets/configs/models/weather_dataset/forecasters/gru/weather_96_48_S.json"),
+     "assets/configs/models/weather_dataset/forecasters/gru/weather_96_96_S.json"),
     ("DLinear",
      "assets/configs/models/weather_dataset/RL/config_dlinear.json",
-     "assets/configs/models/weather_dataset/forecasters/dlinear/weather_96_48_S.json"),
+     "assets/configs/models/weather_dataset/forecasters/dlinear/weather_96_96_S.json"),
 ]
 
 EVAL_SCRIPT = "scripts/evals/eval_weather_all_models.py"

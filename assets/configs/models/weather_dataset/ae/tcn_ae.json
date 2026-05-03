@@ -7,11 +7,11 @@
   "results_dir": "assets/results/weather/ae",
   "train_ratio": 0.7,
   "val_ratio": 0.1,
-  "seq_len": 576,
+  "seq_len": 96,
   "n_features": 1,
   "hidden_dim": 64,
   "latent_dim": 64,
-  "n_blocks": 4,
+  "n_blocks": 6,
   "kernel_size": 3,
   "dropout": 0.1
 }

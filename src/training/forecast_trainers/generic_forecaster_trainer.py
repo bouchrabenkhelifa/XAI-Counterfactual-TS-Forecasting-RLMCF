@@ -121,6 +121,14 @@ def _collect_examples(model, test_loader, configs, device, n: int = 4):
     preds   = out[:, -configs.pred_len:, f_dim:].cpu().numpy()
     targets = batch_y[:, -configs.pred_len:, f_dim:].numpy()
     inputs  = batch_x[:, :, f_dim:].cpu().numpy()
+    
+    # Denormalize if inverse: true
+    if getattr(configs, "inverse", False):
+        scaler = test_loader.dataset.scaler
+        preds = scaler.inverse_transform(preds.reshape(-1, 1)).reshape(preds.shape)
+        targets = scaler.inverse_transform(targets.reshape(-1, 1)).reshape(targets.shape)
+        inputs = scaler.inverse_transform(inputs.reshape(-1, 1)).reshape(inputs.shape)
+    
     return preds[:n], targets[:n], inputs[:n]
 
 
