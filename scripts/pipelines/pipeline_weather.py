@@ -16,7 +16,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 AE_CONFIG = "assets/configs/models/weather_dataset/ae/tcn_ae.json"
 
-# Updated configs with corrected seq_len/pred_len (96/96)
+# Configs for retraining (all 96_96)
 FORECASTER_CONFIGS = [
     "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_48_S.json",
     "assets/configs/models/weather_dataset/forecasters/gru/weather_96_96_S.json",
