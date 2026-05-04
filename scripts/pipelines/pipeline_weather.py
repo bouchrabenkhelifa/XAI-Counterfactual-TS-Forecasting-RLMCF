@@ -18,7 +18,7 @@ AE_CONFIG = "assets/configs/models/weather_dataset/ae/tcn_ae.json"
 
 # Configs for retraining (all 96_96)
 FORECASTER_CONFIGS = [
-    "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_48_S.json",
+    "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_96_S.json",
     "assets/configs/models/weather_dataset/forecasters/gru/weather_96_96_S.json",
     "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_96_S.json",
     "assets/configs/models/weather_dataset/forecasters/timesnet/weather_96_96_S.json",
@@ -28,7 +28,7 @@ FORECASTER_CONFIGS = [
 RL_MODELS = [
     ("iTransformer",
      "assets/configs/models/weather_dataset/RL/config_itransformer.json",
-     "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_48_S.json"),
+     "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_96_S.json"),
     ("PatchTST",
      "assets/configs/models/weather_dataset/RL/config_patchtst.json",
      "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_96_S.json"),
