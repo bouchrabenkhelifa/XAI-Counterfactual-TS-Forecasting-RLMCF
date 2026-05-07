@@ -1,7 +1,8 @@
 {
     "name":  "rl_cf_gru_etth1",
-    "rho":  0.1,
+    "rho":  0.2,
     "fr":  0.6,
+    "global_sigma": 1.006114,
     "w_validity":  4.0,
     "w_proximity":  0.5,
     "w_hard_bonus":  3.0,

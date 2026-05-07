@@ -1,0 +1,2 @@
+dataset,forecast_model,cf_model,validity_ratio,step_validity_auc,proximity,compactness
+etth1,gru,RLMCF,0.9416666666666667,0.9463541666666666,0.674351692199707,0.6807291666666667

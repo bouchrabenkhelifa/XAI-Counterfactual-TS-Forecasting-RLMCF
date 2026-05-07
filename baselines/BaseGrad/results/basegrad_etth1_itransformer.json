@@ -1,0 +1,87 @@
+{
+  "method": "BaseGrad",
+  "dataset": "etth1",
+  "model": "itransformer",
+  "n_samples": 20,
+  "runtime_seconds": 89.6654999256134,
+  "seeds": [
+    1,
+    9,
+    30
+  ],
+  "bounds_params": {
+    "rho": 0.2,
+    "fr": 0.5,
+    "direction": -1.0,
+    "global_sigma": null
+  },
+  "avg_metrics": {
+    "validity_ratio": {
+      "mean": 0.4781250059604645,
+      "std": 0.018072238191962242
+    },
+    "roughness_x": {
+      "mean": 0.048127155750989914,
+      "std": 4.5625303535246076e-09
+    },
+    "roughness_ratio": {
+      "mean": 3.03564715385437,
+      "std": 0.040790855884552
+    },
+    "temporal_consistency": {
+      "mean": 0.6696734428405762,
+      "std": 0.01054869219660759
+    },
+    "plausibility_if": {
+      "mean": 0.42479538917541504,
+      "std": 0.08439922332763672
+    },
+    "plausibility_ensemble": {
+      "mean": 0.4253826141357422,
+      "std": 0.06518595665693283
+    },
+    "stepwise_auc": {
+      "mean": 0.48854169249534607,
+      "std": 0.018072238191962242
+    },
+    "compactness": {
+      "mean": 0.010416666977107525,
+      "std": 0.0018042195588350296
+    },
+    "roughness_cf": {
+      "mean": 0.1460970789194107,
+      "std": 0.0019631485920399427
+    },
+    "plausibility_lof": {
+      "mean": 0.37751325964927673,
+      "std": 0.07261819392442703
+    },
+    "proximity_l2": {
+      "mean": 1.2091422080993652,
+      "std": 0.029842618852853775
+    },
+    "relative_reduction": {
+      "mean": 0.06893528252840042,
+      "std": 0.004775599576532841
+    },
+    "proximity_linf": {
+      "mean": 0.3496443033218384,
+      "std": 0.007024180144071579
+    },
+    "proximity_l1": {
+      "mean": 0.09728274494409561,
+      "std": 0.0031284454744309187
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.47383928298950195,
+      "std": 0.05710151791572571
+    }
+  },
+  "metadata": {
+    "python_version": "3.11.0",
+    "torch_version": "2.9.1+cpu",
+    "checkpoint_name": "chpt_etth1_96_48_itransformer_S.pth",
+    "checkpoint_md5": null,
+    "run_date": "2026-05-07T12:16:54.381726"
+  }
+}

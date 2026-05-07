@@ -1,0 +1,85 @@
+{
+  "method": "BaseNN",
+  "dataset": "etth1",
+  "model": "itransformer",
+  "n_samples": 5,
+  "runtime_seconds": 0.009995460510253906,
+  "seeds": [
+    1
+  ],
+  "bounds_params": {
+    "rho": 0.2,
+    "fr": 0.5,
+    "direction": -1.0,
+    "global_sigma": null
+  },
+  "avg_metrics": {
+    "plausibility_if": {
+      "mean": 0.40855836868286133,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 1.1544500589370728,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.5229166746139526,
+      "std": 0.0
+    },
+    "roughness_cf": {
+      "mean": 0.06760479509830475,
+      "std": 0.0
+    },
+    "roughness_ratio": {
+      "mean": 1.3649195432662964,
+      "std": 0.0
+    },
+    "compactness": {
+      "mean": 0.008333333767950535,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 3.9614930152893066,
+      "std": 0.0
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.3656380772590637,
+      "std": 0.0
+    },
+    "validity_ratio": {
+      "mean": 0.512499988079071,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.32349011301994324,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.5262011885643005,
+      "std": 0.0
+    },
+    "plausibility_ensemble": {
+      "mean": 0.45737922191619873,
+      "std": 0.0
+    },
+    "roughness_x": {
+      "mean": 0.04953023046255112,
+      "std": 0.0
+    },
+    "plausibility_lof": {
+      "mean": 0.5979412198066711,
+      "std": 0.0
+    },
+    "relative_reduction": {
+      "mean": 0.07036568969488144,
+      "std": 0.0
+    }
+  },
+  "metadata": {
+    "python_version": "3.11.0",
+    "torch_version": "2.9.1+cpu",
+    "checkpoint_name": "chpt_etth1_96_48_itransformer_S.pth",
+    "checkpoint_md5": null,
+    "run_date": "2026-05-07T11:00:13.396576"
+  }
+}

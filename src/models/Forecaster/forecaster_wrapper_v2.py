@@ -82,10 +82,9 @@ class ForecasterWrapperV2:
               f"seq={cfg.seq_len}  pred={cfg.pred_len}")
 
     # ─────────────────────────────────────────────────────────────────────────
-    @torch.no_grad()
-    def predict(self, x, x_mark, y_mark=None):
+    def _predict_internal(self, x, x_mark, y_mark=None):
         """
-        Full multivariate prediction.
+        Internal prediction logic (shared by predict and predict_with_grad).
         x      : (B, seq_len, n_features)
         x_mark : (B, seq_len, time_features)
         returns: (B, pred_len, n_features)
@@ -114,6 +113,33 @@ class ForecasterWrapperV2:
             output = output[0]
 
         return output[:, -self.cfg.pred_len:, :]   # (B, pred_len, n_features)
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    @torch.no_grad()
+    def predict(self, x, x_mark, y_mark=None):
+        """
+        Full multivariate prediction (no gradients).
+        x      : (B, seq_len, n_features)
+        x_mark : (B, seq_len, time_features)
+        returns: (B, pred_len, n_features)
+        """
+        return self._predict_internal(x, x_mark, y_mark)
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    def predict_with_grad(self, x, x_mark, y_mark=None):
+        """
+        Full multivariate prediction (WITH gradients for gradient-based baselines).
+        x      : (B, seq_len, n_features)
+        x_mark : (B, seq_len, time_features)
+        returns: (B, pred_len, n_features)
+        
+        Note: This method works around in-place operation issues in some models
+        by temporarily disabling anomaly detection.
+        """
+        # Désactiver temporairement la détection d'anomalies pour contourner
+        # les opérations in-place dans certains modèles (ex: iTransformer)
+        with torch.autograd.set_grad_enabled(True):
+            return self._predict_internal(x, x_mark, y_mark)
 
     # ─────────────────────────────────────────────────────────────────────────
     @torch.no_grad()
