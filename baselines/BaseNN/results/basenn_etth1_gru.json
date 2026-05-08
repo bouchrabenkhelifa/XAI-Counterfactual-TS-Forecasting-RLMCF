@@ -2,10 +2,12 @@
   "method": "BaseNN",
   "dataset": "etth1",
   "model": "gru",
-  "n_samples": 5,
-  "runtime_seconds": 0.01754474639892578,
+  "n_samples": 20,
+  "runtime_seconds": 0.09869074821472168,
   "seeds": [
-    1
+    1,
+    9,
+    30
   ],
   "bounds_params": {
     "rho": 0.2,
@@ -14,60 +16,60 @@
     "global_sigma": 1.006114
   },
   "avg_metrics": {
-    "plausibility_ocsvm": {
-      "mean": 0.7318476438522339,
-      "std": 0.0
+    "relative_reduction": {
+      "mean": 6.796783447265625,
+      "std": 6.743495646333031e-07
+    },
+    "plausibility_if": {
+      "mean": 0.33951064944267273,
+      "std": 0.01583614945411682
     },
     "validity_ratio": {
       "mean": 1.0,
       "std": 0.0
     },
-    "proximity_l2": {
-      "mean": 13.43847942352295,
-      "std": 0.0
-    },
-    "roughness_ratio": {
-      "mean": 1.2146931886672974,
-      "std": 0.0
-    },
     "temporal_consistency": {
-      "mean": 0.5616276264190674,
-      "std": 0.0
-    },
-    "plausibility_lof": {
-      "mean": 0.6737018823623657,
-      "std": 0.0
-    },
-    "plausibility_if": {
-      "mean": 0.4463893175125122,
-      "std": 0.0
-    },
-    "roughness_cf": {
-      "mean": 0.06016404554247856,
-      "std": 0.0
-    },
-    "relative_reduction": {
-      "mean": 15.454124450683594,
-      "std": 0.0
-    },
-    "plausibility_ensemble": {
-      "mean": 0.6173129677772522,
+      "mean": 0.5602970719337463,
       "std": 0.0
     },
     "proximity_l1": {
-      "mean": 1.3524342775344849,
+      "mean": 1.0039234161376953,
       "std": 0.0
     },
+    "roughness_cf": {
+      "mean": 0.07184188067913055,
+      "std": 0.0
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.4309106171131134,
+      "std": 0.006460561417043209
+    },
+    "compactness": {
+      "mean": 0.0015625000232830644,
+      "std": 0.0
+    },
+    "plausibility_ensemble": {
+      "mean": 0.32660284638404846,
+      "std": 0.005581945646554232
+    },
+    "plausibility_lof": {
+      "mean": 0.20938730239868164,
+      "std": 0.030225269496440887
+    },
     "proximity_linf": {
-      "mean": 1.8322254419326782,
+      "mean": 1.4638547897338867,
       "std": 0.0
     },
     "roughness_x": {
-      "mean": 0.04953023046255112,
+      "mean": 0.048127155750989914,
+      "std": 4.5625303535246076e-09
+    },
+    "roughness_ratio": {
+      "mean": 1.4927512407302856,
       "std": 0.0
     },
-    "compactness": {
-      "mean": 0.0,
+    "proximity_l2": {
+      "mean": 10.108345031738281,
       "std": 0.0
     },
     "stepwise_auc": {
@@ -80,6 +82,6 @@
     "torch_version": "2.9.1+cpu",
     "checkpoint_name": "chpt_etth1_96_48_gru_S.pth",
     "checkpoint_md5": "432a594a8cd925f5c2e93499717c4fb3",
-    "run_date": "2026-05-07T10:37:55.271963"
+    "run_date": "2026-05-08T02:55:15.550780"
   }
 }

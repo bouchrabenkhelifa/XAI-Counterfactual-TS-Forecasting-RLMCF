@@ -1,0 +1,2 @@
+dataset,random_seed,forecast_model,cf_model,horizon,desired_change,fraction_std,forecast_smape,forecast_mase,validity_ratio,proximity,compactness,step_validity_auc
+etth1,1,dlinear,ForecastCF,48,-0.1,1.0,0.0,0.0,0.7,2.4766277529570866,0.2276041666666667,0.6854166666666668

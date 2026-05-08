@@ -1,0 +1,87 @@
+{
+  "method": "BaseGrad",
+  "dataset": "etth1",
+  "model": "dlinear",
+  "n_samples": 20,
+  "runtime_seconds": 0.6681936581929525,
+  "seeds": [
+    1,
+    9,
+    30
+  ],
+  "bounds_params": {
+    "rho": 0.1,
+    "fr": 0.6,
+    "direction": -1.0,
+    "global_sigma": null
+  },
+  "avg_metrics": {
+    "proximity_linf": {
+      "mean": 0.09600045531988144,
+      "std": 0.005929709877818823
+    },
+    "plausibility_lof": {
+      "mean": 0.48386505246162415,
+      "std": 0.03470519930124283
+    },
+    "plausibility_ensemble": {
+      "mean": 0.5076563358306885,
+      "std": 0.033318497240543365
+    },
+    "validity_ratio": {
+      "mean": 0.9743055701255798,
+      "std": 0.003658188506960869
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.45365455746650696,
+      "std": 0.06683653593063354
+    },
+    "proximity_l2": {
+      "mean": 0.42813026905059814,
+      "std": 0.018167205154895782
+    },
+    "compactness": {
+      "mean": 0.013194444589316845,
+      "std": 0.0021049226634204388
+    },
+    "plausibility_if": {
+      "mean": 0.5854493975639343,
+      "std": 0.029614239931106567
+    },
+    "proximity_l1": {
+      "mean": 0.037095438688993454,
+      "std": 0.001463565626181662
+    },
+    "stepwise_auc": {
+      "mean": 0.9829861521720886,
+      "std": 0.002621461870148778
+    },
+    "roughness_cf": {
+      "mean": 0.07179504632949829,
+      "std": 0.0017799275228753686
+    },
+    "roughness_ratio": {
+      "mean": 1.491778016090393,
+      "std": 0.03698384389281273
+    },
+    "roughness_x": {
+      "mean": 0.048127155750989914,
+      "std": 4.5625303535246076e-09
+    },
+    "relative_reduction": {
+      "mean": 0.05113973096013069,
+      "std": 0.002178250579163432
+    },
+    "temporal_consistency": {
+      "mean": 0.8679447174072266,
+      "std": 0.00664558308199048
+    }
+  },
+  "metadata": {
+    "python_version": "3.11.0",
+    "torch_version": "2.9.1+cpu",
+    "checkpoint_name": "chpt_etth1_96_48_dlinear_S.pth",
+    "checkpoint_md5": "b2b5026bdf90771570ba18b9028e59b4",
+    "run_date": "2026-05-08T03:00:44.286270"
+  }
+}
