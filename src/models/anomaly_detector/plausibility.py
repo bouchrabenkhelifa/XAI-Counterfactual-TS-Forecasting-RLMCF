@@ -52,8 +52,8 @@ def series_to_windows(series: np.ndarray, window: int) -> np.ndarray:
 
 
 def fit_calibration(raw: np.ndarray,
-                    low_pct: float = 5.0,
-                    high_pct: float = 95.0):
+                    low_pct: float = 1.0,
+                    high_pct: float = 99.0):
    
     p_low  = float(np.percentile(raw, low_pct))
     p_high = float(np.percentile(raw, high_pct))
@@ -69,14 +69,16 @@ def apply_calibration(raw: np.ndarray,
     raw = raw.astype(np.float64)
 
     if abs(p_high - p_low) < 1e-12:
-        return torch.ones(len(raw), dtype=torch.float32).to(device)
+        return torch.zeros(len(raw), dtype=torch.float32).to(device)
 
     if invert:
-        # IForest / LOF : low raw = normal → high plausibility
-        p = 1.0 - (raw - p_low) / (p_high - p_low)
-    else:
-        # OC-SVM : high raw = normal (positive) → high plausibility
+        # IForest / LOF : low raw = normal → LOW plausibility score (more realistic)
+        # Normalize to [0, 1] where 0 = most realistic, 1 = most anomalous
         p = (raw - p_low) / (p_high - p_low)
+    else:
+        # OC-SVM : high raw = normal (positive) → LOW plausibility score (more realistic)
+        # Invert so that high raw → low score
+        p = 1.0 - (raw - p_low) / (p_high - p_low)
 
     p = np.clip(p, 0.0, 1.0).astype(np.float32)
     return torch.from_numpy(p).to(device)

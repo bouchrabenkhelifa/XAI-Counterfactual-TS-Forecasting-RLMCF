@@ -313,16 +313,42 @@ class RLMaskTrainer:
             np.concatenate(x_train_batches, axis=0) if x_train_batches else None
         )
 
-        fit_plaus = self.x_train_eval is not None
-        if fit_plaus:
-            print("[RL] Plausibility will be fitted from x_train OK")
+        # Charger détecteur pré-entraîné si disponible
+        # Détecter le dataset depuis le data_path
+        data_path = getattr(cfg_forecaster, "data_path", "")
+        
+        if "ETTh1" in data_path or "etth1" in data_path.lower():
+            dataset_name = "etth1"
+        elif "ETTh2" in data_path or "etth2" in data_path.lower():
+            dataset_name = "etth2"
+        elif "weather" in data_path.lower():
+            dataset_name = "weather"
         else:
-            print("[RL] No plausibility (no x_train)")
-
-        self.evaluator = CounterfactualEvaluator(
-            x_train=self.x_train_eval,
-            fit_plausibility=fit_plaus,
-        )
+            dataset_name = None
+        
+        if dataset_name:
+            plausibility_ckpt = f"assets/checkpoints/{dataset_name}_chpts/anomaly_detector/plausibility_{dataset_name}.pkl"
+        else:
+            plausibility_ckpt = None
+        
+        if plausibility_ckpt and os.path.exists(plausibility_ckpt):
+            print(f"[RL] Using pre-trained plausibility detector: {plausibility_ckpt}")
+            self.evaluator = CounterfactualEvaluator(
+                x_train=None,
+                fit_plausibility=False,
+                plausibility_checkpoint=plausibility_ckpt,
+            )
+        else:
+            fit_plaus = self.x_train_eval is not None
+            if fit_plaus:
+                print("[RL] Plausibility will be fitted from x_train OK")
+            else:
+                print("[RL] No plausibility (no x_train)")
+            
+            self.evaluator = CounterfactualEvaluator(
+                x_train=self.x_train_eval,
+                fit_plausibility=fit_plaus,
+            )
 
     # ─────────────────────────────────────────────────────────────────────────
     def _compute_bounds_np(self, x_ot, y_hat):

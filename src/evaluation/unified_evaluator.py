@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import numpy as np
 from scipy.stats import pearsonr
 from sklearn.ensemble import IsolationForest
@@ -234,12 +235,23 @@ class CounterfactualEvaluator:
         auc_mode: str = "proportion",
         contamination: float = 0.1,
         fit_plausibility: bool = True,
+        plausibility_checkpoint: Optional[str] = None,
     ):
         self.tol_compact = tol_compact
         self.auc_mode    = auc_mode
         self._plaus: Optional[PlausibilityEvaluator] = None
+        self._ensemble_plaus = None  # For pre-trained EnsemblePlausibility
 
-        if fit_plausibility and x_train is not None:
+        # Charger détecteur pré-entraîné si fourni
+        if plausibility_checkpoint is not None and os.path.exists(plausibility_checkpoint):
+            import pickle
+            print(f"[Plausibility] Loading pre-trained detector from {plausibility_checkpoint}")
+            with open(plausibility_checkpoint, "rb") as f:
+                ckpt = pickle.load(f)
+            # The checkpoint contains an EnsemblePlausibility object
+            self._ensemble_plaus = ckpt["ensemble"]
+            print(f"[Plausibility] Pre-trained detector loaded OK")
+        elif fit_plausibility and x_train is not None:
             self._plaus = PlausibilityEvaluator(contamination=contamination)
             self._plaus.fit(x_train)
 
@@ -292,7 +304,19 @@ class CounterfactualEvaluator:
         R["relative_reduction"] = {"mean": rr_m, "std": rr_s}
 
         # (h) Plausibility
-        if self._plaus is not None:
+        if self._ensemble_plaus is not None:
+            # Use pre-trained EnsemblePlausibility (torch-based)
+            import torch
+            X_cf_torch = torch.from_numpy(X_cf.astype(np.float32))
+            sc_dict = self._ensemble_plaus.score_all(X_cf_torch)
+            for k, v in sc_dict.items():
+                v_np = v.detach().cpu().numpy() if isinstance(v, torch.Tensor) else v
+                R[f"plausibility_{k}"] = {
+                    "mean": float(v_np.mean()),
+                    "std":  float(v_np.std()),
+                }
+        elif self._plaus is not None:
+            # Use sklearn-based PlausibilityEvaluator
             sc = self._plaus.score(X_cf)
             for k, v in sc.items():
                 R[f"plausibility_{k}"] = {

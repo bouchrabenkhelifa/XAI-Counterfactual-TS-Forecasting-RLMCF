@@ -21,12 +21,7 @@ if ROOT not in sys.path:
 
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
-from src.training.RL_trainers.trainer_last import RLMaskTrainer
-
-# Patch : remplace ForecasterWrapper par V2 dans le trainer
-import src.training.RL_trainers.trainer_last as _trainer_mod
-from src.models.Forecaster.forecaster_wrapper_v2 import ForecasterWrapperV2
-_trainer_mod.ForecasterWrapper = ForecasterWrapperV2
+from src.training.RL_trainers.trainer_last_v2 import RLMaskTrainer
 
 AE_CONFIG = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
 EVAL_BATCHES = 20

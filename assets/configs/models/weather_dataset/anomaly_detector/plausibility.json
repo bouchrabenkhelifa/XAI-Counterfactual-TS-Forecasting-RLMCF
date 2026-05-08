@@ -1,0 +1,25 @@
+{
+  "dataset_name": "Weather",
+  "data_path": "assets/datasets/weather.csv",
+  "target_col": "OT",
+  "results_dir": "assets/results/weather/anomaly_detector",
+  "checkpoint_dir": "assets/checkpoints/weather_chpts/anomaly_detector",
+  "checkpoint_name": "plausibility_weather.pkl",
+  "figures_dir": "assets/figures/weather/anomaly_detector",
+  "train_ratio": 0.7,
+  "val_ratio": 0.1,
+  "window": 96,
+  "iforest": {
+    "n_estimators": 500,
+    "random_state": 0
+  },
+  "lof": {
+    "n_neighbors": 50
+  },
+  "ocsvm": {
+    "kernel": "rbf",
+    "nu": 0.1,
+    "gamma": "scale",
+    "max_fit_samples": 5000
+  }
+}
