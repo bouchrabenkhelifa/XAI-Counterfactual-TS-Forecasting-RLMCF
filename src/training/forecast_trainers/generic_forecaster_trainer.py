@@ -196,12 +196,16 @@ class GenericForecasterTrainer:
             train_losses = []
             self.model.train()
 
-            for batch_x, batch_y, batch_x_mark, batch_y_mark in self.train_loader:
+            for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(self.train_loader):
                 self.optimizer.zero_grad()
                 loss = self._compute_loss(batch_x, batch_y, batch_x_mark, batch_y_mark)
                 loss.backward()
                 self.optimizer.step()
                 train_losses.append(loss.item())
+                
+                # Log progress every 10 batches
+                if (i + 1) % 10 == 0:
+                    print(f"  Epoch {epoch+1}/{self.configs.train_epochs} | Batch {i+1}/{len(self.train_loader)} | Loss: {loss.item():.5f}")
 
             train_loss = float(np.mean(train_losses))
             val_loss   = self.validate(self.val_loader)

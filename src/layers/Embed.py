@@ -48,7 +48,6 @@ class PositionalEmbedding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        print(x.shape, self.pe.shape)
         return self.pe[:, :x.size(1)]
 
 
@@ -129,7 +128,6 @@ class TimeFeatureEmbedding(nn.Module):
         self.embed = nn.Linear(d_inp, d_model, bias=False)
 
     def forward(self, x):
-        print(x.shape, self.embed.weight.shape)
         return self.embed(x)
 
 
