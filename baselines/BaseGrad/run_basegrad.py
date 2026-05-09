@@ -47,6 +47,7 @@ def run_basegrad_single_seed(dataset, model, seed, device, n_batches=20):
     cfg_ae_path = f"assets/configs/models/{dataset}_dataset/ae/tcn_ae.json"
     rl_config_path = get_rl_config_path(dataset, model)
     
+    print(f"  [DEBUG] Loading config from: {cfg_f_path}")
     cfg_f = load_config(cfg_f_path)
     cfg_ae = load_config(cfg_ae_path)
     bounds_params = load_bounds_params(rl_config_path)
