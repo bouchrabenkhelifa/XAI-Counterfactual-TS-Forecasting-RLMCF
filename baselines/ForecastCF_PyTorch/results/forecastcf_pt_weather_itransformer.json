@@ -1,0 +1,85 @@
+{
+  "method": "ForecastCF-PyTorch",
+  "dataset": "weather",
+  "model": "itransformer",
+  "n_samples": 20,
+  "runtime_seconds": 86.40386271476746,
+  "seeds": [
+    1
+  ],
+  "bounds_params": {
+    "rho": 0.1,
+    "fr": 0.6,
+    "direction": -1.0,
+    "global_sigma": null
+  },
+  "avg_metrics": {
+    "compactness": {
+      "mean": 0.01197916641831398,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 0.233995720744133,
+      "std": 0.0
+    },
+    "plausibility_lof": {
+      "mean": 0.8959183692932129,
+      "std": 0.0
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.12520529329776764,
+      "std": 0.0
+    },
+    "roughness_x": {
+      "mean": 0.018494369462132454,
+      "std": 0.0
+    },
+    "relative_reduction": {
+      "mean": 0.05681996792554855,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.6151384711265564,
+      "std": 0.0
+    },
+    "validity_ratio": {
+      "mean": 0.9098958373069763,
+      "std": 0.0
+    },
+    "plausibility_if": {
+      "mean": 0.6948591470718384,
+      "std": 0.0
+    },
+    "plausibility_ensemble": {
+      "mean": 0.5719943642616272,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.051652248948812485,
+      "std": 0.0
+    },
+    "roughness_ratio": {
+      "mean": 4.204359531402588,
+      "std": 0.0
+    },
+    "roughness_cf": {
+      "mean": 0.07775702327489853,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 0.6775470972061157,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.9114583134651184,
+      "std": 0.0
+    }
+  },
+  "metadata": {
+    "python_version": "3.12.13",
+    "torch_version": "2.10.0+cu128",
+    "checkpoint_name": "chpt_weather_96_96_itransformer_S.pth",
+    "checkpoint_md5": "d47b048957eaa1a96b566b07a1af989c",
+    "run_date": "2026-05-09T01:13:09.549953"
+  }
+}
