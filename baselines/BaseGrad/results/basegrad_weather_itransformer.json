@@ -1,0 +1,85 @@
+{
+  "method": "BaseGrad",
+  "dataset": "weather",
+  "model": "itransformer",
+  "n_samples": 20,
+  "runtime_seconds": 95.14055800437927,
+  "seeds": [
+    1
+  ],
+  "bounds_params": {
+    "rho": 0.1,
+    "fr": 0.6,
+    "direction": -1.0,
+    "global_sigma": null
+  },
+  "avg_metrics": {
+    "roughness_cf": {
+      "mean": 0.1692776381969452,
+      "std": 0.0
+    },
+    "compactness": {
+      "mean": 0.0052083334885537624,
+      "std": 0.0
+    },
+    "roughness_ratio": {
+      "mean": 9.152923583984375,
+      "std": 0.0
+    },
+    "relative_reduction": {
+      "mean": 0.11157252639532089,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.5485438704490662,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 1.4292044639587402,
+      "std": 0.0
+    },
+    "validity_ratio": {
+      "mean": 0.637499988079071,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 0.39606723189353943,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.6427083611488342,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.1163165494799614,
+      "std": 0.0
+    },
+    "plausibility_lof": {
+      "mean": 1.0,
+      "std": 0.0
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.6695371866226196,
+      "std": 0.0
+    },
+    "roughness_x": {
+      "mean": 0.018494369462132454,
+      "std": 0.0
+    },
+    "plausibility_ensemble": {
+      "mean": 0.8898457288742065,
+      "std": 0.0
+    },
+    "plausibility_if": {
+      "mean": 1.0,
+      "std": 0.0
+    }
+  },
+  "metadata": {
+    "python_version": "3.12.13",
+    "torch_version": "2.10.0+cu128",
+    "checkpoint_name": "chpt_weather_96_96_itransformer_S.pth",
+    "checkpoint_md5": "d47b048957eaa1a96b566b07a1af989c",
+    "run_date": "2026-05-09T01:06:31.044272"
+  }
+}

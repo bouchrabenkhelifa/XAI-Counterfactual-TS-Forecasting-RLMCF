@@ -41,7 +41,9 @@ def run_forecastcf_pt_single_seed(dataset, model, seed, device, n_batches=20):
     torch.manual_seed(seed)
     
     # Charger configs
-    cfg_f_path = f"assets/configs/models/{dataset}_dataset/forecasters/{model}/{dataset}_96_48_S.json"
+    # Weather dataset uses 96_96, others use 96_48
+    seq_config = "96_96" if dataset == "weather" else "96_48"
+    cfg_f_path = f"assets/configs/models/{dataset}_dataset/forecasters/{model}/{dataset}_{seq_config}_S.json"
     cfg_ae_path = f"assets/configs/models/{dataset}_dataset/ae/tcn_ae.json"
     rl_config_path = get_rl_config_path(dataset, model)
     
@@ -184,7 +186,9 @@ def main():
     
     # Vérifier cache
     output_path = os.path.join(args.output_dir, f"forecastcf_pt_{args.dataset}_{args.model}.json")
-    checkpoint_path = f"assets/checkpoints/{args.dataset}_chpts/forecaster/chpt_{args.dataset}_96_48_{args.model}_S.pth"
+    # Weather dataset uses 96_96, others use 96_48
+    seq_config = "96_96" if args.dataset == "weather" else "96_48"
+    checkpoint_path = f"assets/checkpoints/{args.dataset}_chpts/forecaster/chpt_{args.dataset}_{seq_config}_{args.model}_S.pth"
     
     if check_cache(output_path, checkpoint_path):
         print(f"[Cache hit] {output_path}")

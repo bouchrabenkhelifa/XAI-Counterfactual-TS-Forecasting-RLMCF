@@ -35,7 +35,9 @@ def visualize_single_cf(dataset, model, sample_idx=0, seed=1):
     device = torch.device("cpu")
     
     # Charger configs
-    cfg_f_path = f"assets/configs/models/{dataset}_dataset/forecasters/{model}/{dataset}_96_48_S.json"
+    # Weather dataset uses 96_96, others use 96_48
+    seq_config = "96_96" if dataset == "weather" else "96_48"
+    cfg_f_path = f"assets/configs/models/{dataset}_dataset/forecasters/{model}/{dataset}_{seq_config}_S.json"
     cfg_ae_path = f"assets/configs/models/{dataset}_dataset/ae/tcn_ae.json"
     rl_config_path = get_rl_config_path(dataset, model)
     
