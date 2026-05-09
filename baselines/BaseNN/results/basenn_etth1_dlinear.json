@@ -3,11 +3,9 @@
   "dataset": "etth1",
   "model": "dlinear",
   "n_samples": 20,
-  "runtime_seconds": 0.04651721318562826,
+  "runtime_seconds": 0.04752516746520996,
   "seeds": [
-    1,
-    9,
-    30
+    1
   ],
   "bounds_params": {
     "rho": 0.1,
@@ -16,64 +14,64 @@
     "global_sigma": null
   },
   "avg_metrics": {
-    "proximity_l1": {
-      "mean": 0.25350677967071533,
-      "std": 0.0
-    },
-    "plausibility_lof": {
-      "mean": 0.1960744857788086,
-      "std": 0.012498543597757816
-    },
-    "proximity_l2": {
-      "mean": 2.9394452571868896,
-      "std": 0.0
-    },
-    "validity_ratio": {
-      "mean": 0.6499999761581421,
+    "plausibility_ocsvm": {
+      "mean": 0.1764335185289383,
       "std": 0.0
     },
     "temporal_consistency": {
       "mean": 0.5595622062683105,
       "std": 0.0
     },
+    "validity_ratio": {
+      "mean": 0.6499999761581421,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.25350677967071533,
+      "std": 0.0
+    },
+    "roughness_ratio": {
+      "mean": 1.451676845550537,
+      "std": 0.0
+    },
+    "plausibility_lof": {
+      "mean": 0.2150060385465622,
+      "std": 0.0
+    },
     "plausibility_ensemble": {
-      "mean": 0.20119374990463257,
-      "std": 0.0038378245662897825
-    },
-    "roughness_cf": {
-      "mean": 0.06986508518457413,
+      "mean": 0.19221416115760803,
       "std": 0.0
-    },
-    "plausibility_ocsvm": {
-      "mean": 0.1811068058013916,
-      "std": 0.009744597598910332
-    },
-    "stepwise_auc": {
-      "mean": 0.6604166626930237,
-      "std": 0.0
-    },
-    "roughness_x": {
-      "mean": 0.048127155750989914,
-      "std": 4.5625303535246076e-09
-    },
-    "relative_reduction": {
-      "mean": 0.07306480407714844,
-      "std": 9.125060707049215e-09
-    },
-    "plausibility_if": {
-      "mean": 0.2263999581336975,
-      "std": 0.017539773136377335
     },
     "compactness": {
       "mean": 0.010937499813735485,
       "std": 0.0
     },
-    "proximity_linf": {
-      "mean": 0.6523953676223755,
+    "stepwise_auc": {
+      "mean": 0.6604166626930237,
       "std": 0.0
     },
-    "roughness_ratio": {
-      "mean": 1.451676845550537,
+    "roughness_cf": {
+      "mean": 0.06986508518457413,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 2.9394452571868896,
+      "std": 0.0
+    },
+    "roughness_x": {
+      "mean": 0.048127152025699615,
+      "std": 0.0
+    },
+    "plausibility_if": {
+      "mean": 0.18520289659500122,
+      "std": 0.0
+    },
+    "relative_reduction": {
+      "mean": 0.07306481152772903,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 0.6523953676223755,
       "std": 0.0
     }
   },
@@ -82,6 +80,6 @@
     "torch_version": "2.9.1+cpu",
     "checkpoint_name": "chpt_etth1_96_48_dlinear_S.pth",
     "checkpoint_md5": "b2b5026bdf90771570ba18b9028e59b4",
-    "run_date": "2026-05-08T02:59:03.096121"
+    "run_date": "2026-05-09T00:59:18.328109"
   }
 }

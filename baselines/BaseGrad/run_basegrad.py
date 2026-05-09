@@ -134,9 +134,10 @@ def run_basegrad_single_seed(dataset, model, seed, device, n_batches=20):
         y_cf=Y_cf,
         alphas=alphas,
         betas=betas,
-        x_train=X_train,
+        x_train=None,  # Not used - pre-trained detector will be loaded
         method_name="BaseGrad",
-        seed=seed
+        seed=seed,
+        dataset=dataset  # Pass dataset to load correct detector
     )
     
     # Générer figure de visualisation (premier sample)

@@ -9,7 +9,7 @@ from baselines.ForecastCF.src.forecastcf_evaluator import evaluate_forecastcf_me
 
 
 def run_evaluation(x_orig, x_cf, y_hat, y_cf, alphas, betas,
-                   x_train, method_name, seed):
+                   x_train, method_name, seed, dataset="etth1"):
     """
     Lance l'évaluation complète des counterfactuals.
     
@@ -32,11 +32,13 @@ def run_evaluation(x_orig, x_cf, y_hat, y_cf, alphas, betas,
     betas : np.ndarray
         Bornes supérieures, shape [N, H]
     x_train : np.ndarray or None
-        Train set pour plausibilité, shape [M, BH, 1]
+        Train set pour plausibilité, shape [M, BH, 1] (DEPRECATED - not used)
     method_name : str
         Nom de la méthode (pour affichage)
     seed : int
         Seed utilisée (pour affichage)
+    dataset : str
+        Dataset name (etth1, etth2, weather) for loading pre-trained detector
     
     Returns
     -------
@@ -44,10 +46,13 @@ def run_evaluation(x_orig, x_cf, y_hat, y_cf, alphas, betas,
         Dictionnaire avec clés "extended_metrics" et "forecastcf_metrics"
     """
     # Évaluation étendue (8 métriques)
-    fit_plausibility = x_train is not None
+    # IMPORTANT: Use pre-trained plausibility detector
+    plausibility_checkpoint = f"assets/checkpoints/{dataset}_chpts/anomaly_detector/plausibility_{dataset}.pkl"
+    
     evaluator = CounterfactualEvaluator(
-        x_train=x_train,
-        fit_plausibility=fit_plausibility
+        x_train=None,  # Not used when checkpoint is provided
+        fit_plausibility=False,
+        plausibility_checkpoint=plausibility_checkpoint
     )
     
     extended_metrics = evaluator.evaluate(
