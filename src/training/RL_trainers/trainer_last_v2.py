@@ -400,7 +400,7 @@ class RLMaskTrainer:
             self.agent.train()
             stats = {k: [] for k in self.history}
 
-            for batch in self.train_loader:
+            for i, batch in enumerate(self.train_loader):
                 ep = run_episode_train(
                     batch=batch,
                     ae_arch=self.ae_arch,
@@ -425,6 +425,12 @@ class RLMaskTrainer:
                 stats["delta_mean"].append(rs["delta_mean"])
                 stats["success_rate"].append(rs["success"])
                 stats["n_valid"].append(ep["n_valid"])
+                
+                # Log progress every 20 batches
+                if (i + 1) % 20 == 0:
+                    current_reward = float(np.mean(stats["reward_total"])) if stats["reward_total"] else 0.0
+                    current_sr = float(np.mean(stats["success_rate"])) * 100 if stats["success_rate"] else 0.0
+                    print(f"  Epoch {epoch}/{self.cfg_rl.epochs} | Batch {i+1} | R={current_reward:.4f} | SR={current_sr:.1f}%")
 
                 if not use_rl:
                     continue
