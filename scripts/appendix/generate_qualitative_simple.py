@@ -34,7 +34,7 @@ def plot_qualitative_examples(dataset="etth2", n_examples=3):
     # Charger config
     seq_config = "96_96" if dataset == "weather" else "96_48"
     model = "itransformer" if dataset == "etth2" else "timesnet"
-    cfg_f_path = f"assets/configs/models/{dataset}_dataset/forecasters/{model}/{dataset}_{seq_config}_S.json"
+    cfg_f_path = f"assets/configs/{dataset}_dataset/forecasters/{model}/{dataset}_{seq_config}_S.json"
     
     cfg_f = load_config(cfg_f_path)
     

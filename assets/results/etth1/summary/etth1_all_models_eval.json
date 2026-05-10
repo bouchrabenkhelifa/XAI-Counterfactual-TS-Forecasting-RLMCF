@@ -5,7 +5,7 @@
       "std": 0.0
     },
     "stepwise_auc": {
-      "mean": 0.98125,
+      "mean": 0.9817708333333333,
       "std": 0.0
     },
     "proximity_l2": {
@@ -63,11 +63,11 @@
   },
   "PatchTST": {
     "validity_ratio": {
-      "mean": 0.9739583333333334,
+      "mean": 0.975,
       "std": 0.0
     },
     "stepwise_auc": {
-      "mean": 0.9776041666666666,
+      "mean": 0.9786458333333333,
       "std": 0.0
     },
     "proximity_l2": {
@@ -187,11 +187,11 @@
   },
   "GRU": {
     "validity_ratio": {
-      "mean": 0.06770833333333333,
+      "mean": 0.06875,
       "std": 0.0
     },
     "stepwise_auc": {
-      "mean": 0.078125,
+      "mean": 0.07916666666666666,
       "std": 0.0
     },
     "proximity_l2": {
@@ -249,11 +249,11 @@
   },
   "DLinear": {
     "validity_ratio": {
-      "mean": 0.925,
+      "mean": 0.9260416666666667,
       "std": 0.0
     },
     "stepwise_auc": {
-      "mean": 0.9291666666666667,
+      "mean": 0.9302083333333333,
       "std": 0.0
     },
     "proximity_l2": {

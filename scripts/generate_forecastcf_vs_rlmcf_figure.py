@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 """
-Generate ForecastCF vs RL-MCF Comparison Figure
-================================================
-Compare ForecastCF baseline with RL-MCF on the same sample.
-
-Figure shows:
-- x_original : blue solid (lookback + forecast continuous)
-- ForecastCF : orange dashed
-- RL-MCF     : red dashed
+Generate ForecastCF vs RL-MCF Comparison Figure - Batch 15
+===========================================================
+Compare ForecastCF baseline with RL-MCF on batch 15, sample 0.
 
 Usage:
-    python scripts/generate_forecastcf_vs_rlmcf_figure.py
+    python scripts/generate_forecastcf_vs_rlmcf_figure_batch15.py
 """
 
 import os
@@ -34,12 +29,11 @@ from src.training.RL_trainers.trainer_last import build_temporal_mask
 
 # Import ForecastCF baseline
 from baselines.ForecastCF_PyTorch.forecastcf_pt import ForecastCFPyTorch
-from baselines.common.bounds import compute_bounds_np, load_bounds_params, get_rl_config_path
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-CFG_F       = "assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json"
-CFG_AE      = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
-CFG_RLMCF   = "assets/configs/models/etth1_dataset/RL_ablations/config_itransformer_best.json"
+CFG_F       = "assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json"
+CFG_AE      = "assets/configs/etth1_dataset/ae/tcn_ae.json"
+CFG_RLMCF   = "assets/configs/etth1_dataset/RL_ablations/config_itransformer_best.json"
 CKPT_RLMCF  = "assets/checkpoints/etth1_chpts/RL/itransformer/rl_cf_itransformer_best_etth1_agent_best.pt"
 OUT_PATH    = "assets/figures/comparison/forecastcf_vs_rlmcf_itransformer.png"
 
@@ -59,16 +53,14 @@ def make_rlmcf(x_ot, bx, bx_mark, ae, forecaster, agent, lk, rk, device):
 
 def make_forecastcf(x_ot, bx, bx_mark, forecaster, alpha_np, beta_np, device):
     """ForecastCF: gradient-based optimization with SPSA."""
-    # Initialize ForecastCF
     forecastcf = ForecastCFPyTorch(
         forecaster=forecaster,
         device=device,
-        max_iter=300,  # Same as trained
+        max_iter=300,
         lr=0.01,
         pred_margin_weight=0.5
     )
     
-    # Generate CF
     x_cf_np, y_cf_np = forecastcf.transform_sample(
         x_np=x_ot.cpu().numpy(),
         alpha_np=alpha_np,
@@ -140,95 +132,30 @@ def main():
     lk = cfg_rlmcf.mask_last_k   # 12
     rk = cfg_rlmcf.mask_ramp_k   # 4
     
-    # ── Scan for sample: RL-MCF high, ForecastCF lower ──────────────────────
+    # ── Load batch 42, sample 0 ───────────────────────────────────────────────
     test_dataset, test_loader = data_provider(cfg_f, "test")
-    print("\nScanning for sample: RL-MCF high (>90%), ForecastCF lower (30-50%)...")
-    
-    # Get scaler for denormalization
     scaler = test_dataset.scaler
     
-    candidates = []  # Store candidates: (gap, vr_rm, vr_fc, batch_idx, sample_idx, data...)
-    
+    print("\nLoading batch 42, sample 0...")
     for i, batch in enumerate(test_loader):
-        if i >= 50:  # Scan batches
+        if i == 42:
+            bx, _, bx_mark, _ = batch
+            bx      = bx.float().to(device)
+            bx_mark = bx_mark.float().to(device)
+            x_ot    = bx[:, :, -1:]
+            
+            x_ot = x_ot[0:1]
+            bx = bx[0:1]
+            bx_mark = bx_mark[0:1]
+            
+            with torch.no_grad():
+                y_hat = forecaster.predict_ot(bx, bx_mark)
+                alpha, beta, _ = reward_fn.compute_bounds(y_hat, x_ot=x_ot)
+                alpha_np = alpha[0].cpu().numpy()
+                beta_np = beta[0].cpu().numpy()
+            
+            print("✓ Loaded batch 42, sample 0")
             break
-            
-        bx, _, bx_mark, _ = batch
-        bx      = bx.float().to(device)
-        bx_mark = bx_mark.float().to(device)
-        x_ot    = bx[:, :, -1:]
-        
-        with torch.no_grad():
-            # RL-MCF validity
-            z     = ae.encode(x_ot)
-            y_hat = forecaster.predict_ot(bx, bx_mark)
-            z_cf_rm, _, _ = agent_rlmcf.act_deterministic(z, y_hat)
-            x_prop_rm = ae.decode(z_cf_rm)
-            mask = build_temporal_mask(x_ot.shape[0], x_ot.shape[1], x_ot.shape[2], lk, rk, device)
-            x_cf_rm = x_ot + mask * (x_prop_rm - x_ot)
-            y_cf_rm = forecaster.predict_from_ot(x_ot=x_cf_rm, x_full=bx, x_mark=bx_mark)
-            
-            alpha, beta, _ = reward_fn.compute_bounds(y_hat, x_ot=x_ot)
-            vr_rm = ((y_cf_rm[:, :, 0] >= alpha) & (y_cf_rm[:, :, 0] <= beta)).float().mean(dim=1)
-            
-            # For each sample, also compute ForecastCF validity
-            for j in range(len(vr_rm)):
-                vr_rm_val = float(vr_rm[j])
-                
-                # Only consider samples where RL-MCF has high validity
-                if vr_rm_val >= 0.90:
-                    # Generate ForecastCF for this sample
-                    x_ot_j = x_ot[j:j+1]
-                    bx_j = bx[j:j+1]
-                    bx_mark_j = bx_mark[j:j+1]
-                    alpha_j = alpha[j].cpu().numpy()
-                    beta_j = beta[j].cpu().numpy()
-                    
-                    # ForecastCF
-                    forecastcf = ForecastCFPyTorch(
-                        forecaster=forecaster,
-                        device=device,
-                        max_iter=300,
-                        lr=0.01,
-                        pred_margin_weight=0.5
-                    )
-                    x_cf_fc_np, y_cf_fc_np = forecastcf.transform_sample(
-                        x_np=x_ot_j.cpu().numpy(),
-                        alpha_np=alpha_j,
-                        beta_np=beta_j,
-                        x_full_t=bx_j,
-                        x_mark_t=bx_mark_j
-                    )
-                    vr_fc_val = float(((y_cf_fc_np[0, :, 0] >= alpha_j) & (y_cf_fc_np[0, :, 0] <= beta_j)).mean())
-                    
-                    # We want: RL-MCF high (>90%), ForecastCF medium (40-60%)
-                    if 0.40 <= vr_fc_val <= 0.60:
-                        gap = vr_rm_val - vr_fc_val
-                        candidates.append((
-                            abs(vr_fc_val - 0.50),  # Distance from 50% (smaller is better)
-                            vr_rm_val,
-                            vr_fc_val,
-                            i,
-                            j,
-                            x_ot_j.clone(),
-                            bx_j.clone(),
-                            bx_mark_j.clone(),
-                            alpha_j,
-                            beta_j,
-                        ))
-                        print(f"  batch {i:3d}  sample {j}  RL-MCF={vr_rm_val:.2f}  ForecastCF={vr_fc_val:.2f}  gap={gap:.2f}")
-    
-    # Select sample with ForecastCF closest to 50%
-    if len(candidates) == 0:
-        raise ValueError("No suitable samples found with RL-MCF high and ForecastCF ~50%")
-    
-    # Sort by distance from 50% (ascending) and pick the closest one
-    candidates.sort(key=lambda x: x[0])
-    selected = candidates[0]
-    
-    dist_from_50, vr_rm_best, vr_fc_best, batch_idx, sample_idx, x_ot, bx, bx_mark, alpha_np, beta_np = selected
-    print(f"\nSelected: batch {batch_idx}, sample {sample_idx}")
-    print(f"  RL-MCF VR = {vr_rm_best:.3f}  |  ForecastCF VR = {vr_fc_best:.3f}  |  Gap = {vr_rm_best - vr_fc_best:.3f}")
     
     # ── Generate CFs ──────────────────────────────────────────────────────────
     print("Generating counterfactuals...")

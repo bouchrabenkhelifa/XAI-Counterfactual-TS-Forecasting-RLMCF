@@ -42,9 +42,9 @@ device = 'cpu'
 # ============================================================================
 print("\nLoading RL trainer...")
 
-ae_config_path = f'assets/configs/models/{dataset}_dataset/ae/tcn_ae.json'
-rl_config_path = f'assets/configs/models/{dataset}_dataset/RL_ablations/config_v2.json'
-f_config_path = f'assets/configs/models/{dataset}_dataset/forecasters/itransformer/{dataset}_96_48_S.json'
+ae_config_path = f'assets/configs/{dataset}_dataset/ae/tcn_ae.json'
+rl_config_path = f'assets/configs/{dataset}_dataset/RL_ablations/config_v2.json'
+f_config_path = f'assets/configs/{dataset}_dataset/forecasters/itransformer/{dataset}_96_48_S.json'
 
 cfg_rl = load_config(rl_config_path)
 cfg_f = load_config(f_config_path)

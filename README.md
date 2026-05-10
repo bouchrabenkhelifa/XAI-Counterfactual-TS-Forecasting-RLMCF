@@ -1,18 +1,16 @@
 # Counterfactual Explanations for Time Series Forecasting via Reinforcement Learning
 
-This work proposes an **agnostic XAI framework** to generate **counterfactual explanations** for time series forecasting models using **reinforcement learning (RL)** in latent space.
-
-> See [STRUCTURE.md](STRUCTURE.md) for the full project structure, dataset details, and usage guide.
+An **agnostic XAI framework** that generates **counterfactual explanations** for time series forecasting models using **reinforcement learning** in latent space.
 
 ---
 
 ## Motivation
 
-Deep learning models, especially Transformers, have significantly improved time series forecasting performance in high-stakes domains such as healthcare, finance, and energy. However, their black-box nature limits interpretability, which is critical in real-world decision-making.
+Deep learning forecasting models achieve strong performance but remain black boxes. Existing XAI methods explain *why* a prediction was made, but not *how to change it*. Counterfactual explanations answer "what-if" questions and provide actionable insights.
 
-Existing XAI methods mainly focus on feature attribution — explaining *why* a prediction was made, but not *how to change it*. As a result, they lack actionability.
+Most counterfactual methods target classification. For time series forecasting, the main prior work (ForecastCF) relies on per-instance gradient optimization — computationally expensive and prone to temporally inconsistent perturbations.
 
-Counterfactual explanations address this by answering "what-if" questions, providing actionable insights. However, most existing work focuses on **classification tasks**, while counterfactual generation for **time series forecasting** remains largely underexplored. The main existing approach, ForecastCF, relies on instance-specific gradient-based optimization that is computationally expensive and may produce temporally inconsistent perturbations.
+We propose a **global RL policy** that generalizes across all instances: once trained, counterfactuals are generated in a **single forward pass**.
 
 ---
 
@@ -20,79 +18,127 @@ Counterfactual explanations address this by answering "what-if" questions, provi
 
 ![Architecture](assets/figures/Architecture.png)
 
-The pipeline consists of three **frozen** components and one **trainable** agent:
+The pipeline has three **frozen** components and one **trainable** agent:
 
-1. Input time series `X` is encoded into latent representation `z` via a pre-trained **Temporal Convolutional Autoencoder (TCN-AE)**
-2. **Actor-Critic RL agent** perturbs `z → z_cf` in latent space
-3. Decoder reconstructs counterfactual time series `X_cf = ψ(z_cf)`
-4. A **temporal mask** `m` is applied to localize perturbations to the most recent timesteps: `X_cf = X + m ⊙ (X̃ − X)`
-5. Forecasting model evaluates `Ŷ_cf = f(X_cf)`
-6. Reward is computed based on **validity** and **proximity**
+1. Input `X` is encoded into latent `z` via a pre-trained **TCN Autoencoder**
+2. **Actor-Critic agent** perturbs `z → z_cf` in latent space
+3. Decoder reconstructs `X_cf = ψ(z_cf)`
+4. A **temporal mask** `m` localizes perturbations to the most recent timesteps: `X_cf = X + m ⊙ (X̃ − X)`
+5. Frozen forecaster evaluates `Ŷ_cf = f(X_cf)`
+6. Reward is computed from **validity** and **proximity**
 
 ---
 
-## Contributions
+## Key Contributions
 
-### 1. RL Framework for Counterfactual Forecasting
+**Forecast-anchored validity bounds** — bounds are anchored on the original forecast `ŷ`, not on the input median:
+```
+β = ŷ − ρ·σx,   α = β − fr·σx
+```
+This guarantees `ŷ ∉ [α, β]` by construction, ensuring a non-trivial objective.
 
-We introduce the first reinforcement learning framework for counterfactual explanations in time series forecasting. An Actor-Critic agent learns a **global policy** that generalizes across all instances — once trained, counterfactuals are generated in a **single forward pass**, unlike per-instance gradient optimization.
+**Latent-space optimization** — the agent operates in the AE latent space, implicitly constraining perturbations to the data manifold without an explicit plausibility term.
 
-### 2. Forecast-Anchored Validity Bounds
+**Temporal masking** — a ramp mask enforces sparse, localized perturbations on the `k` most recent timesteps, improving compactness and temporal consistency.
 
-Unlike ForecastCF which centers bounds on `median(x)`, we anchor bounds directly on the original forecast `ŷ`:
+**Model-agnostic** — compatible with any frozen PyTorch forecaster. Validated on five architectures: iTransformer, PatchTST, TimesNet, GRU, DLinear.
+
+---
+
+## Project Structure
 
 ```
-β = ŷ − ρ · σx,   α = β − fr · σx
+counterfactual-forecasting-rl/
+│
+├── assets/
+│   ├── checkpoints/          # Saved model weights
+│   │   ├── etth1_chpts/      #   ae/, anomaly_detector/, forecaster/, RL/
+│   │   ├── etth2_chpts/
+│   │   └── weather_chpts/
+│   ├── configs/              # JSON configs per dataset
+│   │   ├── etth1_dataset/    #   ae/, anomaly_detector/, forecasters/, RL/, RL_ablations/
+│   │   ├── etth2_dataset/
+│   │   └── weather_dataset/
+│   ├── datasets/             # ETTh1.csv, ETTh2.csv, weather.csv
+│   ├── figures/              # Generated plots
+│   └── results/              # Evaluation JSONs and summaries
+│
+├── baselines/
+│   ├── ForecastCF/           # Original TF baseline (reference)
+│   ├── ForecastCF_PyTorch/   # Our PyTorch re-implementation
+│   ├── BaseGrad/             # Gradient-based baseline
+│   ├── BaseNN/               # Neural network baseline
+│   └── common/               # Shared evaluation utilities
+│
+├── scripts/
+│   ├── evals/                # eval_etth1.py, eval_etth2.py, eval_weather.py
+│   ├── pipelines/            # pipeline_etth1.py, pipeline_etth2.py, pipeline_weather.py
+│   ├── analysis/             # CF visualization scripts
+│   └── appendix/             # Sensitivity and ablation figures
+│
+└── src/
+    ├── data_provider/        # Dataset loaders
+    ├── evaluation/           # unified_evaluator.py
+    ├── experiments/          # Entry points: rl_cf/, forecasting/, autoencoder/, ...
+    ├── layers/               # Transformer layers
+    ├── models/
+    │   ├── Forecaster/       # iTransformer, PatchTST, TimesNet, GRU, DLinear
+    │   ├── autoencoder/      # TCN-AE
+    │   ├── RL/               # Actor-Critic agent, reward function
+    │   └── anomaly_detector/
+    ├── training/
+    │   ├── RL_trainers/      # trainer_main.py (main), trainer_last.py, trainer_wo_mask.py
+    │   ├── forecast_trainers/
+    │   ├── ae_trainers/
+    │   └── ad_trainers/
+    └── utils/
 ```
 
-This guarantees by construction that `ŷ ∉ [α, β]`, ensuring a non-trivial counterfactual objective.
+---
 
-### 3. Latent-Space Optimization
+## Quick Start
 
-Instead of modifying raw time series directly, the agent operates in the **latent space** of a pre-trained autoencoder:
+See [ENV_SETUP.md](ENV_SETUP.md) for full installation and usage instructions.
 
-```
-a ~ π_θ(s),   z_cf = clip(z + η · a, −1, 1)
-```
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+export PYTHONPATH=.   # or: $env:PYTHONPATH = "." on Windows PowerShell
 
-This implicitly constrains perturbations to the data manifold, enforcing **plausibility** without an explicit plausibility term in the reward.
+# 2. Run full pipeline (train + eval)
+python scripts/pipelines/pipeline_etth1.py
 
-### 4. Temporal Masking Mechanism
-
-A ramp-based temporal mask encourages **sparse and localized** perturbations, modifying only the `k` most recent timesteps:
-
-```
-mt = 0               if t < L − k − r
-     (t−(L−k−r))/r  if L − k − r ≤ t < L − k
-     1               if t ≥ L − k
+# 3. Evaluate only (checkpoints already trained)
+python scripts/evals/eval_etth1.py
 ```
 
-This directly improves compactness and temporal consistency.
+---
 
-### 5. Reward Function
+## Datasets
 
-The reward combines validity and proximity:
+| Dataset | Series | Train | Test | Freq |
+|---------|--------|-------|------|------|
+| ETTh1   | OT (oil temperature) | 8497 | 2833 | Hourly |
+| ETTh2   | OT (oil temperature) | 8497 | 2833 | Hourly |
+| Weather | T (°C) | 36696 | 10444 | 10-min |
 
-```
-R = wv · Validity + wp · Proximity
-```
+---
 
-- **Validity**: `r_valid = (1/H) Σ exp(−2 · dt / (βt − αt))` — penalizes forecasts outside target bounds
-- **Proximity**: `r_prox = exp(−(1/L) Σ |x_cf_t − x_t|)` — penalizes large input perturbations
+## Evaluation Metrics
 
-### 6. Model-Agnostic Design
-
-The framework is compatible with any black-box forecasting architecture. We validate across four representative model families:
-
-- **iTransformer** (Transformer-based)
-- **PatchTST** (Patch-based Transformer)
-- **TimesNet** (CNN-based)
-- **GRU** (Recurrent)
-- **DLinear** (Linear decomposition)
+| Metric | Description |
+|--------|-------------|
+| Validity Ratio ↑ | Fraction of CF forecasts inside target band `[α, β]` |
+| Stepwise AUC ↑ | Area under cumulative validity curve |
+| Proximity L2 ↓ | Mean L2 distance between `X` and `X_cf` |
+| Compactness ↑ | Fraction of unchanged input timesteps |
+| Roughness Ratio ↓ | Smoothness of CF vs original |
+| Temporal Consistency ↑ | Pearson correlation between `X` and `X_cf` |
+| Plausibility ↓ | Ensemble anomaly score (IForest + LOF + OC-SVM) |
 
 ---
 
 ## References
 
 - Wang et al., *Counterfactual Explanations for Time Series Forecasting*, ICDM 2023
-- Li et al., *Counterfactual Explanations for Time Series Data via Reinforcement Learning*, 2026
+- Li et al., *iTransformer: Inverted Transformers Are Effective for Time Series Forecasting*, ICLR 2024

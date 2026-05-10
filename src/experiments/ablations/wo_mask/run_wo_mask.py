@@ -131,15 +131,15 @@ def main():
     parser = argparse.ArgumentParser(description="Ablation — Without Temporal Mask")
     parser.add_argument(
         "--config",
-        default="assets/configs/models/etth1_dataset/RL_ablations/wo_mask.json",
+        default="assets/configs/etth1_dataset/RL_ablations/wo_mask.json",
     )
     parser.add_argument(
         "--forecast_config",
-        default="assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
+        default="assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
     )
     parser.add_argument(
         "--ae_config",
-        default="assets/configs/models/etth1_dataset/ae/tcn_ae.json",
+        default="assets/configs/etth1_dataset/ae/tcn_ae.json",
     )
     parser.add_argument("--eval_batches", type=int, default=20)
     parser.add_argument("--eval_only", action="store_true")

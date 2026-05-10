@@ -4,7 +4,7 @@
     "std": 0.0
   },
   "stepwise_auc": {
-    "mean": 0.98125,
+    "mean": 0.9817708333333333,
     "std": 0.0
   },
   "proximity_l2": {

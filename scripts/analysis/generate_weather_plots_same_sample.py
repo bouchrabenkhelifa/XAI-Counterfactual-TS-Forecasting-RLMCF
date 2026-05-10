@@ -48,11 +48,11 @@ def build_model(configs, device):
 # Model configurations (only models with seq_len=96)
 MODELS = {
     "iTransformer": {
-        "config": "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_48_S.json",
+        "config": "assets/configs/weather_dataset/forecasters/itransformer/weather_96_48_S.json",
         "checkpoint": "assets/checkpoints/weather_chpts/forecaster/chpt_weather_96_96_itransformer_S.pth",
     },
     "DLinear": {
-        "config": "assets/configs/models/weather_dataset/forecasters/dlinear/weather_96_96_S.json",
+        "config": "assets/configs/weather_dataset/forecasters/dlinear/weather_96_96_S.json",
         "checkpoint": "assets/checkpoints/weather_chpts/forecaster/chpt_weather_96_96_dlinear_S.pth",
     },
 }

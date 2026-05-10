@@ -9,9 +9,9 @@ au lieu de la politique apprise par le RL.
 
 Usage (depuis la racine du projet) :
     python baselines/RLP/run_rlp.py \
-        --forecast_config assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json \
-        --ae_config       assets/configs/models/etth1_dataset/ae/tcn_ae.json \
-        --rl_config       assets/configs/models/etth1_dataset/RL_ablations/config_final.json \
+        --forecast_config assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json \
+        --ae_config       assets/configs/etth1_dataset/ae/tcn_ae.json \
+        --rl_config       assets/configs/etth1_dataset/RL_ablations/config_final.json \
         --eval_batches    20 \
         --n_trials        10 \
         --seed            42 \
@@ -283,15 +283,15 @@ def main():
     parser = argparse.ArgumentParser(description="Random Latent Perturbation Baseline")
     parser.add_argument(
         "--forecast_config",
-        default="assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
+        default="assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
     )
     parser.add_argument(
         "--ae_config",
-        default="assets/configs/models/etth1_dataset/ae/tcn_ae.json",
+        default="assets/configs/etth1_dataset/ae/tcn_ae.json",
     )
     parser.add_argument(
         "--rl_config",
-        default="assets/configs/models/etth1_dataset/RL_ablations/config_final.json",
+        default="assets/configs/etth1_dataset/RL_ablations/config_final.json",
     )
     parser.add_argument("--eval_batches", type=int, default=20)
     parser.add_argument("--n_trials",     type=int, default=10)

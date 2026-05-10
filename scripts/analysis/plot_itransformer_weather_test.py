@@ -36,7 +36,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # ============================================================================
 print("\nLoading configuration and model...")
 
-config_path = f'assets/configs/models/{dataset}_dataset/forecasters/itransformer/{dataset}_96_48_S.json'
+config_path = f'assets/configs/{dataset}_dataset/forecasters/itransformer/{dataset}_96_48_S.json'
 config = load_config(config_path)
 
 # Load test data

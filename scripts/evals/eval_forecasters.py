@@ -29,9 +29,9 @@ from src.data_provider.data_factory import data_provider
 # ─────────────────────────────────────────────────────────────────────────────
 
 MODEL_CONFIGS = {
-    "gru":      "assets/configs/models/etth1_dataset/forecasters/gru/etth1_96_48_S.json",
-    "dlinear":  "assets/configs/models/etth1_dataset/forecasters/dlinear/etth1_96_48_S.json",
-    "timesnet": "assets/configs/models/etth1_dataset/forecasters/timesnet/etth1_96_48_S.json",
+    "gru":      "assets/configs/etth1_dataset/forecasters/gru/etth1_96_48_S.json",
+    "dlinear":  "assets/configs/etth1_dataset/forecasters/dlinear/etth1_96_48_S.json",
+    "timesnet": "assets/configs/etth1_dataset/forecasters/timesnet/etth1_96_48_S.json",
 }
 
 FIGURES_DIR = "assets/figures/forecaster"

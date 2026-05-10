@@ -13,32 +13,32 @@ import argparse, subprocess, sys, os
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-AE_CONFIG = "assets/configs/models/etth2_dataset/ae/tcn_ae.json"
+AE_CONFIG = "assets/configs/etth2_dataset/ae/tcn_ae.json"
 
 FORECASTER_CONFIGS = [
-    "assets/configs/models/etth2_dataset/forecasters/itransformer/etth2_96_48_S.json",
-    "assets/configs/models/etth2_dataset/forecasters/patchtst/etth2_96_48_S.json",
-    "assets/configs/models/etth2_dataset/forecasters/timesnet/etth2_96_48_S.json",
-    "assets/configs/models/etth2_dataset/forecasters/gru/etth2_96_48_S.json",
-    "assets/configs/models/etth2_dataset/forecasters/dlinear/etth2_96_48_S.json",
+    "assets/configs/etth2_dataset/forecasters/itransformer/etth2_96_48_S.json",
+    "assets/configs/etth2_dataset/forecasters/patchtst/etth2_96_48_S.json",
+    "assets/configs/etth2_dataset/forecasters/timesnet/etth2_96_48_S.json",
+    "assets/configs/etth2_dataset/forecasters/gru/etth2_96_48_S.json",
+    "assets/configs/etth2_dataset/forecasters/dlinear/etth2_96_48_S.json",
 ]
 
 RL_MODELS = [
     ("iTransformer",
-     "assets/configs/models/etth2_dataset/RL/config_itransformer.json",
-     "assets/configs/models/etth2_dataset/forecasters/itransformer/etth2_96_48_S.json"),
+     "assets/configs/etth2_dataset/RL/config_itransformer.json",
+     "assets/configs/etth2_dataset/forecasters/itransformer/etth2_96_48_S.json"),
     ("PatchTST",
-     "assets/configs/models/etth2_dataset/RL/config_patchtst.json",
-     "assets/configs/models/etth2_dataset/forecasters/patchtst/etth2_96_48_S.json"),
+     "assets/configs/etth2_dataset/RL/config_patchtst.json",
+     "assets/configs/etth2_dataset/forecasters/patchtst/etth2_96_48_S.json"),
     ("TimesNet",
-     "assets/configs/models/etth2_dataset/RL/config_timesnet.json",
-     "assets/configs/models/etth2_dataset/forecasters/timesnet/etth2_96_48_S.json"),
+     "assets/configs/etth2_dataset/RL/config_timesnet.json",
+     "assets/configs/etth2_dataset/forecasters/timesnet/etth2_96_48_S.json"),
     ("GRU",
-     "assets/configs/models/etth2_dataset/RL/config_gru.json",
-     "assets/configs/models/etth2_dataset/forecasters/gru/etth2_96_48_S.json"),
+     "assets/configs/etth2_dataset/RL/config_gru.json",
+     "assets/configs/etth2_dataset/forecasters/gru/etth2_96_48_S.json"),
     ("DLinear",
-     "assets/configs/models/etth2_dataset/RL/config_dlinear.json",
-     "assets/configs/models/etth2_dataset/forecasters/dlinear/etth2_96_48_S.json"),
+     "assets/configs/etth2_dataset/RL/config_dlinear.json",
+     "assets/configs/etth2_dataset/forecasters/dlinear/etth2_96_48_S.json"),
 ]
 
 EVAL_SCRIPT = "scripts/evals/eval_etth2_all_models.py"

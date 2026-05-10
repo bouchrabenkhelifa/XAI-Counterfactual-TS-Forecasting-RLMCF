@@ -4,7 +4,7 @@ import os
 
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
-from src.training.RL_trainers.trainer_last_v2 import RLMaskTrainer
+from src.training.RL_trainers.trainer_main import RLMaskTrainer
 
 
 def run_one(
@@ -71,12 +71,12 @@ def main():
     parser.add_argument(
         "--forecast_config",
         type=str,
-        default="assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
+        default="assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
     )
     parser.add_argument(
         "--ae_config",
         type=str,
-        default="assets/configs/models/etth1_dataset/ae/tcn_ae.json",
+        default="assets/configs/etth1_dataset/ae/tcn_ae.json",
     )
     parser.add_argument("--eval_batches", type=int, default=20)
     parser.add_argument("--eval_only", action="store_true")

@@ -103,9 +103,9 @@ def get_rl_config_path(dataset, model):
     Retourne le chemin de la config RL pour un (dataset, model) donné.
     
     Mapping :
-        etth1   -> assets/configs/models/etth1_dataset/RL_ablations/config_{model}.json
-        etth2   -> assets/configs/models/etth2_dataset/RL/config_{model}.json
-        weather -> assets/configs/models/weather_dataset/RL/config_{model}.json
+        etth1   -> assets/configs/etth1_dataset/RL_ablations/config_{model}.json
+        etth2   -> assets/configs/etth2_dataset/RL/config_{model}.json
+        weather -> assets/configs/weather_dataset/RL/config_{model}.json
     
     Parameters
     ----------
@@ -125,11 +125,11 @@ def get_rl_config_path(dataset, model):
     if dataset == "etth1":
         # Special case for itransformer
         if model == "itransformer":
-            return f"assets/configs/models/etth1_dataset/RL_ablations/config_itransformer_best.json"
-        return f"assets/configs/models/etth1_dataset/RL_ablations/config_{model}.json"
+            return f"assets/configs/etth1_dataset/RL_ablations/config_itransformer_best.json"
+        return f"assets/configs/etth1_dataset/RL_ablations/config_{model}.json"
     elif dataset == "etth2":
-        return f"assets/configs/models/etth2_dataset/RL/config_{model}.json"
+        return f"assets/configs/etth2_dataset/RL/config_{model}.json"
     elif dataset == "weather":
-        return f"assets/configs/models/weather_dataset/RL/config_{model}.json"
+        return f"assets/configs/weather_dataset/RL/config_{model}.json"
     else:
         raise ValueError(f"Unknown dataset: {dataset}")

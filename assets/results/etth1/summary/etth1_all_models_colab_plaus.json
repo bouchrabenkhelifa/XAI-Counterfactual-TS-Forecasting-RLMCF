@@ -1,0 +1,292 @@
+{
+  "iTransformer": {
+    "validity_ratio": {
+      "mean": 0.9760416666666667,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.9817708333333333,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 0.604978084564209,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.02119879238307476,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 0.29423385858535767,
+      "std": 0.0
+    },
+    "compactness": {
+      "mean": 0.8026041666666667,
+      "std": 0.0
+    },
+    "roughness_cf": {
+      "mean": 0.04850926250219345,
+      "std": 0.002546989591792226
+    },
+    "roughness_x": {
+      "mean": 0.048127152025699615,
+      "std": 0.0011672591790556908
+    },
+    "roughness_ratio": {
+      "mean": 1.0079393934819967,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.968893913924694,
+      "std": 0.012559499409504501
+    },
+    "relative_reduction": {
+      "mean": 0.15038688480854034,
+      "std": 0.02471497282385826
+    },
+    "plausibility_if": {
+      "mean": 0.08968614041805267,
+      "std": 0.07222705334424973
+    },
+    "plausibility_lof": {
+      "mean": 0.23796780407428741,
+      "std": 0.077188640832901
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.1953357458114624,
+      "std": 0.054334454238414764
+    },
+    "plausibility_ensemble": {
+      "mean": 0.17432990670204163,
+      "std": 0.04732021689414978
+    }
+  },
+  "PatchTST": {
+    "validity_ratio": {
+      "mean": 0.975,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.9786458333333333,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 0.6434952020645142,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.025203542783856392,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 0.27431797981262207,
+      "std": 0.0
+    },
+    "compactness": {
+      "mean": 0.7822916666666667,
+      "std": 0.0
+    },
+    "roughness_cf": {
+      "mean": 0.05041714757680893,
+      "std": 0.0024064083117991686
+    },
+    "roughness_x": {
+      "mean": 0.048127152025699615,
+      "std": 0.0011672591790556908
+    },
+    "roughness_ratio": {
+      "mean": 1.047581977717416,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.9464145764708519,
+      "std": 0.012837080933483567
+    },
+    "relative_reduction": {
+      "mean": 0.1408410221338272,
+      "std": 0.03203120082616806
+    },
+    "plausibility_if": {
+      "mean": 0.07457660883665085,
+      "std": 0.02778739668428898
+    },
+    "plausibility_lof": {
+      "mean": 0.23144471645355225,
+      "std": 0.12215676158666611
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.15686935186386108,
+      "std": 0.03309858590364456
+    },
+    "plausibility_ensemble": {
+      "mean": 0.1542969048023224,
+      "std": 0.05502071604132652
+    }
+  },
+  "TimesNet": {
+    "validity_ratio": {
+      "mean": 0.5489583333333333,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.559375,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 0.7308434247970581,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.03421664610505104,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 0.28063493967056274,
+      "std": 0.0
+    },
+    "compactness": {
+      "mean": 0.678125,
+      "std": 0.0
+    },
+    "roughness_cf": {
+      "mean": 0.04471271485090256,
+      "std": 0.0011155850952491164
+    },
+    "roughness_x": {
+      "mean": 0.048127152025699615,
+      "std": 0.0011672591790556908
+    },
+    "roughness_ratio": {
+      "mean": 0.9290536355961782,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.9399899408221245,
+      "std": 0.01034076069651811
+    },
+    "relative_reduction": {
+      "mean": 0.05572894215583801,
+      "std": 0.0636681392788887
+    },
+    "plausibility_if": {
+      "mean": 0.05044425651431084,
+      "std": 0.036385759711265564
+    },
+    "plausibility_lof": {
+      "mean": 0.22798189520835876,
+      "std": 0.09136580675840378
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.17221978306770325,
+      "std": 0.030278537422418594
+    },
+    "plausibility_ensemble": {
+      "mean": 0.1502152979373932,
+      "std": 0.04136309027671814
+    }
+  },
+  "GRU": {
+    "validity_ratio": {
+      "mean": 0.9396,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.9443,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 0.6744,
+      "std": 0.0
+    },
+    "compactness": {
+      "mean": 0.6807,
+      "std": 0.0
+    },
+    "roughness_ratio": {
+      "mean": 0.9656,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.9311,
+      "std": 0.0
+    },
+    "plausibility_if": {
+      "mean": 0.15737582743167877,
+      "std": 0.1336383819580078
+    },
+    "plausibility_lof": {
+      "mean": 0.3817066550254822,
+      "std": 0.20117422938346863
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.24495761096477509,
+      "std": 0.10205505788326263
+    },
+    "plausibility_ensemble": {
+      "mean": 0.2613467276096344,
+      "std": 0.14035987854003906
+    }
+  },
+  "DLinear": {
+    "validity_ratio": {
+      "mean": 0.9260416666666667,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.9302083333333333,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 0.8375957608222961,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.04251529276371002,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 0.26793864369392395,
+      "std": 0.0
+    },
+    "compactness": {
+      "mean": 0.678125,
+      "std": 0.0
+    },
+    "roughness_cf": {
+      "mean": 0.04677406698465347,
+      "std": 0.0017526246374472976
+    },
+    "roughness_x": {
+      "mean": 0.048127152025699615,
+      "std": 0.0011672591790556908
+    },
+    "roughness_ratio": {
+      "mean": 0.9718850024789827,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.9291261404752731,
+      "std": 0.014781129272163962
+    },
+    "relative_reduction": {
+      "mean": 0.1748959720134735,
+      "std": 0.03407945856451988
+    },
+    "plausibility_if": {
+      "mean": 0.0974961519241333,
+      "std": 0.04014859348535538
+    },
+    "plausibility_lof": {
+      "mean": 0.2538665235042572,
+      "std": 0.11669974774122238
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.17700541019439697,
+      "std": 0.045709509402513504
+    },
+    "plausibility_ensemble": {
+      "mean": 0.17612269520759583,
+      "std": 0.045484017580747604
+    }
+  }
+}

@@ -16,7 +16,7 @@ if ROOT not in sys.path:
 
 from src.utils.config import load_config
 from src.utils.train_tools import get_device
-from src.training.RL_trainers.trainer_last_v2 import RLMaskTrainer
+from src.training.RL_trainers.trainer_main import RLMaskTrainer
 from baselines.common.bounds import compute_bounds_np
 
 
@@ -43,19 +43,19 @@ def evaluate_rho_sensitivity(
     
     # Charger configs
     seq_config = "96_96" if dataset == "weather" else "96_48"
-    cfg_f_path = f"assets/configs/models/{dataset}_dataset/forecasters/{model}/{dataset}_{seq_config}_S.json"
-    cfg_ae_path = f"assets/configs/models/{dataset}_dataset/ae/tcn_ae.json"
+    cfg_f_path = f"assets/configs/{dataset}_dataset/forecasters/{model}/{dataset}_{seq_config}_S.json"
+    cfg_ae_path = f"assets/configs/{dataset}_dataset/ae/tcn_ae.json"
     
     # Chemin du config RL selon le dataset
     if dataset == "etth1":
         # ETTh1 utilise RL_ablations
         if model == "itransformer":
-            rl_config_path = f"assets/configs/models/{dataset}_dataset/RL_ablations/config_itransformer_best.json"
+            rl_config_path = f"assets/configs/{dataset}_dataset/RL_ablations/config_itransformer_best.json"
         else:
-            rl_config_path = f"assets/configs/models/{dataset}_dataset/RL_ablations/config_{model}.json"
+            rl_config_path = f"assets/configs/{dataset}_dataset/RL_ablations/config_{model}.json"
     else:
         # ETTh2 et Weather utilisent RL
-        rl_config_path = f"assets/configs/models/{dataset}_dataset/RL/config_{model}.json"
+        rl_config_path = f"assets/configs/{dataset}_dataset/RL/config_{model}.json"
     
     cfg_f = load_config(cfg_f_path)
     cfg_ae = load_config(cfg_ae_path)

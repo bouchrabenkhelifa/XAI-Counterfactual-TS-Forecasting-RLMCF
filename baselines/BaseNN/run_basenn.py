@@ -42,8 +42,8 @@ def run_basenn_single_seed(dataset, model, seed, device, n_batches=20):
     
     # Charger configs - weather uses 96_96, others use 96_48
     pred_len = "96" if dataset == "weather" else "48"
-    cfg_f_path = f"assets/configs/models/{dataset}_dataset/forecasters/{model}/{dataset}_96_{pred_len}_S.json"
-    cfg_ae_path = f"assets/configs/models/{dataset}_dataset/ae/tcn_ae.json"
+    cfg_f_path = f"assets/configs/{dataset}_dataset/forecasters/{model}/{dataset}_96_{pred_len}_S.json"
+    cfg_ae_path = f"assets/configs/{dataset}_dataset/ae/tcn_ae.json"
     rl_config_path = get_rl_config_path(dataset, model)
     
     cfg_f = load_config(cfg_f_path)

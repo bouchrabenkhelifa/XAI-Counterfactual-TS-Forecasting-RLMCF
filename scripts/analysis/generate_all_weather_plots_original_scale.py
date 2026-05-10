@@ -49,23 +49,23 @@ def build_model(configs, device):
 # Model configurations (matching existing checkpoints)
 MODELS = {
     "iTransformer": {
-        "config": "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_48_S.json",
+        "config": "assets/configs/weather_dataset/forecasters/itransformer/weather_96_48_S.json",
         "checkpoint": "assets/checkpoints/weather_chpts/forecaster/chpt_weather_96_96_itransformer_S.pth",
     },
     "GRU": {
-        "config": "assets/configs/models/weather_dataset/forecasters/gru/weather_96_48_S.json",
+        "config": "assets/configs/weather_dataset/forecasters/gru/weather_96_48_S.json",
         "checkpoint": "assets/checkpoints/weather_chpts/forecaster/chpt_weather_96_48_gru_S.pth",
     },
     "PatchTST": {
-        "config": "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_48_S.json",
+        "config": "assets/configs/weather_dataset/forecasters/patchtst/weather_96_48_S.json",
         "checkpoint": "assets/checkpoints/weather_chpts/forecaster/chpt_weather_96_48_patchtst_S.pth",
     },
     "TimesNet": {
-        "config": "assets/configs/models/weather_dataset/forecasters/timesnet/weather_96_48_S.json",
+        "config": "assets/configs/weather_dataset/forecasters/timesnet/weather_96_48_S.json",
         "checkpoint": "assets/checkpoints/weather_chpts/forecaster/chpt_weather_96_48_timesnet_S.pth",
     },
     "DLinear": {
-        "config": "assets/configs/models/weather_dataset/forecasters/dlinear/weather_96_96_S.json",
+        "config": "assets/configs/weather_dataset/forecasters/dlinear/weather_96_96_S.json",
         "checkpoint": "assets/checkpoints/weather_chpts/forecaster/chpt_weather_96_96_dlinear_S.pth",
     },
 }

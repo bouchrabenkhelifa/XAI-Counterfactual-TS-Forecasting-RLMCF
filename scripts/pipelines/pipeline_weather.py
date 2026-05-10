@@ -14,33 +14,33 @@ import argparse, subprocess, sys, os
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-AE_CONFIG = "assets/configs/models/weather_dataset/ae/tcn_ae.json"
+AE_CONFIG = "assets/configs/weather_dataset/ae/tcn_ae.json"
 
 # Configs for retraining (all 96_96)
 FORECASTER_CONFIGS = [
-    "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_96_S.json",
-    "assets/configs/models/weather_dataset/forecasters/gru/weather_96_96_S.json",
-    "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_96_S.json",
-    "assets/configs/models/weather_dataset/forecasters/timesnet/weather_96_96_S.json",
-    "assets/configs/models/weather_dataset/forecasters/dlinear/weather_96_96_S.json",
+    "assets/configs/weather_dataset/forecasters/itransformer/weather_96_96_S.json",
+    "assets/configs/weather_dataset/forecasters/gru/weather_96_96_S.json",
+    "assets/configs/weather_dataset/forecasters/patchtst/weather_96_96_S.json",
+    "assets/configs/weather_dataset/forecasters/timesnet/weather_96_96_S.json",
+    "assets/configs/weather_dataset/forecasters/dlinear/weather_96_96_S.json",
 ]
 
 RL_MODELS = [
     ("iTransformer",
-     "assets/configs/models/weather_dataset/RL/config_itransformer.json",
-     "assets/configs/models/weather_dataset/forecasters/itransformer/weather_96_96_S.json"),
+     "assets/configs/weather_dataset/RL/config_itransformer.json",
+     "assets/configs/weather_dataset/forecasters/itransformer/weather_96_96_S.json"),
     ("PatchTST",
-     "assets/configs/models/weather_dataset/RL/config_patchtst.json",
-     "assets/configs/models/weather_dataset/forecasters/patchtst/weather_96_96_S.json"),
+     "assets/configs/weather_dataset/RL/config_patchtst.json",
+     "assets/configs/weather_dataset/forecasters/patchtst/weather_96_96_S.json"),
     ("TimesNet",
-     "assets/configs/models/weather_dataset/RL/config_timesnet.json",
-     "assets/configs/models/weather_dataset/forecasters/timesnet/weather_96_96_S.json"),
+     "assets/configs/weather_dataset/RL/config_timesnet.json",
+     "assets/configs/weather_dataset/forecasters/timesnet/weather_96_96_S.json"),
     ("GRU",
-     "assets/configs/models/weather_dataset/RL/config_gru.json",
-     "assets/configs/models/weather_dataset/forecasters/gru/weather_96_96_S.json"),
+     "assets/configs/weather_dataset/RL/config_gru.json",
+     "assets/configs/weather_dataset/forecasters/gru/weather_96_96_S.json"),
     ("DLinear",
-     "assets/configs/models/weather_dataset/RL/config_dlinear.json",
-     "assets/configs/models/weather_dataset/forecasters/dlinear/weather_96_96_S.json"),
+     "assets/configs/weather_dataset/RL/config_dlinear.json",
+     "assets/configs/weather_dataset/forecasters/dlinear/weather_96_96_S.json"),
 ]
 
 EVAL_SCRIPT = "scripts/evals/eval_weather_all_models.py"

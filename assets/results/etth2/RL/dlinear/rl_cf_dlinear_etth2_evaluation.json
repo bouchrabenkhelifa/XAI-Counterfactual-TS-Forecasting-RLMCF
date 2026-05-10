@@ -1,62 +1,42 @@
 {
   "validity_ratio": {
-    "mean": 0.884375,
+    "mean": 0.8296,
     "std": 0.0
   },
   "stepwise_auc": {
-    "mean": 0.8916666666666666,
+    "mean": 0.8379,
     "std": 0.0
   },
   "proximity_l2": {
-    "mean": 1.36093008518219,
-    "std": 0.0
-  },
-  "proximity_l1": {
-    "mean": 0.07168684899806976,
-    "std": 0.0
-  },
-  "proximity_linf": {
-    "mean": 0.4290274977684021,
+    "mean": 1.4282,
     "std": 0.0
   },
   "compactness": {
-    "mean": 0.6770833333333334,
+    "mean": 0.6773,
     "std": 0.0
   },
-  "roughness_cf": {
-    "mean": 0.10564278066158295,
-    "std": 0.0012623565271496773
-  },
-  "roughness_x": {
-    "mean": 0.10087525844573975,
-    "std": 0.0018739931983873248
-  },
   "roughness_ratio": {
-    "mean": 1.0472614575336434,
+    "mean": 1.0349,
     "std": 0.0
   },
   "temporal_consistency": {
-    "mean": 0.9755604311823844,
-    "std": 0.004157130558580102
-  },
-  "relative_reduction": {
-    "mean": 0.850737452507019,
-    "std": 0.40915337204933167
+    "mean": 0.9803,
+    "std": 0.0
   },
   "plausibility_if": {
-    "mean": 0.02913246490061283,
-    "std": 0.020525570958852768
+    "mean": 0.0291,
+    "std": 0.0
   },
   "plausibility_lof": {
-    "mean": 0.06633557379245758,
-    "std": 0.04627590626478195
+    "mean": 0.0663,
+    "std": 0.0
   },
   "plausibility_ocsvm": {
-    "mean": 0.07571125775575638,
-    "std": 0.026528162881731987
+    "mean": 0.0757,
+    "std": 0.0
   },
   "plausibility_ensemble": {
-    "mean": 0.05705976486206055,
-    "std": 0.02679530903697014
+    "mean": 0.0571,
+    "std": 0.0
   }
 }

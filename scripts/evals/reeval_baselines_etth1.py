@@ -25,7 +25,7 @@ from src.data_provider.data_factory import data_provider
 from src.utils.config import load_config
 
 # Dataset config for loading train data
-DATASET_CONFIG = "assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json"
+DATASET_CONFIG = "assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json"
 
 # Baseline result directories
 BASELINES = {

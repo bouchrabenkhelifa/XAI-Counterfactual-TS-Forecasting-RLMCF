@@ -28,9 +28,9 @@ from src.data_provider.data_factory import data_provider
 from src.training.RL_trainers.trainer_last import build_temporal_mask
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-CFG_F       = "assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json"
-CFG_AE      = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
-CFG_RLMCF   = "assets/configs/models/etth1_dataset/RL_ablations/config_itransformer_best.json"
+CFG_F       = "assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json"
+CFG_AE      = "assets/configs/etth1_dataset/ae/tcn_ae.json"
+CFG_RLMCF   = "assets/configs/etth1_dataset/RL_ablations/config_itransformer_best.json"
 CKPT_RLMCF  = "assets/checkpoints/etth1_chpts/RL/itransformer/rl_cf_itransformer_best_etth1_agent_best.pt"
 OUT_PATH    = "assets/figures/comparison/rlmcf_only_itransformer.png"
 

@@ -182,4 +182,4 @@ def main(config_path):
 
 
 if __name__ == "__main__":
-    main("assets/configs/models/etth1_dataset/anomaly_detector/plausibility.json")
+    main("assets/configs/etth1_dataset/anomaly_detector/plausibility.json")

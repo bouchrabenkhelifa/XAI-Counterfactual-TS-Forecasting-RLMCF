@@ -200,13 +200,6 @@ class RLMaskTrainer:
         self.mask_ramp_k = getattr(cfg_rl, "mask_ramp_k", 8)
         self.filter_quantile = getattr(cfg_rl, "filter_quantile", 0.0)
 
-        for d in [
-            cfg_rl.checkpoint_dir_lp,
-            cfg_rl.figures_dir_lp,
-            cfg_rl.results_dir_lp,
-        ]:
-            os.makedirs(d, exist_ok=True)
-
         print("\n[RL] Loading frozen models …")
         self.ae_arch = TCNAutoEncoder.from_checkpoint(
             cfg_ae.checkpoint_path, device=device
@@ -362,6 +355,14 @@ class RLMaskTrainer:
 
     # ─────────────────────────────────────────────────────────────────────────
     def train(self):
+        # Créer les dossiers seulement au moment de l'entraînement
+        for d in [
+            self.cfg_rl.checkpoint_dir_lp,
+            self.cfg_rl.figures_dir_lp,
+            self.cfg_rl.results_dir_lp,
+        ]:
+            os.makedirs(d, exist_ok=True)
+
         print(f"\n{'='*60}")
         print(f"Training | {self.cfg_rl.epochs} epochs | fr={self.reward_fn.fr}")
         print(f"{'='*60}")

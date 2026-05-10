@@ -30,41 +30,41 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # ── Configs ───────────────────────────────────────────────────────────────────
 
-AE_CONFIG = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+AE_CONFIG = "assets/configs/etth1_dataset/ae/tcn_ae.json"
 
 FORECASTER_CONFIGS = [
-    "assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
-    "assets/configs/models/etth1_dataset/forecasters/patchtst/etth1_96_48_S.json",
-    "assets/configs/models/etth1_dataset/forecasters/timesnet/etth1_96_48_S.json",
-    "assets/configs/models/etth1_dataset/forecasters/gru/etth1_96_48_S.json",
-    "assets/configs/models/etth1_dataset/forecasters/dlinear/etth1_96_48_S.json",
+    "assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
+    "assets/configs/etth1_dataset/forecasters/patchtst/etth1_96_48_S.json",
+    "assets/configs/etth1_dataset/forecasters/timesnet/etth1_96_48_S.json",
+    "assets/configs/etth1_dataset/forecasters/gru/etth1_96_48_S.json",
+    "assets/configs/etth1_dataset/forecasters/dlinear/etth1_96_48_S.json",
 ]
 
 RL_MODELS = [
     (
         "iTransformer",
-        "assets/configs/models/etth1_dataset/RL_ablations/config_v2.json",
-        "assets/configs/models/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
+        "assets/configs/etth1_dataset/RL_ablations/config_v2.json",
+        "assets/configs/etth1_dataset/forecasters/itransformer/etth1_96_48_S.json",
     ),
     (
         "PatchTST",
-        "assets/configs/models/etth1_dataset/RL_ablations/config_patchtst.json",
-        "assets/configs/models/etth1_dataset/forecasters/patchtst/etth1_96_48_S.json",
+        "assets/configs/etth1_dataset/RL_ablations/config_patchtst.json",
+        "assets/configs/etth1_dataset/forecasters/patchtst/etth1_96_48_S.json",
     ),
     (
         "TimesNet",
-        "assets/configs/models/etth1_dataset/RL_ablations/config_timesnet.json",
-        "assets/configs/models/etth1_dataset/forecasters/timesnet/etth1_96_48_S.json",
+        "assets/configs/etth1_dataset/RL_ablations/config_timesnet.json",
+        "assets/configs/etth1_dataset/forecasters/timesnet/etth1_96_48_S.json",
     ),
     (
         "GRU",
-        "assets/configs/models/etth1_dataset/RL_ablations/config_gru.json",
-        "assets/configs/models/etth1_dataset/forecasters/gru/etth1_96_48_S.json",
+        "assets/configs/etth1_dataset/RL_ablations/config_gru.json",
+        "assets/configs/etth1_dataset/forecasters/gru/etth1_96_48_S.json",
     ),
     (
         "DLinear",
-        "assets/configs/models/etth1_dataset/RL_ablations/config_dlinear.json",
-        "assets/configs/models/etth1_dataset/forecasters/dlinear/etth1_96_48_S.json",
+        "assets/configs/etth1_dataset/RL_ablations/config_dlinear.json",
+        "assets/configs/etth1_dataset/forecasters/dlinear/etth1_96_48_S.json",
     ),
 ]
 

@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 MODEL_PATH  = "assets/checkpoints/etth1_chpts/forecaster/chpt_etth1_96_48_gru_S.pth"
-CONFIG_PATH = "assets/configs/models/etth1_dataset/forecasters/gru/etth1_96_48_S.json"
+CONFIG_PATH = "assets/configs/etth1_dataset/forecasters/gru/etth1_96_48_S.json"
 DATA_PATH   = "assets/datasets/ETTh1.csv"
 OUTPUT      = "baselines/ForecastCF/results/forecastcf_etth1_gru.csv"
 SEEDS       = [1, 9, 30]

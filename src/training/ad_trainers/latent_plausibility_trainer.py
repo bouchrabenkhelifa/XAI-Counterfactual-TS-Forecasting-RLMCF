@@ -11,7 +11,7 @@ from src.models.autoencoder.tcn_ae     import TCNAutoEncoder
 from src.models.RL_without_ae.latent_plausibility import LatentPlausibility
 
 
-CONFIG_AE = "assets/configs/models/etth1_dataset/ae/tcn_ae.json"
+CONFIG_AE = "assets/configs/etth1_dataset/ae/tcn_ae.json"
 
 if __name__ == "__main__":
     cfg_ae = load_config(CONFIG_AE)
