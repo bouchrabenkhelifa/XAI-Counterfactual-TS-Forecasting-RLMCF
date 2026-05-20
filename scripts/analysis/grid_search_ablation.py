@@ -60,7 +60,7 @@ BASE_RL_CONFIG = {
     "direction": -1.0,
     "eta": 0.15,
     "entropy_coef": 0.02,
-    "epochs": 10,  # Reduced for screening
+    "epochs": 30,  # Same as real training for reliable results
     "lr_actor": 0.0003,
     "lr_critic": 0.0001,
     "lr_decay": 0.5,
@@ -75,8 +75,8 @@ BASE_RL_CONFIG = {
     "eval_train_batches": 30,
 }
 
-SCREENING_EPOCHS = 10
-EVAL_BATCHES = 15
+SCREENING_EPOCHS = 30
+EVAL_BATCHES = 20
 
 
 # ─────────────────────────────────────────────────────────────────────────────
