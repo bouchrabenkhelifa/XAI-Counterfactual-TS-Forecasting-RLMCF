@@ -39,7 +39,8 @@ CFG_AE      = "assets/configs/etth1_dataset/ae/tcn_ae.json"
 CFG_RLMCF   = "assets/configs/etth1_dataset/RL_ablations/config_itransformer_best.json"
 CKPT_RLMCF  = "assets/checkpoints/etth1_chpts/RL/itransformer/rl_cf_itransformer_best_etth1_agent_best.pt"
 CKPT_WOMASK = "assets/checkpoints/etth1_chpts/RL/wo_mask/rl_cf_wo_mask_etth1_agent_best.pt"
-OUT_PATH    = "assets/figures/comparison/ablation_series_3methods.png"
+CKPT_WOPROX = "assets/results/etth1/RL/ablation/checkpoints/wo_proximity/ablation_wo_proximity_agent_best.pt"
+OUT_PATH    = "assets/figures/comparison/ablation_series_4methods.png"
 
 
 def make_rlmcf(x_ot, bx, bx_mark, ae, forecaster_v2, agent, lk, rk, device):
@@ -80,6 +81,19 @@ def make_womask(x_ot, bx, bx_mark, ae, forecaster_v2, agent, device):
         z_cf, _, _ = agent.act_deterministic(z, y_hat)
         x_cf  = ae.decode(z_cf)          # pas de masque
         y_cf  = forecaster_v2.predict_from_ot(x_ot=x_cf, x_full=bx, x_mark=bx_mark)
+    return x_cf, y_cf
+
+
+def make_woprox(x_ot, bx, bx_mark, ae, forecaster_v2, agent, lk, rk, device):
+    """wo_proximity : politique apprise SANS reward de proximité, avec masque."""
+    with torch.no_grad():
+        z     = ae.encode(x_ot)
+        y_hat = forecaster_v2.predict_ot(bx, bx_mark)
+        z_cf, _, _ = agent.act_deterministic(z, y_hat)
+        x_prop = ae.decode(z_cf)
+        mask   = build_temporal_mask(x_ot.shape[0], x_ot.shape[1], x_ot.shape[2], lk, rk, device)
+        x_cf   = x_ot + mask * (x_prop - x_ot)
+        y_cf   = forecaster_v2.predict_from_ot(x_ot=x_cf, x_full=bx, x_mark=bx_mark)
     return x_cf, y_cf
 
 
@@ -132,6 +146,18 @@ def main():
     agent_womask.actor.load_state_dict(ckpt_wo["actor_state_dict"])
     agent_womask.critic.load_state_dict(ckpt_wo["critic_state_dict"])
     agent_womask.eval()
+
+    # ── Agent wo_proximity ────────────────────────────────────────────────────
+    print("Loading wo_proximity agent...")
+    agent_woprox = ActorCritic(
+        latent_dim=cfg_ae.latent_dim, pred_len=cfg_f.pred_len,
+        eta=cfg_rlmcf.eta, entropy_coef=cfg_rlmcf.entropy_coef,
+        direction=getattr(cfg_rlmcf, "direction", -1.0),
+    ).to(device)
+    ckpt_wp = torch.load(CKPT_WOPROX, map_location=device, weights_only=False)
+    agent_woprox.actor.load_state_dict(ckpt_wp["actor_state_dict"])
+    agent_woprox.critic.load_state_dict(ckpt_wp["critic_state_dict"])
+    agent_woprox.eval()
 
     # ── Reward fn (bounds) ────────────────────────────────────────────────────
     _, train_loader = data_provider(cfg_f, "train")
@@ -213,11 +239,12 @@ def main():
     x_ot, bx, bx_mark, rlp_seed = best_data
     print(f"\nSelected: RLMCF-RLP diff = {best_score:.3f}")
 
-    # ── Générer les 3 CFs ─────────────────────────────────────────────────────
+    # ── Générer les 4 CFs ─────────────────────────────────────────────────────
     print("Generating counterfactuals...")
     x_cf_rm, y_cf_rm, y_hat = make_rlmcf(x_ot, bx, bx_mark, ae, forecaster_v2, agent_rlmcf, lk, rk, device)
     x_cf_rp, y_cf_rp        = make_rlp(x_ot, bx, bx_mark, ae, forecaster_v1, lk, rk, eta, device, seed=rlp_seed)
     x_cf_wo, y_cf_wo        = make_womask(x_ot, bx, bx_mark, ae, forecaster_v2, agent_womask, device)
+    x_cf_wp, y_cf_wp        = make_woprox(x_ot, bx, bx_mark, ae, forecaster_v2, agent_woprox, lk, rk, device)
 
     # ── Bounds ────────────────────────────────────────────────────────────────
     alpha, beta, _ = reward_fn.compute_bounds(y_hat, x_ot=x_ot)
@@ -233,6 +260,8 @@ def main():
     ycf_rp = y_cf_rp[0, :, 0].cpu().numpy()
     xcf_wo = x_cf_wo[0, :, 0].cpu().numpy()
     ycf_wo = y_cf_wo[0, :, 0].cpu().numpy()
+    xcf_wp = x_cf_wp[0, :, 0].cpu().numpy()
+    ycf_wp = y_cf_wp[0, :, 0].cpu().numpy()
 
     BH = len(x);  H = len(yh)
     t_back = np.arange(BH)
@@ -241,7 +270,8 @@ def main():
     vr_rm = float(((ycf_rm >= a_np) & (ycf_rm <= b_np)).mean())
     vr_rp = float(((ycf_rp >= a_np) & (ycf_rp <= b_np)).mean())
     vr_wo = float(((ycf_wo >= a_np) & (ycf_wo <= b_np)).mean())
-    print(f"Validity — RLMCF: {vr_rm:.3f}  |  RLP: {vr_rp:.3f}  |  wo-mask: {vr_wo:.3f}")
+    vr_wp = float(((ycf_wp >= a_np) & (ycf_wp <= b_np)).mean())
+    print(f"Validity — RLMCF: {vr_rm:.3f}  |  RLP: {vr_rp:.3f}  |  wo-mask: {vr_wo:.3f}  |  wo-prox: {vr_wp:.3f}")
 
     # ── Figure ────────────────────────────────────────────────────────────────
     fig, ax = plt.subplots(figsize=(14, 5))
@@ -251,6 +281,7 @@ def main():
     rm_full   = np.concatenate([xcf_rm, ycf_rm])
     rp_full   = np.concatenate([xcf_rp, ycf_rp])
     wo_full   = np.concatenate([xcf_wo, ycf_wo])
+    wp_full   = np.concatenate([xcf_wp, ycf_wp])
 
     t_back = np.arange(BH)
     t_fore = np.arange(BH, BH + H)
@@ -267,6 +298,12 @@ def main():
             label=f"$x_{{cf}}$ / $\hat{{y}}_{{cf}}$ RLMCF  (VR={vr_rm:.2f})")
     ax.plot([BH-1, BH], rm_full[BH-1:BH+1], color="#C62828", lw=2.0, ls="-")
 
+    # wo-proximity : violet
+    ax.plot(t_back, wp_full[:BH], color="#7B1FA2", lw=2.0, ls="--")
+    ax.plot(t_fore, wp_full[BH:], color="#7B1FA2", lw=2.0, ls="-",
+            label=f"$x_{{cf}}$ / $\hat{{y}}_{{cf}}$ w/o prox  (VR={vr_wp:.2f})")
+    ax.plot([BH-1, BH], wp_full[BH-1:BH+1], color="#7B1FA2", lw=2.0, ls="-")
+
     # RLP : orange
     ax.plot(t_back, rp_full[:BH], color="#E65100", lw=2.0, ls="--")
     ax.plot(t_fore, rp_full[BH:], color="#E65100", lw=2.0, ls="-",
@@ -276,11 +313,11 @@ def main():
     # wo-mask : vert
     ax.plot(t_back, wo_full[:BH], color="#2E7D32", lw=2.0, ls="--")
     ax.plot(t_fore, wo_full[BH:], color="#2E7D32", lw=2.0, ls="-",
-            label=f"$x_{{cf}}$ / $\hat{{y}}_{{cf}}$ wo-mask  (VR={vr_wo:.2f})")
+            label=f"$x_{{cf}}$ / $\hat{{y}}_{{cf}}$ w/o mask  (VR={vr_wo:.2f})")
     ax.plot([BH-1, BH], wo_full[BH-1:BH+1], color="#2E7D32", lw=2.0, ls="-")
 
-    # Bande α/β : gris transparent (denormalized)
-    ax.fill_between(t_fore, a_denorm, b_denorm, alpha=0.18, color="#757575",
+    # Bande α/β : gris transparent
+    ax.fill_between(t_fore, a_np, b_np, alpha=0.18, color="#757575",
                     label=r"Target band [$\alpha$, $\beta$]")
 
     # Ligne verticale lookback/forecast
@@ -292,8 +329,10 @@ def main():
     ax.grid(alpha=0.25, ls="--")
     
     # Set Y axis to start at 4 with specific ticks
-    y_min = 4
-    y_max = max(orig_full.max(), rm_full.max(), rp_full.max(), wo_full.max(), b_denorm.max()) * 1.05
+    # Set Y axis dynamically
+    all_vals = np.concatenate([orig_full, rm_full, rp_full, wo_full, wp_full, a_np, b_np])
+    y_min = all_vals.min() - 0.1
+    y_max = all_vals.max() + 0.1
     ax.set_ylim(y_min, y_max)
     
     # Set Y ticks: 4, 6, 8, 10, ...

@@ -1,0 +1,85 @@
+{
+  "method": "ForecastCF-PyTorch",
+  "dataset": "etth2",
+  "model": "dlinear",
+  "n_samples": 20,
+  "runtime_seconds": 6.112620115280151,
+  "seeds": [
+    1
+  ],
+  "bounds_params": {
+    "rho": 0.1,
+    "fr": 0.6,
+    "direction": -1.0,
+    "global_sigma": null
+  },
+  "avg_metrics": {
+    "plausibility_ensemble": {
+      "mean": 0.5394764542579651,
+      "std": 0.0
+    },
+    "stepwise_auc": {
+      "mean": 0.9927083253860474,
+      "std": 0.0
+    },
+    "roughness_ratio": {
+      "mean": 1.2713167667388916,
+      "std": 0.0
+    },
+    "relative_reduction": {
+      "mean": 0.5567511320114136,
+      "std": 0.0
+    },
+    "plausibility_lof": {
+      "mean": 0.9863990545272827,
+      "std": 0.0
+    },
+    "compactness": {
+      "mean": 0.01875000074505806,
+      "std": 0.0
+    },
+    "proximity_l1": {
+      "mean": 0.04973193630576134,
+      "std": 0.0
+    },
+    "roughness_x": {
+      "mean": 0.10087525844573975,
+      "std": 0.0
+    },
+    "proximity_l2": {
+      "mean": 0.6520770788192749,
+      "std": 0.0
+    },
+    "temporal_consistency": {
+      "mean": 0.9101194739341736,
+      "std": 0.0
+    },
+    "validity_ratio": {
+      "mean": 0.9916666746139526,
+      "std": 0.0
+    },
+    "plausibility_if": {
+      "mean": 0.565759539604187,
+      "std": 0.0
+    },
+    "proximity_linf": {
+      "mean": 0.2129317969083786,
+      "std": 0.0
+    },
+    "plausibility_ocsvm": {
+      "mean": 0.06627063453197479,
+      "std": 0.0
+    },
+    "roughness_cf": {
+      "mean": 0.12824441492557526,
+      "std": 0.0
+    }
+  },
+  "metadata": {
+    "python_version": "3.11.0",
+    "torch_version": "2.9.1+cpu",
+    "checkpoint_name": "chpt_etth2_96_48_dlinear_S.pth",
+    "checkpoint_md5": "667517fe4496e4365e9a87d5b43ad4bc",
+    "run_date": "2026-05-26T16:10:30.487424"
+  }
+}

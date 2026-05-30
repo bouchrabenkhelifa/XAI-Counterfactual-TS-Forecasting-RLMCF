@@ -40,7 +40,7 @@ DATASETS = {
         "target_col": "OT",
         "description": "Electricity Transformer Temperature (Station 1)",
         "unit": "°C",
-        "freq": "1H",
+        "freq": "1h",
         "period": 24,  # 24h daily cycle
         "train_ratio": 0.6,
         "val_ratio": 0.2,
@@ -57,7 +57,7 @@ DATASETS = {
         "target_col": "OT",
         "description": "Electricity Transformer Temperature (Station 2)",
         "unit": "°C",
-        "freq": "1H",
+        "freq": "1h",
         "period": 24,  # 24h daily cycle
         "train_ratio": 0.6,
         "val_ratio": 0.2,
@@ -74,7 +74,7 @@ DATASETS = {
         "target_col": "T (degC)",
         "description": "Weather Station — Temperature",
         "unit": "°C",
-        "freq": "10T",
+        "freq": "10min",
         "period": 144,  # 144 samples/day (every 10 min)
         "train_ratio": 0.7,
         "val_ratio": 0.1,

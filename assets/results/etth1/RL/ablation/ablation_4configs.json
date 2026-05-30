@@ -1,0 +1,34 @@
+{
+  "RL-MCF (full)": {
+    "validity_ratio": 0.976,
+    "stepwise_auc": 0.982,
+    "proximity_l2": 0.605,
+    "compactness": 0.803,
+    "temporal_consistency": 0.969,
+    "plausibility_ensemble": 0.17
+  },
+  "w/o Proximity": {
+    "validity_ratio": 0.9270833333333334,
+    "stepwise_auc": 0.9343750000000001,
+    "proximity_l2": 0.5850765109062195,
+    "compactness": 0.8458333333333333,
+    "temporal_consistency": 0.9588241577148438,
+    "plausibility_ensemble": 0.2112835943698883
+  },
+  "w/o Mask": {
+    "validity_ratio": 0.851,
+    "stepwise_auc": 0.855,
+    "proximity_l2": 2.059,
+    "compactness": 0.003,
+    "temporal_consistency": 0.643,
+    "plausibility_ensemble": 0.451
+  },
+  "No Policy (random)": {
+    "validity_ratio": 0.09583333333333334,
+    "stepwise_auc": 0.10625,
+    "proximity_l2": 0.26053720712661743,
+    "compactness": 0.84375,
+    "temporal_consistency": 0.9769726693630219,
+    "plausibility_ensemble": 0.1023498922586441
+  }
+}
