@@ -4,277 +4,155 @@
 
 ```
 counterfactual-forecasting-rl/
-├── assets/
-│   ├── checkpoints/          # Model checkpoints
-│   ├── configs/              # Configuration files
-│   ├── datasets/             # Time series datasets
-│   ├── figures/              # Generated visualizations
-│   └── results/              # Training histories & metrics
-├── src/                      # Source code
-├── scripts/                  # Utility scripts & pipelines
-├── baselines/                # Baseline implementations
-└── README.md
+├── src/                          # Source code
+├── scripts/                      # Pipelines, evaluation, plot generation
+├── baselines/                    # Baseline implementations
+├── assets/                       # Data, configs, checkpoints, results, figures
+├── README.md                     # Project introduction and quick start
+├── RESULTS_AND_DISCUSSION.md     # Full results, discussion, future directions
+├── STRUCTURE.md                  # This file
+├── run_full.py                   # Full evaluation pipeline (tables + figures)
+└── requirements.txt              # Python dependencies
 ```
 
 ---
 
-## Detailed Structure
-
-### `assets/checkpoints/`
-
-Organized by dataset and component:
-
-```
-assets/checkpoints/
-├── etth1_chpts/
-│   ├── ae/                   # AutoEncoder checkpoint
-│   │   └── ae_etth1.pt
-│   ├── forecaster/           # Forecaster models
-│   │   ├── chpt_etth1_96_48_S.pth
-│   │   ├── chpt_etth1_96_96.pth
-│   │   └── ...
-│   └── RL/                   # RL agents by model
-│       ├── dlinear/
-│       ├── gru/
-│       ├── itransformer/
-│       ├── patchtst/
-│       ├── timesnet/
-│       └── wo_mask/
-├── etth2_chpts/
-│   ├── ae/
-│   ├── forecaster/
-│   └── RL/
-├── traffic_chpts/            # (Optional)
-└── weather_chpts/            # (Optional)
-```
-
-### `assets/configs/`
-
-Configuration files for models and experiments:
-
-```
-assets/configs/
-└── models/
-    ├── etth1_dataset/
-    │   ├── ae/
-    │   │   └── tcn_ae.json
-    │   ├── anomaly_detector/
-    │   │   └── plausibility.json
-    │   ├── forecasters/
-    │   │   ├── dlinear/
-    │   │   ├── gru/
-    │   │   ├── itransformer/
-    │   │   ├── patchtst/
-    │   │   └── timesnet/
-    │   └── RL_ablations/
-    │       ├── config_dlinear.json
-    │       ├── config_final.json
-    │       └── ...
-    ├── etth2_dataset/
-    │   ├── ae/
-    │   ├── forecasters/
-    │   └── RL/
-    └── weather_dataset/
-        ├── forecasters/
-        └── RL/
-```
-
-### `assets/figures/`
-
-Visualizations organized by dataset and model:
-
-```
-assets/figures/
-├── Architecture.png          # System architecture diagram
-├── etth1/
-│   ├── ae/
-│   │   └── tcn_ae_loss.png
-│   ├── forecaster/
-│   │   ├── dlinear/
-│   │   │   ├── dlinear_training_curves.png
-│   │   │   ├── dlinear_forecast_examples.png
-│   │   │   └── ...
-│   │   ├── gru/
-│   │   ├── itransformer/
-│   │   ├── patchtst/
-│   │   └── timesnet/
-│   └── RL/
-│       ├── dlinear/
-│       ├── gru/
-│       ├── itransformer/
-│       ├── patchtst/
-│       ├── timesnet/
-│       └── wo_mask/
-├── etth2/
-│   ├── ae/
-│   └── forecaster/
-│       ├── dlinear/
-│       ├── gru/
-│       ├── itransformer/
-│       ├── patchtst/
-│       └── timesnet/
-└── anomaly_detector/
-    └── plausibility_sanity_ETTh1.png
-```
-
-### `assets/results/`
-
-Training histories and evaluation metrics:
-
-```
-assets/results/
-├── etth1/
-│   ├── ae/
-│   │   └── history_tcn_ae.json
-│   ├── forecaster/
-│   │   ├── history_etth1_96_48_S.json
-│   │   ├── history_etth1_96_96.json
-│   │   └── ...
-│   ├── RL/
-│   │   ├── dlinear/
-│   │   ├── gru/
-│   │   ├── itransformer/
-│   │   ├── patchtst/
-│   │   ├── timesnet/
-│   │   └── wo_mask/
-│   └── anomaly_detector/
-├── etth2/
-│   ├── ae/
-│   ├── forecaster/
-│   └── RL/
-└── comparison/
-    └── (Baseline comparison results)
-```
-
-### `src/`
-
-Source code organized by functionality:
+## `src/` — Source Code
 
 ```
 src/
-├── data_provider/            # Data loading & preprocessing
-│   ├── data_factory.py
-│   └── data_loader.py
+├── data_provider/
+│   ├── data_factory.py           # Factory: dataset_name → DataLoader
+│   └── data_loader.py            # Dataset classes (ETT, Weather, Custom)
 ├── models/
-│   ├── Forecaster/           # Forecasting models
-│   │   ├── iTransformer.py
-│   │   ├── GRU.py
-│   │   ├── DLinear.py
-│   │   ├── PatchTST.py
-│   │   ├── TimesNet.py
-│   │   └── forecaster_wrapper.py
-│   ├── AE/                   # AutoEncoder
-│   │   └── TCN_AE.py
-│   ├── RL/                   # RL agents
-│   │   ├── agent.py
-│   │   └── environment.py
-│   └── layers/               # Reusable layers
+│   ├── Forecaster/
+│   │   ├── iTransformer.py       # iTransformer architecture
+│   │   ├── PatchTST.py           # PatchTST architecture
+│   │   ├── TimesNet.py           # TimesNet architecture
+│   │   ├── GRU.py                # GRU architecture
+│   │   ├── DLinear.py            # DLinear architecture
+│   │   ├── forecaster_wrapper.py     # Original wrapper (iTransformer)
+│   │   └── forecaster_wrapper_v2.py  # Generic wrapper (all 5 models)
+│   ├── autoencoder/
+│   │   ├── tcn_ae.py             # TCN Autoencoder (encoder + decoder)
+│   │   └── identity_ae.py       # Identity AE (ablation)
+│   ├── RL/
+│   │   ├── agent.py             # ActorCritic class
+│   │   ├── actor.py             # Actor network (MLP + tanh)
+│   │   ├── critic.py            # Critic network (MLP → scalar)
+│   │   └── reward_last.py       # Reward function (validity + proximity)
+│   └── anomaly_detector/
+│       └── plausibility.py      # Ensemble detector (IForest + LOF + OC-SVM)
 ├── training/
+│   ├── RL_trainers/
+│   │   ├── trainer_main.py      # Main RL trainer (temporal mask, eval)
+│   │   ├── trainer_last.py      # Legacy trainer (used by baselines/ablations)
+│   │   └── trainer_wo_mask.py   # Ablation: no temporal mask
 │   ├── forecast_trainers/
 │   │   ├── itransformer_trainer.py
-│   │   ├── generic_forecaster_trainer.py
+│   │   └── generic_forecaster_trainer.py
+│   ├── ae_trainers/
 │   │   └── ae_trainer.py
-│   └── rl_trainers/
+│   └── ad_trainers/
+│       └── ad_trainer.py
 ├── experiments/
-│   ├── forecasting/
-│   │   └── run.py            # Train forecasters
-│   ├── rl_cf/
-│   │   └── run.py            # Train RL agents
-│   └── comparison/
-│       └── run_forecastcf.py
-├── utils/
-│   ├── config.py
-│   ├── train_tools.py
-│   └── metrics.py
-└── evaluation/
-    └── evaluator.py
+│   ├── rl_cf/run.py             # Train RL agents
+│   ├── forecasting/run.py       # Train forecasters
+│   ├── autoencoder/run.py       # Train AE
+│   ├── anomaly_detection/run.py # Train anomaly detector
+│   ├── comparison/              # ForecastCF comparison scripts
+│   └── ablations/               # wo_mask, RLP ablations
+├── evaluation/
+│   └── unified_evaluator.py    # All 7 metrics
+├── layers/                      # Transformer layers (Embed, Attention, EncDec)
+└── utils/
+    ├── config.py                # JSON → SimpleNamespace loader
+    ├── train_tools.py           # Device selection, EarlyStopping
+    ├── metrics.py               # MSE, MAE
+    ├── masking.py               # Causal/Prob masks
+    └── timefeatures.py          # Time feature engineering
 ```
 
-### `scripts/`
+---
 
-Utility scripts and pipelines:
+## `scripts/` — Orchestration & Analysis
 
 ```
 scripts/
 ├── pipelines/
-│   ├── pipeline_etth1.py     # Full ETTh1 pipeline
-│   ├── pipeline_etth2.py     # Full ETTh2 pipeline
-│   └── pipeline_weather.py
+│   ├── pipeline_etth1.py        # Full ETTh1: train → eval
+│   ├── pipeline_etth2.py        # Full ETTh2: train → eval
+│   └── pipeline_weather.py      # Full Weather: train → eval
 ├── evals/
-│   ├── eval_forecasters.py
-│   └── eval_etth2_all_models.py
-└── generate_latex_table.py
+│   ├── eval_etth1.py            # Evaluate 5 models on ETTh1
+│   ├── eval_etth2.py            # Evaluate 5 models on ETTh2
+│   ├── eval_weather.py          # Evaluate 5 models on Weather
+│   ├── eval_forecasters.py      # Evaluate forecaster accuracy
+│   ├── eval_with_significance.py # Statistical significance tests
+│   ├── reeval_baselines_etth1.py
+│   ├── run_all_baselines_etth1.py
+│   └── run_all_baselines_weather_parallel.py
+├── plots_generation/
+│   ├── baselines/               # Comparison plots (scatter, barplots, tables)
+│   ├── cf_examples/             # Counterfactual visualization
+│   ├── model_analysis/          # Radars, heatmaps, t-SNE, barplots
+│   ├── ablations/               # Ablation & sensitivity figures
+│   ├── training/                # Training curves, AE reconstruction
+│   └── datasets_inspection/     # Dataset exploration & periodicity
+└── all_eval.py                  # Top-level eval orchestrator
 ```
 
 ---
 
-## Configuration Files
+## `baselines/` — Comparison Methods
 
-Each config JSON contains:
-
-```json
-{
-  "model_name": "iTransformer",
-  "dataset_name": "ETTh2",
-  
-  "root_path": "assets/datasets",
-  "data_path": "ETTh2.csv",
-  
-  "seq_len": 96,
-  "label_len": 48,
-  "pred_len": 48,
-  
-  "checkpoint_dir": "assets/checkpoints/etth2_chpts/forecaster",
-  "checkpoint_name": "chpt_etth2_96_48_S.pth",
-  "history_name": "history_etth2_96_48_S.json",
-  "results_dir": "assets/results/etth2/forecaster",
-  "figures_dir": "assets/figures/etth2/forecaster/itransformer",
-  
-  "plot_training_curves": true,
-  "plot_forecast_examples": true
-}
+```
+baselines/
+├── ForecastCF/                  # Original TensorFlow implementation (reference)
+├── ForecastCF_PyTorch/          # PyTorch re-implementation
+├── BaseGrad/                    # SPSA gradient-free optimization
+├── BaseNN/                      # 1-Nearest-Neighbour baseline
+└── common/                      # Shared: bounds, evaluator_wrapper, result_io
 ```
 
 ---
 
-## Key Naming Conventions
-
-### Checkpoints
-- Format: `chpt_{dataset}_{seq}_{pred}_{model}_{variant}.pth`
-- Example: `chpt_etth1_96_48_S.pth` (ETTh1, seq=96, pred=48, univariate)
-
-### Results (History)
-- Format: `history_{dataset}_{seq}_{pred}_{model}_{variant}.json`
-- Example: `history_etth2_96_48_S.json`
-
-### Figures
-- Format: `{model}_{type}.png`
-- Types: `training_curves`, `forecast_examples`, `error_distribution`
-- Example: `itransformer_training_curves.png`
-
-### RL Agents
-- Format: `rl_cf_{variant}_{dataset}_agent_{type}.pt`
-- Types: `best`, `final`
-- Example: `rl_cf_v2_etth1_agent_best.pt`
-
----
-
-## Dataset Organization
+## `assets/` — Data, Configs, Outputs
 
 ```
-assets/datasets/
-├── ETTh1.csv                 # 17,420 samples, 7 features
-├── ETTh2.csv                 # 17,420 samples, 7 features
-├── electricity.csv           # Traffic dataset
-└── weather.csv               # Weather dataset
+assets/
+├── datasets/                    # ETTh1.csv, ETTh2.csv, weather.csv
+├── configs/{dataset}_dataset/
+│   ├── ae/tcn_ae.json
+│   ├── anomaly_detector/plausibility.json
+│   ├── forecasters/{model}/     # Per-model forecaster configs
+│   └── RL/config_{model}.json   # Per-model RL configs
+├── checkpoints/{dataset}_chpts/
+│   ├── ae/                      # ae_{dataset}.pt
+│   ├── forecaster/              # chpt_{dataset}_{seq}_{pred}_{model}_S.pth
+│   ├── RL/{model}/              # rl_cf_{model}_{dataset}_agent_best.pt
+│   └── anomaly_detector/        # plausibility_{dataset}.pkl
+├── results/{dataset}/
+│   ├── RL/{model}/              # Per-model evaluation JSONs
+│   ├── summary/                 # Aggregated results + plots
+│   └── forecaster/              # Forecaster training histories
+├── figures/
+│   ├── global_analysis/         # Cross-dataset figures (radars, scatter, heatmaps, t-SNE)
+│   ├── datasets_overview/       # Dataset decomposition plots
+│   ├── etth1/                   # ETTh1-specific (ae, forecaster, RL per model)
+│   ├── etth2/                   # ETTh2-specific
+│   └── weather/                 # Weather-specific
+└── results/significance/        # Statistical significance results
 ```
 
 ---
 
-## Notes
+## Naming Conventions
 
-- **Univariate (S)**: Single target variable (OT - Oil Temperature)
-- **Multivariate (MS)**: All 7 features used
-- **Variants**: `S` = univariate, `MS` = multivariate
-- **Seq/Pred**: `96_48` = 96-step lookback, 48-step forecast
-- **Models**: iTransformer, GRU, DLinear, PatchTST, TimesNet
+| Type | Pattern | Example |
+|------|---------|---------|
+| Forecaster checkpoint | `chpt_{dataset}_{seq}_{pred}_{model}_S.pth` | `chpt_etth1_96_48_S.pth` |
+| RL agent checkpoint | `rl_cf_{model}_{dataset}_agent_best.pt` | `rl_cf_itransformer_etth1_agent_best.pt` |
+| AE checkpoint | `ae_{dataset}.pt` | `ae_etth1.pt` |
+| Training history | `history_{dataset}_{seq}_{pred}_{model}_S.json` | `history_etth1_96_48_S.json` |
+| RL config | `config_{model}.json` | `config_itransformer.json` |

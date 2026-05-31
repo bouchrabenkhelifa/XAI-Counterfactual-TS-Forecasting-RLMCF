@@ -1,0 +1,66 @@
+{
+  "experiment": "Appendix F - Bounds Sensitivity",
+  "dataset": "etth1",
+  "model": "itransformer",
+  "n_samples": 20,
+  "forecastcf_original_bounds": {
+    "description": "ForecastCF with original median-centered bounds (Wang et al.)",
+    "bounds_formula": "alpha = median(x) - 0.5*std(x), beta = median(x) + 0.5*std(x)",
+    "metrics": {
+      "validity_ratio": {
+        "mean": 0.4895833333333333,
+        "std": 0.0
+      },
+      "proximity_l2": {
+        "mean": 0.8142876625061035,
+        "std": 0.0
+      },
+      "compactness": {
+        "mean": 0.011458333333333333,
+        "std": 0.0
+      },
+      "temporal_consistency": {
+        "mean": 0.7390325330197811,
+        "std": 0.0
+      },
+      "plausibility_ensemble": {
+        "mean": 0.8029950857162476,
+        "std": 0.0
+      }
+    },
+    "runtime_seconds": 114.66544079780579
+  },
+  "forecastcf_our_bounds": {
+    "description": "ForecastCF with RL-MCF aligned bounds (anchored on y_hat)",
+    "bounds_formula": "beta = y_hat - rho*sigma, alpha = beta - fr*sigma",
+    "bounds_params": {
+      "rho": 0.2,
+      "fr": 0.5,
+      "direction": -1.0,
+      "global_sigma": null
+    },
+    "metrics": {
+      "validity_ratio": {
+        "mean": 0.7583333333333333,
+        "std": 0.0
+      },
+      "proximity_l2": {
+        "mean": 0.7172266244888306,
+        "std": 0.0
+      },
+      "compactness": {
+        "mean": 0.016145833333333335,
+        "std": 0.0
+      },
+      "temporal_consistency": {
+        "mean": 0.7806934736669063,
+        "std": 0.0
+      },
+      "plausibility_ensemble": {
+        "mean": 0.7026416063308716,
+        "std": 0.0
+      }
+    },
+    "runtime_seconds": 93.6356565952301
+  }
+}

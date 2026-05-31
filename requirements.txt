@@ -6,7 +6,6 @@ scikit-learn>=1.2.0
 
 # Visualization
 matplotlib>=3.6.0
-tensorboard>=2.11.0
 
 # Deep learning utilities
 einops>=0.6.0
@@ -15,8 +14,3 @@ reformer-pytorch>=1.4.4
 # Data processing
 scipy>=1.9.0
 tqdm>=4.64.0
-
-# Configuration
-pyyaml>=6.0
-python-dotenv>=0.20.0
-

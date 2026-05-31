@@ -168,5 +168,55 @@ def main():
         print(f"  {method:<15} {count:>3}/{total}  ({pct:>5.1f}%)  {bar}")
 
 
+def generate_figures():
+    """Generate global cross-dataset figures after evaluation."""
+    import subprocess
+
+    print(f"\n\n{'='*90}")
+    print(f"  GENERATING GLOBAL FIGURES")
+    print(f"{'='*90}")
+
+    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    env = os.environ.copy()
+    env["PYTHONPATH"] = ROOT
+
+    scripts = [
+        ("Radar charts (3 datasets × 5 models)",
+         "scripts/plots_generation/model_analysis/generate_radar_3datasets.py"),
+        ("CF examples (3 datasets)",
+         "scripts/plots_generation/cf_examples/generate_cf_examples_3datasets.py"),
+        ("Scatter validity vs plausibility",
+         "scripts/plots_generation/baselines/scatter_validity_plausibility.py"),
+        ("Barplot compactness",
+         "scripts/plots_generation/model_analysis/barplot_compactness.py"),
+        ("Barplot temporal consistency",
+         "scripts/plots_generation/model_analysis/barplot_temporal_consistency.py"),
+        ("Heatmap + t-SNE",
+         "scripts/plots_generation/model_analysis/plot_heatmap_and_latent.py"),
+    ]
+
+    for label, script in scripts:
+        script_path = os.path.join(ROOT, script)
+        if not os.path.exists(script_path):
+            print(f"  [SKIP] {label} -- script not found")
+            continue
+        print(f"\n  -> {label}")
+        env["PYTHONIOENCODING"] = "utf-8"
+        result = subprocess.run(
+            [sys.executable, script_path],
+            cwd=ROOT, env=env, capture_output=True, text=True,
+            encoding="utf-8", errors="replace"
+        )
+        if result.returncode == 0:
+            print(f"    [OK] Done")
+        else:
+            print(f"    [FAIL]: {result.stderr[-200:] if result.stderr else 'unknown error'}")
+
+    print(f"\n{'='*90}")
+    print(f"  Figures saved -> assets/figures/global_analysis/")
+    print(f"{'='*90}")
+
+
 if __name__ == "__main__":
     main()
+    generate_figures()

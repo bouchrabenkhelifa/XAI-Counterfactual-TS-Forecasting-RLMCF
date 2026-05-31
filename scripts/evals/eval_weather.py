@@ -270,6 +270,17 @@ def main():
     plot_radar(results, OUTPUT_DIR)
     plot_barplot(results, OUTPUT_DIR)
 
+    # Generate CF example figure for this dataset
+    print("\n  Generating CF example figure...")
+    import subprocess
+    cf_script = os.path.join(ROOT, "scripts/plots_generation/cf_examples/generate_cf_examples_3datasets.py")
+    if os.path.exists(cf_script):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = ROOT
+        subprocess.run([sys.executable, cf_script], cwd=ROOT, env=env,
+                       capture_output=True, text=True)
+        print("  ✓ CF examples figure updated")
+
     print("\nDone.")
 
 

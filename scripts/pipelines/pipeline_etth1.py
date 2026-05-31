@@ -127,10 +127,19 @@ def main():
     # ── 4. Eval + plots ───────────────────────────────────────────────────────
     run([EVAL_SCRIPT], "Eval all models + plots / ETTh1")
 
+    # ── 5. Global figures ─────────────────────────────────────────────────────
+    global_scripts = [
+        ("scripts/plots_generation/model_analysis/generate_radar_3datasets.py", "Radar charts"),
+        ("scripts/plots_generation/cf_examples/generate_cf_examples_3datasets.py", "CF examples"),
+    ]
+    for script, label in global_scripts:
+        if os.path.exists(os.path.join(ROOT, script)):
+            run([script], f"Generate {label}", stop_on_error=False)
+
     print("\n" + "="*60)
     print("  ETTh1 pipeline complete ✓")
-    print("  Results → assets/results/etth1_summary/")
-    print("  Figures → assets/results/etth1_summary/")
+    print("  Results → assets/results/etth1/summary/")
+    print("  Figures → assets/figures/global_analysis/")
     print("="*60)
 
 
