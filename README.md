@@ -1,4 +1,4 @@
-# RL-MCF: Masked Counterfactual Explanations for Time Series Forecasting via Reinforcement Learning
+# RL-MCF : Reinforcement Learning for Counterfactual Explanations in Time Series Forecasting
 
 A **model-agnostic XAI framework** that generates **counterfactual explanations** for time series forecasting models using **reinforcement learning** in latent space. A single trained actor-critic policy produces counterfactuals in one forward pass (~2 ms), achieving ×3000 speedup over instance-specific optimization baselines.
 
