@@ -1,0 +1,59 @@
+{
+  "no_ae": {
+    "validity_ratio": {
+      "mean_across_seeds": 0.3600694444444444,
+      "std_across_seeds": 0.2019257690432395,
+      "per_seed_values": [
+        0.25729166666666664,
+        0.5927083333333333,
+        0.23020833333333332
+      ]
+    },
+    "stepwise_auc": {
+      "mean_across_seeds": 0.37048611111111107,
+      "std_across_seeds": 0.20192576904323947,
+      "per_seed_values": [
+        0.2677083333333333,
+        0.6031249999999999,
+        0.24062499999999998
+      ]
+    },
+    "proximity_l2": {
+      "mean_across_seeds": 1.259534478187561,
+      "std_across_seeds": 0.040521154806719285,
+      "per_seed_values": [
+        1.223897933959961,
+        1.303610920906067,
+        1.2510945796966553
+      ]
+    },
+    "compactness": {
+      "mean_across_seeds": 0.8439236111111111,
+      "std_across_seeds": 0.000300703265202913,
+      "per_seed_values": [
+        0.8442708333333333,
+        0.84375,
+        0.84375
+      ]
+    },
+    "temporal_consistency": {
+      "mean_across_seeds": 0.7331895320365827,
+      "std_across_seeds": 0.025135595349469308,
+      "per_seed_values": [
+        0.7460188381373882,
+        0.7042281534522772,
+        0.7493216045200825
+      ]
+    },
+    "plausibility_ensemble": {
+      "mean_across_seeds": 0.7917049725850424,
+      "std_across_seeds": 0.07332690007823886,
+      "per_seed_values": [
+        0.8686472773551941,
+        0.7226275205612183,
+        0.7838401198387146
+      ]
+    }
+  },
+  "with_ae": null
+}

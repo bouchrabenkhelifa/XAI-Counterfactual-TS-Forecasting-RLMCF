@@ -143,9 +143,10 @@ Figure 5 provides a geometric interpretation of why RL-MCF achieves strong plaus
 
 | Configuration | Valid.↑ | AUC↑ | Prox.↓ | Comp.↑ | T-Cons.↑ | Plaus.↓ |
 |---------------|---------|------|--------|--------|----------|---------|
-| **RL-MCF (full)** | **0.974** | **0.979** | 0.605 | 0.802 | **0.968** | **0.169** |
+| **RL-MCF (full)** | **0.976** | **0.982** | 0.605 | 0.803 | **0.969** | **0.174** |
 | RL-MCF w/o Proximity | 0.889 | 0.934 | 0.811 | 0.790 | 0.949 | 0.253 |
 | RL-MCF w/o Mask | 0.851 | 0.855 | 2.05 | 0.002 | 0.642 | 0.450 |
+| RL-MCF w/o AutoEncoder | 0.360 | 0.371 | 1.260 | 0.844 | 0.733 | 0.792 |
 | RLP (no policy) | 0.354 | 0.363 | **0.585** | **0.844** | 0.962 | 0.438 |
 
 ### Component Analysis
@@ -155,11 +156,13 @@ Figure 5 provides a geometric interpretation of why RL-MCF achieves strong plaus
 
 **Effect of the learned RL policy (RLP)** — Replacing the actor-critic with random Gaussian noise in the same latent space causes validity to collapse (0.974 → 0.354), confirming that the policy is the primary driver of counterfactual validity. RLP's apparent gains in proximity and compactness are misleading: small perturbations arise by chance, not by design, and two thirds of generated counterfactuals never reach the target band. As visible in Figure 6, the RLP counterfactual (green) barely deviates from the original series and its forecast remains far outside the target band — the random perturbation lacks the directionality needed to steer the prediction into [α, β].
 
-**Effect of temporal masking (w/o Mask)** — Disabling the mask causes near-complete compactness collapse (0.802 → 0.002), confirming it is solely responsible for sparse, localised perturbations. Validity and proximity also degrade (0.974 → 0.851; 0.605 → 2.059): without the mask, perturbations spread across the full input horizon, rendering counterfactuals unactionable. Figure 6 illustrates this clearly: the w/o mask variant (orange) modifies the entire input sequence, producing large deviations even in early timesteps that have no causal relevance to the forecast horizon — a fundamentally uninterpretable explanation.
+**Effect of temporal masking (w/o Mask)** — Disabling the mask causes near-complete compactness collapse (0.803 → 0.002), confirming it is solely responsible for sparse, localised perturbations. Validity and proximity also degrade (0.976 → 0.851; 0.605 → 2.059): without the mask, perturbations spread across the full input horizon, rendering counterfactuals unactionable. Figure 6 illustrates this clearly: the w/o mask variant (orange) modifies the entire input sequence, producing large deviations even in early timesteps that have no causal relevance to the forecast horizon — a fundamentally uninterpretable explanation.
 
-**Effect of the proximity reward (w/o Proximity)** — Setting w_prox=0 degrades validity (−8.5 pp), proximity (+34.0%), and plausibility (+49.2%), revealing that proximity regularisation implicitly promotes distributional realism — a non-obvious but structurally grounded side effect.
+**Effect of autoencoder removal (w/o AutoEncoder)** — Removing the autoencoder causes plausibility to collapse (0.174 → 0.792) and proximity to degrade (0.605 → 1.260), confirming that the TCN-AE latent space acts as an implicit regulariser toward realistic, compact perturbations. Validity also drops sharply (0.976 → 0.360), showing that structured latent compression is critical for generating effective counterfactuals. Without the autoencoder, the policy operates directly in the input space, losing the distributional constraint that guides perturbations toward the data manifold.
 
-**Takeaway**: Each component makes a distinct and necessary contribution: the learned policy drives validity, the temporal mask enforces compactness, and the proximity reward preserves realism. The qualitative comparison in Figure 6 makes these roles visually evident — only the full RL-MCF (blue) produces a counterfactual that is both localized to recent timesteps and successfully steers the forecast into the target band.
+**Effect of the proximity reward (w/o Proximity)** — Setting w_prox=0 degrades validity (−8.7 pp), proximity (+34.1%), and plausibility (+48.3%), revealing that proximity regularisation implicitly promotes distributional realism — a non-obvious but structurally grounded side effect.
+
+**Takeaway**: Each component makes a distinct and necessary contribution: the learned policy drives validity, the temporal mask enforces compactness, the autoencoder promotes plausibility, and the proximity reward preserves realism. The qualitative comparison in Figure 6 makes these roles visually evident — only the full RL-MCF (blue) produces a counterfactual that is both localized to recent timesteps and successfully steers the forecast into the target band.
 
 ---
 
